@@ -1,0 +1,1 @@
+The custom phpDocumentor2 template will eventually live in this directory.

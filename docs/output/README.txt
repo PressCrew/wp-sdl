@@ -1,0 +1,1 @@
+The phpDocumentor2 docs are generated into this directory.

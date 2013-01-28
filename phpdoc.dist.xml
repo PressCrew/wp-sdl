@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdoc>
+	<parser>
+		<target>docs/output</target>
+	</parser>
+	<transformer>
+		<target>docs/output</target>
+	</transformer>
+	<transformations>
+		<template name="new-black" />
+	</transformations>
+	<files>
+		<directory>.</directory>
+		<ignore>examples/*</ignore>
+		<ignore>tests/*</ignore>
+	</files>
+</phpdoc>
