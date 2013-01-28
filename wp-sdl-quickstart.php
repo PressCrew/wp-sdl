@@ -43,7 +43,7 @@ $options = array(
 );
 
 // generate the html using standard method calls
-$html_helper->label( 'colors', 'Pick a color:' );
+$html_helper->label( 'colors', 'Pick a color ->' );
 $html_helper->select( 'colors', $select_atts );
 $html_helper->option_list( $options, $option_atts, 'yellow' );
 $html_helper->select_close();
