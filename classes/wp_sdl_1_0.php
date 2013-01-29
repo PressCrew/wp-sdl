@@ -55,7 +55,13 @@ class WP_SDL_1_0 extends WP_SDL_Compat
 		// check if instance already set up
 		if ( !isset( self::$helper_instances[ $helper_class ] ) ) {
 			// get instance from lib factory
-			self::$helper_instances[ $helper_class ] = WP_SDL::instance( $helper_class );
+			// IMPORTANT: in the case of helpers, the WP_SDL factory stores a
+			// *prototype* object which must be cloned. For concurrent compatibility to
+			// work properly, each helper's compat object pointer must be of the version
+			// that loaded it. This is impossible to accomplish if every WP_SDL_Compat
+			// instance shares the same singleton instance of a helper class, because
+			// a helper's compat object pointer *cannot be changed once set*.
+			self::$helper_instances[ $helper_class ] = clone WP_SDL::instance( $helper_class );
 			// set compat
 			self::$helper_instances[ $helper_class ]->compat( $this );
 		}
