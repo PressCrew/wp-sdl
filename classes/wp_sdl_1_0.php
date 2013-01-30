@@ -10,7 +10,7 @@
  * @package wp-sdl
  * @version 1.0
  */
-class WP_SDL_1_0 extends WP_SDL_Compat
+class WP_SDL_1_0 implements WP_SDL_Compat
 {
 	/**
 	 * Map of helper names to their singleton instances
@@ -18,6 +18,15 @@ class WP_SDL_1_0 extends WP_SDL_Compat
 	 * @var array
 	 */
 	private static $helper_instances = array();
+
+	/**
+	 * Constructor
+	 */
+	public function __construct()
+	{
+		// all helpers require this base classs
+		WP_SDL::load_class( 'WP_SDL_Helper_1_0' );
+	}
 
 	/**
 	 * Trigger a PHP warning

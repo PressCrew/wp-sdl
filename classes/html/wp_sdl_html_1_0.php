@@ -10,7 +10,7 @@
  * @package wp-sdl\helpers
  * @version 1.0
  */
-class WP_SDL_Html_1_0 extends WP_SDL_Helper
+class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 {
 	/**
 	 * Class version

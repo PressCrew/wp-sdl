@@ -59,7 +59,7 @@ final class WP_SDL
 	/**
 	 * Load registered class.
 	 */
-	final static protected function load_class( $class_name )
+	final static public function load_class( $class_name )
 	{
 		// make sure class been not been loaded yet
 		if ( false === class_exists( $class_name, false ) ) {
@@ -149,47 +149,24 @@ final class WP_SDL
 }
 
 /**
- * WP-SDL: base lib class
+ * WP-SDL: compat interface
  *
  * @internal
  * @package wp-sdl
  */
-abstract class WP_SDL_Compat
+interface WP_SDL_Compat
 {
-	abstract public function doing_it_wrong( $method, $message, $version );
-	abstract public function helper( $name, $version );
+	public function doing_it_wrong( $method, $message, $version );
+	public function helper( $name, $version );
 }
 
 /**
- * WP-SDL: base helper class
+ * WP-SDL: helper interface
  *
+ * @internal
  * @package wp-sdl\helpers
  */
-abstract class WP_SDL_Helper
+interface WP_SDL_Helper
 {
-	/**
-	 * The instance which owns this helper
-	 * 
-	 * @var WP_SDL_Compat
-	 */
-	private $compat;
-
-	/**
-	 * Set/Get compat instance.
-	 *
-	 * @param WP_SDL_Compat $wpsdl
-	 * @return WP_SDL_Compat
-	 */
-	final public function compat( WP_SDL_Compat $wpsdl = null )
-	{
-		if ( $wpsdl ) {
-			if ( null === $this->compat ) {
-				$this->compat = $wpsdl;
-			} else {
-				throw new OverflowException( __( 'Compat instance cannot be overwritten once set.', 'wp-sdl' ) );
-			}
-		}
-
-		return $this->compat;
-	}
+	public function compat( WP_SDL_Compat $wpsdl = null );
 }
