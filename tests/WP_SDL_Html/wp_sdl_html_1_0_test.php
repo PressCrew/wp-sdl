@@ -124,42 +124,53 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 	public function testInput()
 	{
 		$this->expectOutputString(
-			'<input id="foo" class="bar" value="Bob" type="text" name="firstname"/>'
+			'<input id="foo" class="bar" type="text" name="firstname" value="Bob"/>'
 		);
 
 		$this->html->input(
 			'text',
 			'firstname',
+			'Bob',
 			array(
 				'id' => 'foo',
-				'class' => 'bar',
-				'value' => 'Bob'
+				'class' => 'bar'
 			)
+		);
+	}
+
+	public function testInputViaField()
+	{
+		$this->expectOutputString(
+			'<input id="foo" class="bar" type="text" name="firstname" value="Joe"/>'
+		);
+
+		$this->html->field(
+			'text',
+			'firstname',
+			'Bob',
+			array(
+				'id' => 'foo',
+				'class' => 'bar'
+			),
+			'Joe'
 		);
 	}
 
 	public function testInputOverrideValue()
 	{
 		$this->expectOutputString(
-			'<input value="Joe" type="text" name="firstname"/>'
+			'<input type="text" name="firstname" value="Joe"/>'
 		);
 
-		$this->html->input(
-			'text',
-			'firstname',
-			array(
-				'value' => 'Bob'
-			),
-			'Joe'
-		);
+		$this->html->input( 'text', 'firstname', 'Bob', array(), 'Joe' );
 	}
 
 	public function testRadioGroup()
 	{
 		$this->expectOutputString(
-			'<input class="foo" tabindex="3" value="red" title="Red" type="radio" name="color"/> Red' .
-			'<input class="foo" tabindex="3" value="yellow" title="Yellow" checked="checked" type="radio" name="color"/> Yellow' .
-			'<input class="foo" tabindex="3" value="blue" title="Blue" type="radio" name="color"/> Blue'
+			'<input class="foo" tabindex="3" title="Red" type="radio" name="color" value="red"/> Red' .
+			'<input class="foo" tabindex="3" title="Yellow" checked="checked" type="radio" name="color" value="yellow"/> Yellow' .
+			'<input class="foo" tabindex="3" title="Blue" type="radio" name="color" value="blue"/> Blue'
 		);
 
 		$this->html->input_group(
@@ -178,12 +189,36 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		);
 	}
 
+	public function testRadioGroupViaField()
+	{
+		$this->expectOutputString(
+			'<input class="foo" tabindex="3" title="Red" type="radio" name="color" value="red"/> Red' .
+			'<input class="foo" tabindex="3" title="Yellow" checked="checked" type="radio" name="color" value="yellow"/> Yellow' .
+			'<input class="foo" tabindex="3" title="Blue" type="radio" name="color" value="blue"/> Blue'
+		);
+
+		$this->html->field(
+			'radio',
+			'color',
+			array(
+				'red' => 'Red',
+				'yellow' => 'Yellow',
+				'blue' => 'Blue',
+			),
+			array(
+				'class' => 'foo',
+				'tabindex' => 3
+			),
+			'yellow'
+		);
+	}
+
 	public function testCheckboxGroup()
 	{
 		$this->expectOutputString(
-			'<input class="foo" tabindex="3" value="red" title="Red" type="checkbox" name="colors[]"/> Red' .
-			'<input class="foo" tabindex="3" value="yellow" title="Yellow" checked="checked" type="checkbox" name="colors[]"/> Yellow' .
-			'<input class="foo" tabindex="3" value="blue" title="Blue" checked="checked" type="checkbox" name="colors[]"/> Blue'
+			'<input class="foo" tabindex="3" title="Red" type="checkbox" name="colors[]" value="red"/> Red' .
+			'<input class="foo" tabindex="3" title="Yellow" checked="checked" type="checkbox" name="colors[]" value="yellow"/> Yellow' .
+			'<input class="foo" tabindex="3" title="Blue" checked="checked" type="checkbox" name="colors[]" value="blue"/> Blue'
 		);
 
 		$this->html->input_group(
@@ -386,6 +421,32 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 			->auto_close_end();
 	}
 
+	public function testSelectWithOptionListViaField()
+	{
+		$this->expectOutputString(
+			'<select class="foo" title="A nice title" name="dropdown">' .
+			'<option value="red" title="Red">Red</option>' .
+			'<option selected="selected" value="yellow" title="Yellow">Yellow</option>' .
+			'<option value="blue" title="Blue">Blue</option>' .
+			'</select>'
+		);
+
+		$this->html->field(
+			'select',
+			'dropdown',
+			array(
+				'red' => 'Red',
+				'yellow' => 'Yellow',
+				'blue' => 'Blue',
+			),
+			array(
+				'class' => 'foo',
+				'title' => 'A nice title'
+			),
+			'yellow'
+		);
+	}
+
 	public function testSelectWithOptionGroups()
 	{
 		$this->expectOutputString(
@@ -536,5 +597,22 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 				'My favorite color is blue.'
 			)
 			->auto_close_end();
+	}
+	
+	public function testTextareaViaField()
+	{
+		$this->expectOutputString(
+			'<textarea id="foo" class="bar" name="aboutyou">My favorite color is blue.</textarea>'
+		);
+
+		$this->html->field(
+			'textarea',
+			'aboutyou',
+			'My favorite color is blue.',
+			array(
+				'id' => 'foo',
+				'class' => 'bar'
+			)
+		);
 	}
 }
