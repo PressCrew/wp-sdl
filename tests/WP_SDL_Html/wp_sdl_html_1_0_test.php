@@ -138,6 +138,22 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		);
 	}
 
+	public function testInputOverrideValue()
+	{
+		$this->expectOutputString(
+			'<input value="Joe" type="text" name="firstname"/>'
+		);
+
+		$this->html->input(
+			'text',
+			'firstname',
+			array(
+				'value' => 'Bob'
+			),
+			'Joe'
+		);
+	}
+
 	public function testRadioGroup()
 	{
 		$this->expectOutputString(
