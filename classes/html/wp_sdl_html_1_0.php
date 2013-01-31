@@ -449,9 +449,10 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 * @param string $name The name attribute
 	 * @param array $atts An array of additional attributes to render
 	 * @param string $content The content of the element
+	 * @param string $current_content The content will be automagically overridden if this is *not* null.
 	 * @return WP_SDL_Html_1_0
 	 */
-	public function textarea( $name, $atts = array(), $content = null )
+	public function textarea( $name, $atts = array(), $content = null, $current_content = null )
 	{
 		// handle auto close
 		if ( true === $this->auto_close ) {
@@ -467,7 +468,7 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 
 		// maybe render content
 		if ( null !== $content ) {
-			$this->textarea_content( $content );
+			$this->textarea_content( $content, $current_content );
 		} elseif ( true === $this->auto_close ) {
 			$this->auto_close_next();
 		}
@@ -482,11 +483,18 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 * Content is automatically escaped with
 	 * {@link http://codex.wordpress.org/Function_Reference/esc_textarea esc_textarea()}.
 	 *
-	 * @param type $content
+	 * @param type $content The text area content.
+	 * @param string $current_content The content will be automagically overridden if this is *not* null.
 	 * @return WP_SDL_Html_1_0
 	 */
-	public function textarea_content( $content )
+	public function textarea_content( $content, $current_content = null )
 	{
+		// handle content override
+		if ( null !== $current_content ) {
+			// override it
+			$content = $current_content;
+		}
+
 		// maybe render content
 		if ( null !== $content ) {
 			echo esc_textarea( $content );
