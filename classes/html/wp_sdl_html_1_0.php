@@ -259,14 +259,20 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 * @param string $type The input type attribute. This will override the type attribute if set in the attributes array.
 	 * @param string $name The input name attribute. This will override the name attribute if set in the attributes array.
 	 * @param array $atts An array of additional attributes to render.
+	 * @param string $current_value The value attribute will be automagically overridden if this is *not* null. This has nothing to do with the "checked" attribute!
 	 * @return WP_SDL_Html_1_0
 	 */
-	public function input( $type, $name, $atts = array() )
+	public function input( $type, $name, $atts = array(), $current_value = null )
 	{
 		// override type attribute
 		$atts['type'] = $type;
 		// override name attribute
 		$atts['name'] = $name;
+		// maybe override value attribute
+		if ( null !== $current_value ) {
+			// override it
+			$atts['value'] = (string) $current_value;
+		}
 		// render the input
 		?><input<?php echo $this->attributes( $atts ) ?>/><?php
 
