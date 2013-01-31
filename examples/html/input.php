@@ -9,14 +9,13 @@
 $atts =
 	array(
 		'id' => 'foo',
-		'class' => 'man',
-		'value' => 'choo',
+		'class' => 'man'
 	);
 
 // render text input tag
-echo $wpsdl->html()->input( 'text', 'address', $atts );
+echo $wpsdl->html()->input( 'text', 'address', '123 Street Road', $atts );
 
 // result:
-// <input type="text" name="address" id="foo" class="man" value="choo" />
+// <input type="text" name="address" id="foo" class="man" value="123 Street Road" />
 
 ?>

@@ -253,26 +253,59 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	}
 
 	/**
+	 * Render a field.
+	 *
+	 * This is a convenience method which comes in handy when rendering
+	 * fields inside a loop, or other cases where the type relies on context.
+	 *
+	 * @param string $type The field's type
+	 * @param string $name The field's name
+	 * @param mixed $value The field's value
+	 * @param array $atts The field's attributes
+	 * @param mixed $current_value The field's value/content will be automagically overridden if this is *not* null.
+	 */
+	public function field( $type, $name, $value = null, $atts = array(), $current_value = null )
+	{
+		// render the correct field tag
+		switch( $type ) {
+			case 'select':
+				$this->select( $name, $atts );
+				$this->option_list( $value, array(), $current_value );
+				$this->select_close();
+				break;
+			case 'checkbox':
+			case 'radio':
+				$this->input_group( $type, $name, $value, $atts, $current_value );
+				break;
+			case 'textarea':
+				$this->textarea( $name, $atts, $value, $current_value );
+				$this->textarea_close();
+				break;
+			default:
+				$this->input( $type, $name, $value, $atts, $current_value );
+		}
+	}
+
+	/**
 	 * Render an input element.
 	 *
 	 * @example html/input.php
 	 * @param string $type The input type attribute. This will override the type attribute if set in the attributes array.
 	 * @param string $name The input name attribute. This will override the name attribute if set in the attributes array.
+	 * @param mixed $value The input value attribute. This will override the value attribute if set in the attributes array.
 	 * @param array $atts An array of additional attributes to render.
 	 * @param string $current_value The value attribute will be automagically overridden if this is *not* null. This has nothing to do with the "checked" attribute!
 	 * @return WP_SDL_Html_1_0
 	 */
-	public function input( $type, $name, $atts = array(), $current_value = null )
+	public function input( $type, $name, $value = null, $atts = array(), $current_value = null )
 	{
 		// override type attribute
 		$atts['type'] = $type;
 		// override name attribute
 		$atts['name'] = $name;
-		// maybe override value attribute
-		if ( null !== $current_value ) {
-			// override it
-			$atts['value'] = (string) $current_value;
-		}
+		// determine value attribute
+		$atts['value'] = ( null === $current_value ) ? $value : $current_value;
+		
 		// render the input
 		?><input<?php echo $this->attributes( $atts ) ?>/><?php
 
@@ -297,14 +330,12 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	{
 		// loop all values
 		foreach ( $values as $value => $title ) {
-			// set value in attributes
-			$atts['value'] = $value;
 			// set title in attributes
 			$atts['title'] = $title;
 			// determine checkiness
 			$atts['checked'] = $this->value_is_current( $value, $current_value );
 			// render the input
-			$this->input( $type, $name, $atts );
+			$this->input( $type, $name, $value, $atts );
 			// render the title
 			echo esc_html( ' ' . $title );
 		}
