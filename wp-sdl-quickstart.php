@@ -26,6 +26,7 @@ $html_helper = $wpsdl->html();
 
 // attributes for the select element
 $select_atts = array(
+	'id' => 'favcolor',
 	'class' => 'small',
 	'tabindex' => '5'
 );
@@ -43,22 +44,22 @@ $options = array(
 );
 
 // generate the html using standard method calls
-$html_helper->label( 'colors', 'Pick a color ->' );
+$html_helper->label( 'favcolor', 'Pick a color ->' );
 $html_helper->select( 'colors', $select_atts );
 $html_helper->option_list( $options, $option_atts, 'yellow' );
 $html_helper->select_close();
 
 // ...or generate the html using object chaining
 $html_helper
-	->label( 'colors', 'Pick a color ->' )
+	->label( 'favcolor', 'Pick a color ->' )
 	->select( 'colors', $select_atts )
 	->option_list( $options, $option_atts, 'yellow' )
 	->select_close();
 
 // either method renders the same markup:
 //
-// <label for="colors">Pick a color -&gt;</label>
-// <select class="small" tabindex="5" name="colors">
+// <label for="favcolor">Pick a color -&gt;</label>
+// <select id="favcolor" class="small" tabindex="5" name="colors">
 //     <option class="fancy" value="red" title="Red">Red</option>
 //     <option class="fancy" selected="selected" value="yellow" title="Yellow">Yellow</option>
 //     <option class="fancy" value="blue" title="Blue">Blue</option>
