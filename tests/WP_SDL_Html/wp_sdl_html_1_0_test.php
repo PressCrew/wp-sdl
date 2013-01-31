@@ -468,6 +468,18 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->html->textarea_content( 'My favorite color is "totally" blue.' );
 	}
 
+	public function testTextareaContentOverride()
+	{
+		$this->expectOutputString(
+			'Moe, Larry, Shemp'
+		);
+
+		$this->html->textarea_content(
+			'Moe, Larry, Curly',
+			'Moe, Larry, Shemp'
+		);
+	}
+
 	public function testTextareaNoClose()
 	{
 		$this->expectOutputString(
