@@ -20,6 +20,13 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	protected static $VERSION = '1.0';
 
 	/**
+	 * Auto close brackets toggle
+	 *
+	 * @var boolean
+	 */
+	private $auto_brackets = true;
+
+	/**
 	 * Auto close tags toggle
 	 *
 	 * @var boolean
@@ -153,6 +160,57 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 
 		// fall through to no match
 		return false;
+	}
+
+	/**
+	 * Toggle auto brackets on/off.
+	 *
+	 * Auto brackets are ON by default.
+	 * 
+	 * @param boolean $toggle Pass true/false to toggle on/off.
+	 * @return WP_SDL_Html_1_0
+	 */
+	public function auto_brackets( $toggle )
+	{
+		// is toggle boolean?
+		if ( is_bool( $toggle ) ) {
+			// yep, set it
+			$this->auto_brackets = $toggle;
+		} else {
+			// not good
+			$this->compat()->doing_it_wrong(
+				__METHOD__,
+				__( 'Argument must be true/false (boolean).', 'wp-sdl' ),
+				self::$VERSION
+			);
+		}
+
+		// maintain the chain
+		return $this;
+	}
+
+	/**
+	 * Maybe append brackets to name value if autobrackets is enabled.
+	 *
+	 * @param string $type The field type.
+	 * @param string $name The name attribute value.
+	 * @param boolean $toggle Optional parameter for easy context toggling.
+	 * @return string
+	 */
+	protected function auto_brackets_name( $type, $name, $toggle = true )
+	{
+		// auto brackets on?
+		if ( true === $this->auto_brackets && true === $toggle ) {
+			// two types support brackets
+			switch( $type ) {
+				case 'checkbox':
+				case 'select':
+					$name .= '[]';
+			}
+		}
+
+		// return name
+		return $name;
 	}
 
 	/**
@@ -299,6 +357,9 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 */
 	public function input( $type, $name, $value = null, $atts = array(), $current_value = null )
 	{
+		// handle auto brackets
+		$name = $this->auto_brackets_name( $type, $name );
+		
 		// override type attribute
 		$atts['type'] = $type;
 		// override name attribute
@@ -450,6 +511,9 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 			$this->auto_close_tags[] = 'select';
 		}
 
+		// handle auto brackets
+		$name = $this->auto_brackets_name( 'select', $name, ( $atts['multiple'] ) );
+		
 		// set name in atts
 		$atts['name'] = $name;
 
