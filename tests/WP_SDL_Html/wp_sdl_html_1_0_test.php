@@ -27,6 +27,28 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertAttributeEquals( '1.0', 'VERSION', 'WP_SDL_Html_1_0' );
 	}
 
+	public function testAutoBrackets()
+	{
+		// on by default
+		$this->assertAttributeEquals( true, 'auto_brackets', $this->html );
+
+		// toggle off
+		$this->html->auto_brackets( false );
+		$this->assertAttributeEquals( false, 'auto_brackets', $this->html );
+
+		// toggle on
+		$this->html->auto_brackets( true );
+		$this->assertAttributeEquals( true, 'auto_brackets', $this->html );
+	}
+
+	/**
+	 * @expectedException PHPUnit_Framework_Error_Warning
+	 */
+	public function testAutoBracketsBadArg()
+	{
+		$this->html->auto_brackets('on');
+	}
+
 	public function testAutoClose()
 	{
 		// init state
@@ -223,7 +245,7 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 
 		$this->html->input_group(
 			'checkbox',
-			'colors[]',
+			'colors',
 			array(
 				'red' => 'Red',
 				'yellow' => 'Yellow',
@@ -467,7 +489,7 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->html
 			->auto_close_start()
 			->select(
-				'dropdown[]',
+				'dropdown',
 				array(
 					'multiple' => true,
 					'class' => 'foo',
