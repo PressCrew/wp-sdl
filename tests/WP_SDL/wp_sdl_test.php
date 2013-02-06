@@ -13,7 +13,7 @@ class WP_SDL_Test extends PHPUnit_Framework_TestCase
 	public function testInit()
 	{
 		// check for all versions
-		$this->assertAttributeCount( 3, 'files_ready', 'WP_SDL' );
+		$this->assertAttributeCount( 4, 'files_ready', 'WP_SDL' );
 	}
 
 	public function testClassName()
@@ -31,7 +31,7 @@ class WP_SDL_Test extends PHPUnit_Framework_TestCase
 	{
 		$obj = WP_SDL::support( '1.0' );
 		$this->assertInstanceOf( 'WP_SDL_1_0', $obj );
-		$this->assertAttributeCount( 3, 'files_ready', 'WP_SDL' );
+		$this->assertAttributeCount( 4, 'files_ready', 'WP_SDL' );
 		$this->assertAttributeCount( 1, 'files_loaded', 'WP_SDL' );
 	}
 
@@ -51,7 +51,8 @@ class WP_SDL_Test extends PHPUnit_Framework_TestCase
 			array(
 				'WP_SDL_1_0',
 				'WP_SDL_Helper_1_0',
-				'WP_SDL_Html_1_0'
+				'WP_SDL_Html_1_0',
+				'WP_SDL_Widget_1_0'
 			),
 			WP_SDL::supports()
 		);
