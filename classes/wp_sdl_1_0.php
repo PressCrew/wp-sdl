@@ -89,4 +89,15 @@ class WP_SDL_1_0 implements WP_SDL_Compat
 	{
 		return $this->helper( 'html', $version );
 	}
+
+	/**
+	 * Return Widget helper.
+	 *
+	 * @param string $version
+	 * @return WP_SDL_Widget_1_0
+	 */
+	public function widget( $version = '1.0' )
+	{
+		return $this->helper( 'widget', $version );
+	}
 }
