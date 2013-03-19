@@ -13,7 +13,7 @@ $atts =
 	);
 
 // render text input tag
-echo $wpsdl->html()->input( 'text', 'address', '123 Street Road', $atts );
+$wpsdl->html()->input( 'text', 'address', '123 Street Road', $atts );
 
 // result:
 // <input type="text" name="address" id="foo" class="man" value="123 Street Road" />
