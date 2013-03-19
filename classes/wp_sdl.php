@@ -79,7 +79,10 @@ final class WP_SDL
 	final static public function instance( $class_name )
 	{
 		// have an instance of this version yet?
-		if ( !self::$instances[ $class_name ] instanceof $class_name ) {
+		if (
+			!isset( self::$instances[ $class_name ] ) ||
+			!self::$instances[ $class_name ] instanceof $class_name
+		) {
 			// nope, call class loader
 			self::load_class( $class_name );
 			// create new instance
