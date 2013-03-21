@@ -66,7 +66,7 @@ final class WP_SDL
 			// load class file
 			require_once self::$files_ready[ $class_name ];
 			// set as loaded
-			self::$files_loaded[ $class_version ] = true;
+			self::$files_loaded[ $class_name ] = true;
 		}
 	}
 
