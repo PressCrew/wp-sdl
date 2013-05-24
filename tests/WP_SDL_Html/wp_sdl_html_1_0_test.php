@@ -10,6 +10,7 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		$this->html = WP_SDL::support( '1.0' )->html();
+		$this->html->smart_close( true );
 	}
 
 	public function tearDown()
@@ -126,6 +127,65 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 			),
 			$attributes
 		);
+	}
+
+	public function testOpen()
+	{
+		$this->expectOutputString(
+			'<div class="foo">'
+		);
+
+		$this->html
+			->smart_close( false )
+			->open(
+				'div',
+				array(
+					'class' => 'foo'
+				)
+			);
+	}
+
+	public function testClose()
+	{
+		$this->expectOutputString(
+			'</div>'
+		);
+
+		$this->html->close( 'div' );
+	}
+
+	public function testSmartClose()
+	{
+		$this->expectOutputString(
+			'<div class="foo"></div>'
+		);
+
+		$this->html->open(
+			'div',
+			array(
+				'class' => 'foo'
+			)
+		);
+
+		$this->html->close();
+	}
+
+	public function testSmartCloseNested()
+	{
+		$this->expectOutputString(
+			'<div><span><i>Hello</i> <b>You!</b></span></div>'
+		);
+
+		$this->html
+			->open( 'div' )
+				->open( 'span' )
+					->open( 'i' )
+						->content( 'Hello' )
+					->close()
+					->content( ' ' )
+					->open( 'b' )
+						->content( 'You!' )
+			->close_all();
 	}
 
 	public function testLabel()
@@ -326,7 +386,7 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 					'class' => 'foo'
 				)
 			)
-			->option_group_close();
+			->close();
 	}
 
 	public function testOptionGroupNested()
@@ -599,7 +659,7 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		echo esc_textarea( 'My favorite color is "totally" blue.' );
 
 		// close textarea
-		$this->html->textarea_close();
+		$this->html->close();
 	}
 	
 	public function testTextareaAutoClose()

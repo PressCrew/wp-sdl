@@ -5,7 +5,7 @@
 		<server name="PHP_SELF" value="/index.php" />
 		<const name="WP_DEBUG" value="false" />
 		<const name="DISABLE_WP_CRON" value="true" />
-		<const name="WP_TEST_LOAD_PATH" value="../../../wp-load.php" />
+		<const name="WP_TEST_LOAD_PATH" value="../../../../../wp-load.php" />
 	</php>
 	<testsuites>
 		<testsuite name="WP-SDL Test Suite">

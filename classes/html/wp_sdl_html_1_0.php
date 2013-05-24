@@ -27,6 +27,20 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	private $auto_brackets = true;
 
 	/**
+	 * Smart close elements toggle.
+	 *
+	 * @var boolean
+	 */
+	private $smart_close = true;
+
+	/**
+	 * Smart close tags stack.
+	 *
+	 * @var array
+	 */
+	private $smart_close_tags = array();
+
+	/**
 	 * Auto close tags toggle
 	 *
 	 * @var boolean
@@ -39,6 +53,31 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 * @var array
 	 */
 	private $auto_close_tags = array();
+
+	/**
+	 * Master list of HTML5 elements.
+	 *
+	 * IMPORTANT: Only elements that have an empty content model are listed for now.
+	 *
+	 * @var array
+	 */
+	private $elements = array(
+		'area' => false,
+		'base' => false,
+		'br' => false,
+		'embed' => false,
+		'hr' => false,
+		'image' => false,
+		'input' => false,
+		'keygen' => false,
+		'link' => false,
+		'meta' => false,
+		'menuitem' => false,
+		'param' => false,
+		'source' => false,
+		'track' => false,
+		'wbr' => false
+	);
 
 	/**
 	 * Format attributes for an HTML element.
@@ -163,6 +202,36 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	}
 
 	/**
+	 * Toggle smart close on/off.
+	 *
+	 * Smart close is ON by default.
+	 *
+	 * @param boolean $toggle Pass true/false to toggle on/off and reset the open tags stack.
+	 * @return WP_SDL_Html_1_0
+	 */
+	public function smart_close( $toggle )
+	{
+		// is toggle boolean?
+		if ( is_bool( $toggle ) ) {
+			// yep, set it
+			$this->smart_close = $toggle;
+		} else {
+			// not good
+			$this->compat()->doing_it_wrong(
+				__METHOD__,
+				__( 'Argument must be true/false (boolean).', 'wp-sdl' ),
+				self::$VERSION
+			);
+		}
+
+		// reset stack
+		$this->smart_close_tags = array();
+
+		// maintain the chain
+		return $this;
+	}
+
+	/**
 	 * Toggle auto brackets on/off.
 	 *
 	 * Auto brackets are ON by default.
@@ -214,27 +283,120 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	}
 
 	/**
-	 * Close an auto-closeable tag
+	 * Open an element.
 	 *
-	 * @param string $tag
+	 * @param string $element A valid element name.
+	 * @param array $atts An array of attributes.
+	 * @return WP_SDL_Html_1_0
+	 */
+	public function open( $element, $atts = array() )
+	{
+		// sanity check element names in debug mode
+		if (
+			true == WP_DEBUG &&
+			1 !== preg_match( '/^[a-z]+$/', $element )
+		) {
+			// generate error
+			$this->compat()->doing_it_wrong(
+				__METHOD__,
+				sprintf( __( 'The "%s" element is not valid.' ), $element ),
+				self::$VERSION
+			);
+			// not good
+			return false;
+		}
+
+		// smart close on?
+		if ( true === $this->smart_close ) {
+			// append to smart close stack
+			$this->smart_close_tags[] = $element;
+		}
+
+		// render opening element
+		?><<?php echo $element, $this->attributes( $atts ) ?>><?php
+
+		// maintain the chain
+		return $this;
+	}
+
+	/**
+	 * Close next tag in stack.
+	 *
+	 * @param string|integer $element A valid element name or number of elements to close.
+	 * @return WP_SDL_Html_1_0
+	 */
+	public function close( $element = null )
+	{
+		// is element empty?
+		if ( empty( $element ) ) {
+			// smart close enabled?
+			if ( true === $this->smart_close ) {
+				// yep, get next element from stack
+				$element = array_pop( $this->smart_close_tags );
+				// is it a one sided element?
+				if ( true === isset( $this->elements[ $element ] ) ) {
+					// yep, go to next element
+					return $this->close();
+				}
+			} else {
+				// generate error
+				$this->compat()->doing_it_wrong(
+					__METHOD__,
+					__( 'The $tag parameter cannot be empty unless auto close is enabled.' ),
+					self::$VERSION
+				);
+				// not good
+				return false;
+			}
+		}
+
+		// have element to close?
+		if ( $element ) {
+			// yep, render closing tag
+			?></<?php echo $element ?>><?php
+		}
+
+		// maintain the chain
+		return $this;
+	}
+
+	/**
+	 * Close all remaining smart close tags.
+	 */
+	public function close_all()
+	{
+		// close all open tags
+		while( count( $this->smart_close_tags ) ) {
+			// at least one tag left, close it
+			$this->close();
+		}
+	}
+
+	/**
+	 * Open an auto-closeable tag
+	 *
 	 * @return boolean
 	 */
-	protected function auto_close_tag( $tag )
+	protected function auto_close_tag( $element, $atts )
 	{
-		// only close supported elements
-		switch ( $tag ) {
+		// only auto open supported elements
+		switch ( $element ) {
 			case 'optgroup':
 			case 'select':
 			case 'textarea':
-				// render closing tag
-				?></<?php echo $tag ?>><?php
-				return true;
+				// is auto close on?
+				if ( true === $this->auto_close ) {
+					// append to auto close stack
+					$this->auto_close_tags[] = $element;
+				}
+				// now open the tag normally
+				return $this->open( $element, $atts );
 		}
 
 		// not good
 		$this->compat()->doing_it_wrong(
 			__METHOD__,
-			sprintf( __( 'The "%s" tag is not supported by auto close.' ), $tag ),
+			sprintf( __( 'The "%s" element is not supported by auto close.' ), $element ),
 			self::$VERSION
 		);
 
@@ -248,12 +410,20 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 */
 	protected function auto_close_next()
 	{
-		// pop last tag and pass to auto closer
-		return $this->auto_close_tag( array_pop( $this->auto_close_tags ) );
+		// auto close on?
+		if ( true === $this->auto_close ) {
+			// is smart close on?
+			if ( true === $this->smart_close ) {
+				// yep, tidy up smart close stack
+				array_pop( $this->smart_close_tags );
+			}
+			// pop last tag and pass to close
+			return $this->close( array_pop( $this->auto_close_tags ) );
+		}
 	}
 
 	/**
-	 * Turn auto close tags ON
+	 * Turn auto close tags ON.
 	 *
 	 * @return WP_SDL_Html_1_0
 	 */
@@ -262,25 +432,43 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 		// flip it on
 		$this->auto_close = true;
 
+		// reset tag stack
+		$this->auto_close_tags = array();
+
 		// maintain the chain
 		return $this;
 	}
 
 	/**
-	 * Turn auto close tags OFF and close final elements
+	 * Turn auto close tags OFF and close final elements.
 	 *
 	 * @return WP_SDL_Html_1_0
 	 */
 	public function auto_close_end()
 	{
-		// flip it off
-		$this->auto_close = false;
-
 		// complete any remaining
 		while( count( $this->auto_close_tags ) ) {
 			// at least one tag left, close it
 			$this->auto_close_next();
 		}
+		
+		// flip it off
+		$this->auto_close = false;
+
+		// maintain the chain
+		return $this;
+	}
+
+	/**
+	 * The content is automatically escaped with
+	 * {@link http://codex.wordpress.org/Function_Reference/esc_html esc_html()}.
+	 *
+	 * @param string $string
+	 * @return WP_SDL_Html_1_0
+	 */
+	public function content( $string )
+	{
+		echo esc_html( $string );
 
 		// maintain the chain
 		return $this;
@@ -304,10 +492,7 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 		// override "title" in atts
 		$atts['title'] = $title;
 		// render label tag
-		?><label<?php echo $this->attributes( $atts ) ?>><?php echo esc_html( $title ) ?></label><?php
-
-		// maintain the chain
-		return $this;
+		return $this->open( 'label', $atts )->content( $title )->close();
 	}
 
 	/**
@@ -329,7 +514,7 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 			case 'select':
 				$this->select( $name, $atts );
 				$this->option_list( $value, array(), $current_value );
-				$this->select_close();
+				$this->close();
 				break;
 			case 'checkbox':
 			case 'radio':
@@ -337,7 +522,7 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 				break;
 			case 'textarea':
 				$this->textarea( $name, $atts, $value, $current_value );
-				$this->textarea_close();
+				$this->close();
 				break;
 			default:
 				$this->input( $type, $name, $value, $atts, $current_value );
@@ -423,10 +608,7 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 		// set title in atts
 		$atts['title'] = $title;
 		// render option tag
-		?><option<?php echo $this->attributes( $atts )?>><?php echo esc_html( $title ) ?></option><?php
-
-		// maintain the chain
-		return $this;
+		return $this->open( 'option', $atts )->content( $title )->close();
 	}
 
 	/**
@@ -447,11 +629,8 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 			$this->option( $value, $title, $atts );
 		}
 
-		// handle auto close of select and optgroups
-		if ( true === $this->auto_close ) {
-			// close the next element in stack
-			$this->auto_close_next();
-		}
+		// auto close select and optgroups
+		$this->auto_close_next();
 
 		// maintain the chain
 		return $this;
@@ -466,34 +645,11 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 */
 	public function option_group( $label, $atts = array() )
 	{
-		// auto close on?
-		if ( true === $this->auto_close ) {
-			// append it
-			$this->auto_close_tags[] = 'optgroup';
-		}
-
 		// set label in atts
 		$atts['label'] = $label;
 
 		// open opt group
-		?><optgroup<?php echo $this->attributes( $atts ) ?>><?php
-
-		// maintain the chain
-		return $this;
-	}
-
-	/**
-	 * Manually close an optgroup element
-	 *
-	 * @return WP_SDL_Html_1_0
-	 */
-	public function option_group_close()
-	{
-		// close optgroup
-		$this->auto_close_tag( 'optgroup' );
-
-		// maintain the chain
-		return $this;
+		return $this->auto_close_tag( 'optgroup', $atts );
 	}
 
 	/**
@@ -505,12 +661,6 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 */
 	public function select( $name, $atts = array() )
 	{
-		// handle auto close
-		if ( true === $this->auto_close ) {
-			// append to stack
-			$this->auto_close_tags[] = 'select';
-		}
-
 		// handle auto brackets
 		$name = $this->auto_brackets_name( 'select', $name, ( $atts['multiple'] ) );
 		
@@ -518,24 +668,7 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 		$atts['name'] = $name;
 
 		// open select
-		?><select<?php echo $this->attributes( $atts ) ?>><?php
-
-		// maintain the chain
-		return $this;
-	}
-
-	/**
-	 * Manually close a select element
-	 *
-	 * @return WP_SDL_Html_1_0
-	 */
-	public function select_close()
-	{
-		// close select
-		$this->auto_close_tag( 'select' );
-
-		// maintain the chain
-		return $this;
+		return $this->auto_close_tag( 'select', $atts );
 	}
 
 	/**
@@ -549,22 +682,16 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 */
 	public function textarea( $name, $atts = array(), $content = null, $current_content = null )
 	{
-		// handle auto close
-		if ( true === $this->auto_close ) {
-			// append to stack
-			$this->auto_close_tags[] = 'textarea';
-		}
-		
 		// set name in atts
 		$atts['name'] = $name;
 
 		// open text area tag
-		?><textarea<?php echo $this->attributes( $atts ) ?>><?php
+		$this->auto_close_tag( 'textarea', $atts );
 
 		// maybe render content
 		if ( null !== $content ) {
 			$this->textarea_content( $content, $current_content );
-		} elseif ( true === $this->auto_close ) {
+		} else {
 			$this->auto_close_next();
 		}
 
@@ -595,24 +722,8 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 			echo esc_textarea( $content );
 		}
 
-		// close tag if auto close is on
-		if ( true === $this->auto_close ) {
-			$this->auto_close_next();
-		}
-
-		// maintain the chain
-		return $this;
-	}
-
-	/**
-	 * Manually close a textarea element
-	 *
-	 * @return WP_SDL_Html_1_0
-	 */
-	public function textarea_close()
-	{
-		// close text area
-		$this->auto_close_tag( 'textarea' );
+		// call auto closer
+		$this->auto_close_next();
 
 		// maintain the chain
 		return $this;
