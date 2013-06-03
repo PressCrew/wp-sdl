@@ -661,9 +661,19 @@ class WP_SDL_Struct_Queue_1_0 extends WP_SDL_Struct_DLL_1_0
 	 *
 	 * @return mixed
 	 */
-	public function peek()
+	public function front()
 	{
 		return $this->first();
+	}
+
+	/**
+	 * Return last item from the end of the queue without removing.
+	 *
+	 * @return mixed
+	 */
+	public function back()
+	{
+		return $this->last();
 	}
 }
 
@@ -706,10 +716,10 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	/**
 	 * Sort the priority map.
 	 */
-	private function priority_sort( $force = false )
+	private function priority_sort()
 	{
 		// need to re-sort priority map?
-		if ( true === $force || true === $this->priority_resort ) {
+		if ( true === $this->priority_resort ) {
 			// yep, sort it by value
 			asort( $this->priority_map );
 			// toggle priority sort off
@@ -771,11 +781,11 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	}
 
 	/**
-	 * Return first item from the front of the queue without removing.
+	 * Return highest priority item from the front of the queue without removing.
 	 *
 	 * @return mixed
 	 */
-	public function peek()
+	public function front()
 	{
 		// get highest priority key
 		$key = $this->priority_key();
@@ -785,12 +795,29 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	}
 
 	/**
+	 * Return last item from the back of the queue without removing.
+	 *
+	 * @return mixed
+	 */
+	public function back()
+	{
+		// make sure priorities are sorted
+		$this->priority_sort();
+		// seek to end of priority map
+		end( $this->priority_map );
+		// get very last key from priority map
+		$key = key( $this->priority_map );
+		// return value for that key
+		return $this->get( $key );
+	}
+
+	/**
 	 * Rewind is special for a priority queue!
 	 */
 	public function rewind()
 	{
-		// force resort of priority map
-		$this->priority_sort( true );
+		// sort priority map
+		$this->priority_sort();
 		// the first iteration key is now zero
 		$this->iterator_key = 0;
 		// build up array of keys for iterating over
