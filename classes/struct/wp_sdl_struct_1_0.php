@@ -162,7 +162,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
-	 * Return the item for the previous key.
+	 * Rewind internal pointer to previous list item.
 	 *
 	 * @return mixed
 	 */
@@ -172,7 +172,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
-	 * Return the item for the next key.
+	 * Advance internal pointer to next list item.
 	 *
 	 * @return mixed
 	 */
