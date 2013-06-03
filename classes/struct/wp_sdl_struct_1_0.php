@@ -81,7 +81,7 @@ class WP_SDL_Struct_1_0 extends WP_SDL_Helper_1_0
 }
 
 /**
- * Doubly Linked List Structure
+ * Doubly Linked List Structure.
  *
  * This is a fork of SplDoublyLinkedList from PHP 5.3.25 which has been stripped
  * of all interface implementations and modified to allow setting of keys.
@@ -121,7 +121,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
-	 * Pop the last item off the end of the list
+	 * Pop the last item off the end of the list.
 	 *
 	 * @return mixed
 	 * @throws RuntimeException If the stack is empty.
@@ -223,7 +223,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
-	 * Returns true if current key is valid
+	 * Returns true if current key is valid.
 	 *
 	 * @return boolean
 	 */
@@ -529,7 +529,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 }
 
 /**
- * Dynamic List Structure
+ * Dynamic List Structure.
  *
  * @package wp-sdl\helpers
  * @version 1.0
@@ -630,7 +630,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 }
 
 /**
- * Stack Structure (last in, first out)
+ * Stack Structure (last in, first out).
  *
  * @package wp-sdl\helpers
  * @version 1.0
@@ -709,7 +709,7 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 }
 
 /**
- * Queue Structure (first in, first out)
+ * Queue Structure (first in, first out).
  *
  * @package wp-sdl\helpers
  * @version 1.0
@@ -758,7 +758,7 @@ class WP_SDL_Struct_Queue_1_0 extends WP_SDL_Struct_DLL_1_0
 }
 
 /**
- * Priority Queue Structure
+ * Priority Queue Structure (mixed in, highest priority out)
  *
  * @package wp-sdl\helpers
  * @version 1.0
