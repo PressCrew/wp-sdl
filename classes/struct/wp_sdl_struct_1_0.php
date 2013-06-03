@@ -18,14 +18,14 @@
  */
 class WP_SDL_Struct_1_0 extends WP_SDL_Helper_1_0
 {
-	public function stack()
+	public function static_list( $length )
 	{
-		return new WP_SDL_Struct_Stack_1_0();
+		return new WP_SDL_Struct_StaticList_1_0( $length );
 	}
 
-	public function dlist()
+	public function dynamic_list()
 	{
-		return new WP_SDL_Struct_DList_1_0();
+		return new WP_SDL_Struct_DynamicList_1_0();
 	}
 
 	public function map()
@@ -33,6 +33,11 @@ class WP_SDL_Struct_1_0 extends WP_SDL_Helper_1_0
 		return new WP_SDL_Struct_Map_1_0();
 	}
 
+	public function stack()
+	{
+		return new WP_SDL_Struct_Stack_1_0();
+	}
+	
 	public function queue()
 	{
 		return new WP_SDL_Struct_Queue_1_0();
@@ -371,7 +376,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
  * @package wp-sdl\helpers
  * @version 1.0
  */
-class WP_SDL_Struct_SList_1_0 extends WP_SDL_Struct_DLL_1_0
+class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 {
 	/**
 	 * The exact length of the list.
@@ -488,7 +493,7 @@ class WP_SDL_Struct_SList_1_0 extends WP_SDL_Struct_DLL_1_0
  * @package wp-sdl\helpers
  * @version 1.0
  */
-class WP_SDL_Struct_DList_1_0 extends WP_SDL_Struct_DLL_1_0
+class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 {
 	/**
 	 * Returns offset if its within valid range.
