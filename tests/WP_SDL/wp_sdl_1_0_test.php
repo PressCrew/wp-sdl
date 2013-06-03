@@ -32,6 +32,13 @@ class WP_SDL_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertInstanceOf( 'WP_SDL_Html_1_0', $this->wpsdl->html() );
 	}
 
+	public function testOptionsHelper()
+	{
+		$this->assertInstanceOf( 'WP_SDL_Options_1_0', $this->wpsdl->helper('options', '1.0') );
+		$this->assertInstanceOf( 'WP_SDL_Options_1_0', $this->wpsdl->options('1.0') );
+		$this->assertInstanceOf( 'WP_SDL_Options_1_0', $this->wpsdl->options() );
+	}
+
 	/**
 	 * @expectedException Exception
 	 */

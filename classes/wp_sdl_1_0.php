@@ -91,6 +91,17 @@ class WP_SDL_1_0 implements WP_SDL_Compat
 	}
 
 	/**
+	 * Return Options helper.
+	 *
+	 * @param string $version
+	 * @return WP_SDL_Options_1_0
+	 */
+	public function options( $version = '1.0' )
+	{
+		return $this->helper( 'options', $version );
+	}
+
+	/**
 	 * Return Widget helper.
 	 *
 	 * @param string $version

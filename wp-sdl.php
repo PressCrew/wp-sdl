@@ -26,6 +26,7 @@ WP_SDL::init(
 		'WP_SDL_1_0' => '',
 		'WP_SDL_Helper_1_0' => '',
 		'WP_SDL_Html_1_0' => 'html',
+		'WP_SDL_Options_1_0' => 'options',
 		'WP_SDL_Widget_1_0' => 'widget'
 	)
 );
