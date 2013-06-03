@@ -772,6 +772,9 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 		// sort the priority map
 		$this->priority_sort();
 
+		// make sure priority map is rewound
+		reset( $this->priority_map );
+
 		// return highest priority item key
 		return key( $this->priority_map );
 	}
