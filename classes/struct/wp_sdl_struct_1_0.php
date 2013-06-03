@@ -18,31 +18,62 @@
  */
 class WP_SDL_Struct_1_0 extends WP_SDL_Helper_1_0
 {
+	/**
+	 * Return a new static list data structure instance.
+	 *
+	 * @param integer $length The exact length of the list.
+	 * @return WP_SDL_Struct_StaticList_1_0
+	 */
 	public function static_list( $length )
 	{
 		return new WP_SDL_Struct_StaticList_1_0( $length );
 	}
 
+	/**
+	 * Return a new dynamic list data structure instance.
+	 *
+	 * @return WP_SDL_Struct_DynamicList_1_0
+	 */
 	public function dynamic_list()
 	{
 		return new WP_SDL_Struct_DynamicList_1_0();
 	}
 
+	/**
+	 * Return a new map data structure instance.
+	 *
+	 * @return WP_SDL_Struct_Map_1_0
+	 */
 	public function map()
 	{
 		return new WP_SDL_Struct_Map_1_0();
 	}
 
+	/**
+	 * Return a new stack data structure instance.
+	 *
+	 * @return WP_SDL_Struct_Stack_1_0
+	 */
 	public function stack()
 	{
 		return new WP_SDL_Struct_Stack_1_0();
 	}
-	
+
+	/**
+	 * Return a new queue data structure instance.
+	 *
+	 * @return WP_SDL_Struct_Queue_1_0
+	 */
 	public function queue()
 	{
 		return new WP_SDL_Struct_Queue_1_0();
 	}
 
+	/**
+	 * Return a new priority queue data structure instance.
+	 *
+	 * @return WP_SDL_Struct_PriorityQueue_1_0
+	 */
 	public function priority_queue()
 	{
 		return new WP_SDL_Struct_PriorityQueue_1_0();
