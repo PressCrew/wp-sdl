@@ -162,6 +162,16 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
+	 * Return the item for the previous key.
+	 *
+	 * @return mixed
+	 */
+	public function prev()
+	{
+		prev( $this->list );
+	}
+
+	/**
 	 * Return the item for the next key.
 	 *
 	 * @return mixed
@@ -625,6 +635,33 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function peek()
 	{
 		return $this->last();
+	}
+
+	/**
+	 * Rewind pointer to top of stack.
+	 */
+	public function rewind()
+	{
+		// a stack's logic is reversed (LI/FO)
+		$this->last();
+	}
+
+	/**
+	 * Return one item deeper into stack stack without removing.
+	 */
+	public function prev()
+	{
+		// a stack's logic is reversed (LI/FO)
+		return parent::next();
+	}
+
+	/**
+	 * Return next item from top of stack.
+	 */
+	public function next()
+	{
+		// a stack's logic is reversed (LI/FO)
+		return parent::prev();
 	}
 }
 
