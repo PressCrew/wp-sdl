@@ -632,9 +632,21 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 	 * 
 	 * @return mixed
 	 */
-	public function peek()
+	public function top()
 	{
+		// a stack's logic is reversed (LI/FO)
 		return $this->last();
+	}
+
+	/**
+	 * Return last item from bottom of stack without removing.
+	 *
+	 * @return mixed
+	 */
+	public function bottom()
+	{
+		// a stack's logic is reversed (LI/FO)
+		return $this->first();
 	}
 
 	/**
