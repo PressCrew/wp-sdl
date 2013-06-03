@@ -53,7 +53,7 @@ class WP_SDL_Struct_1_0 extends WP_SDL_Helper_1_0
  * @package wp-sdl\helpers
  * @version 1.0
  */
-abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Traversable
+abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 {
 	/**
 	 * The internal list of items.
