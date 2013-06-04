@@ -99,6 +99,16 @@ class WP_SDL_Struct_1_0 extends WP_SDL_Helper_1_0
 abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 {
 	/**
+	 * Safe mode enabled flag.
+	 */
+	const SAFE_MODE_ENABLE = 0x0000001;
+
+	/**
+	 * Safe mode strict flag.
+	 */
+	const SAFE_MODE_STRICT = 0x0000002;
+
+	/**
 	 * The internal list of items.
 	 *
 	 * @var array
@@ -111,6 +121,51 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 * @var integer|null
 	 */
 	private $count = null;
+
+	/**
+	 * Bit packed safe mode setting.
+	 *
+	 * Safe mode with strict is enabled by default!
+	 * 
+	 * @var integer
+	 */
+	private $safe_mode = 0x0000003;
+
+	/**
+	 * Set safe mode.
+	 *
+	 * @param integer $int
+	 * @throws InvalidArgumentException If new value is not an integer.
+	 */
+	public function safe_mode( $int )
+	{
+		// is it an integer?
+		if ( is_integer( $int ) ) {
+			// yep, set it
+			$this->safe_mode = $int;
+		} else {
+			// not a valid arg
+			throw new InvalidArgumentException( __( 'Safe mode must be an integer.', 'wp-sdl' ) );
+		}
+	}
+
+	/**
+	 * Check if given safe mode flag is enabled.
+	 *
+	 * @param integer $flag
+	 * @return boolean
+	 */
+	protected function safe_mode_is( $flag )
+	{
+		// is it an integer?
+		if ( is_integer( $flag ) ) {
+			// yep, eval it
+			return ( ( $this->safe_mode & $flag ) === $flag );
+		}
+
+		// not a valid arg
+		throw new InvalidArgumentException( __( 'Safe mode must be an integer.', 'wp-sdl' ) );
+	}
 
 	/**
 	 * Fill the list with values.
@@ -353,7 +408,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 *
 	 * @param $key The key.
 	 * @param $value New value.
-	 * @param $safe_mode Set to true to throw an exception if data would be overwritten.
+	 * @param $safe_mode Set to true to perform a safe mode check.
 	 * @throws OverflowException If the key has been previously set.
 	 */
 	protected function insert( $key, $value, $safe_mode = false )
@@ -363,12 +418,22 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 			// yep, just append it
 			$this->list[] = $value;
 		} else {
-			// safe mode check
-			if ( true === $safe_mode && true === $this->exists( $key ) ) {
-				// safe mode violation
-				throw new OverflowException(
-					__( 'Safe mode is enabled and data already exists for the key.', 'wp-sdl' )
-				);
+			// safe mode check?
+			if (
+				true === $safe_mode &&
+				true === $this->safe_mode_is( self::SAFE_MODE_ENABLE ) &&
+				true === $this->exists( $key )
+			) {
+				// strict mode?
+				if ( true === $this->safe_mode_is( self::SAFE_MODE_STRICT ) ) {
+					// yep, throw exception
+					throw new OverflowException(
+						__( 'Safe mode strict is enabled and data already exists for the key.', 'wp-sdl' )
+					);
+				} else {
+					// nope, just return without modifying the list
+					return;
+				}
 			}
 			// set the given key
 			$this->list[ $key ] = $value;
@@ -382,11 +447,11 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 * Removes the data for the given key in the list.
 	 *
 	 * @param mixed $key The key.
-	 * @param boolean $safe_mode Set to true to throw an exception if key does not exist.
+	 * @param boolean $safe_mode Set to false to disable safe mode check.
 	 * @throws InvalidArgumentException If the key is null.
 	 * @throws OutOfRangeException If safe mode is enabled and the key does not exist.
 	 */
-	protected function delete( $key, $safe_mode = false )
+	protected function delete( $key, $safe_mode = true )
 	{
 		// is key null?
 		if ( null === $key ) {
@@ -394,18 +459,27 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 			throw new InvalidArgumentException(
 				__( 'The key cannot be null.', 'wp-sdl' )
 			);
-		} elseif ( true === $safe_mode && false === $this->exists( $key ) ) {
-			// safe mode violation
-			throw new OutOfRangeException(
-				__( 'Safe mode is enabled and the key does not exist.', 'wp-sdl' )
-			);
 		}
 
-		// unset the given key
-		unset( $this->list[ $key ] );
+		// does key exist?
+		if ( true === $this->exists( $key ) ) {
 
-		// wipe the count
-		$this->count = null;
+			// yep, unset the given key
+			unset( $this->list[ $key ] );
+			
+			// wipe the count
+			$this->count = null;
+
+		// do a safe mode check?
+		} else if (
+			true === $safe_mode &&
+			true === $this->safe_mode_is( self::SAFE_MODE_ENABLE | self::SAFE_MODE_STRICT )
+		) {
+			// yep, throw exception
+			throw new OutOfRangeException(
+				__( 'Safe mode strict is enabled and the key does not exist.', 'wp-sdl' )
+			);
+		}
 	}
 }
 
@@ -507,18 +581,21 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 *
 	 * @param integer $key Numeric key. Must be greater or equal to zero.
 	 * @param mixed $value The value to store.
-	 * @param boolean $strict If true, throw an exception if data not inserted.
+	 * @param boolean $safe_mode Set to false to disable safe mode check.
 	 * @throws OverflowException If strict mode is enabled and data insert failed.
 	 */
-	public function add( $key, $value, $strict = true )
+	public function add( $key, $value, $safe_mode = true )
 	{
-		// existing value must be null
-		if ( $this->is_null( $this->offset( $key ) ) ) {
-			// key is within valid range and value is null
+		// check key
+		$this->offset( $key );
+
+		// existing value can be null
+		if ( $this->is_null( $key ) ) {
+			// value is null, skip safe mode check
 			$this->insert( $key, $value );
-		} else if ( true === $strict ) {
-			// data would have been overwritten
-			throw new OverflowException( __( 'Data already exists for the key.', 'wp-sdl' ) );
+		} else {
+			// need to insert with safe mode check
+			$this->insert( $key, $value, $safe_mode );
 		}
 	}
 
@@ -592,10 +669,10 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 *
 	 * @param integer $key Numeric key. Must be greater or equal to zero.
 	 * @param mixed $value The value to store.
-	 * @param $safe_mode Set to true to throw an exception if data would be overwritten.
+	 * @param $safe_mode Set to false to disable safe mode check.
 	 * @throws OverflowException If the key has been previously set.
 	 */
-	public function add( $key, $value, $safe_mode = false )
+	public function add( $key, $value, $safe_mode = true )
 	{
 		// insert if key is within valid range
 		$this->insert( $this->offset( $key ), $value, $safe_mode );
@@ -605,7 +682,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 * Remove item from list.
 	 *
 	 * @param integer $key Numeric key. Must be greater or equal to zero.
-	 * @param boolean $safe_mode Set to true to throw an exception if key does not exist.
+	 * @param boolean $safe_mode Set to false to disable safe mode check.
 	 * @throws InvalidArgumentException If the key is null.
 	 * @throws OutOfRangeException If safe mode is enabled and the key does not exist.
 	 */
@@ -984,10 +1061,10 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 	 *
 	 * @param $key The key.
 	 * @param $value New value.
-	 * @param $safe_mode Set to true to throw an exception if data would be overwritten.
+	 * @param $safe_mode Set to false to disable safe mode check.
 	 * @throws OverflowException If the key has been previously set.
 	 */
-	public function add( $key, $value, $safe_mode = false )
+	public function add( $key, $value, $safe_mode = true )
 	{
 		return $this->insert( $key, $value, $safe_mode );
 	}
@@ -996,11 +1073,11 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 	 * Removes the data for the given key in the list.
 	 *
 	 * @param mixed $key The key.
-	 * @param boolean $safe_mode Set to true to throw an exception if key does not exist.
+	 * @param boolean $safe_mode Set to false to disable safe mode check.
 	 * @throws InvalidArgumentException If the key is null.
 	 * @throws OutOfRangeException If safe mode is enabled and the key does not exist.
 	 */
-	public function remove( $key, $safe_mode = false )
+	public function remove( $key, $safe_mode = true )
 	{
 		return $this->delete( $key, $safe_mode );
 	}

@@ -516,11 +516,18 @@ class WP_SDL_Struct_StaticList_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		$this->dummyDataAdd();
 
-		// nothing should happen
-		$this->assertNull( $this->list->add( 1, 'foo', false ) );
-		
-		// value should NOT have changed
+		// set safe mode without strict
+		$this->list->safe_mode(
+			WP_SDL_Struct_DLL_1_0::SAFE_MODE_ENABLE
+		);
+
+		// safe mode check with no strict
+		$this->assertNull( $this->list->add( 1, 'foo', true ) );
 		$this->assertEquals( 'one', $this->list->get( 1 ) );
+
+		// completely override safe mode check at call time
+		$this->assertNull( $this->list->add( 1, 'foo', false ) );
+		$this->assertEquals( 'foo', $this->list->get( 1 ) );
 
 		// count should be same
 		$this->assertListCount();
@@ -550,4 +557,76 @@ class WP_SDL_Struct_StaticList_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertEquals( 'four', $this->list->bottom() );
 	}
 
+}
+
+/**
+ * @group struct
+ */
+class WP_SDL_Struct_DynamicList_1_0_Test extends PHPUnit_Framework_TestCase
+{
+	/**
+	 * @var WP_SDL_Struct_DynamicList_1_0
+	 */
+	private $list;
+
+	/**
+	 * @var array
+	 */
+	private static $expected =
+		array(
+			0 => 'zero',
+			1 => 'one',
+			2 => 'two',
+			3 => 'three',
+			4 => 'four'
+		);
+
+	public function setUp()
+	{
+		$this->list =
+			WP_SDL::support( '1.0' )
+				->struct()
+				->dynamic_list();
+	}
+
+	public function tearDown()
+	{
+		unset( $this->list );
+	}
+
+	private function dummyDataSet()
+	{
+		$this->list->set( 0, 'zero' );
+		$this->list->set( 1, 'one' );
+		$this->list->set( 2, 'two' );
+		$this->list->set( 3, 'three' );
+		$this->list->set( 4, 'four' );
+	}
+
+	private function dummyDataAdd()
+	{
+		$this->list->add( 0, 'zero' );
+		$this->list->add( 1, 'one' );
+		$this->list->add( 2, 'two' );
+		$this->list->add( 3, 'three' );
+		$this->list->add( 4, 'four' );
+	}
+
+	public function testInstance()
+	{
+		$this->assertInstanceOf( 'WP_SDL_Struct_DynamicList_1_0', $this->list );
+		$this->assertInstanceOf( 'Countable', $this->list );
+		$this->assertInstanceOf( 'Iterator', $this->list );
+	}
+
+	public function testRemove()
+	{
+		$this->list->safe_mode(
+			WP_SDL_Struct_DLL_1_0::SAFE_MODE_ENABLE |
+			WP_SDL_Struct_DLL_1_0::SAFE_MODE_STRICT
+		);
+		
+		$this->list->remove( 123, false );
+	}
+	
 }
