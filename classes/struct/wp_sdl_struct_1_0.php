@@ -18,6 +18,13 @@
  */
 class WP_SDL_Struct_1_0 extends WP_SDL_Helper_1_0
 {
+	/*
+	 * Class version
+	 *
+	 * @var string
+	 */
+	protected static $VERSION = '1.0';
+	
 	/**
 	 * Return a new static list data structure instance.
 	 *
