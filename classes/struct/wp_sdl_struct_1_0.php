@@ -511,7 +511,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	{
 		// since this is a fixed length list, overwrite value
 		// with null to preserve the key in the list.
-		$this->insert( $key, null );
+		$this->insert( $this->offset( $key ), null );
 	}
 
 	/**
