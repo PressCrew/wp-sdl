@@ -503,6 +503,26 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	}
 
 	/**
+	 * Add value at specified key if not already set.
+	 *
+	 * @param integer $key Numeric key. Must be greater or equal to zero.
+	 * @param mixed $value The value to store.
+	 * @param boolean $strict If true, throw an exception if data not inserted.
+	 * @throws OverflowException If strict mode is enabled and data insert failed.
+	 */
+	public function add( $key, $value, $strict = true )
+	{
+		// existing value must be null
+		if ( $this->is_null( $this->offset( $key ) ) ) {
+			// key is within valid range and value is null
+			$this->insert( $key, $value );
+		} else if ( true === $strict ) {
+			// data would have been overwritten
+			throw new OverflowException( __( 'Data already exists for the key.', 'wp-sdl' ) );
+		}
+	}
+
+	/**
 	 * Erase value at specified key.
 	 *
 	 * @param integer $key Numeric key. Must be greater or equal to zero.
