@@ -458,18 +458,18 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	private function offset( $offset )
 	{
-		// offset must be numeric
-		if ( is_numeric( $offset ) ) {
+		// offset must be an integer
+		if ( is_integer( $offset ) ) {
 			// offset must be gte zero and lte length minus one
 			if ( 0 <= $offset && $this->length > $offset ) {
 				// offet is good
-				return (integer) $offset;
+				return $offset;
 			}
 			// offset out of range
 			throw new OutOfRangeException( __( 'Offset is out of range.', 'wp-sdl' ) );
 		}
 		// invalid offset
-		throw new InvalidArgumentException( __( 'Offset must be numeric.', 'wp-sdl' ) );
+		throw new InvalidArgumentException( __( 'Offset must be an integer.', 'wp-sdl' ) );
 	}
 
 	/**
@@ -546,18 +546,18 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	private function offset( $offset )
 	{
-		// offset must be numeric
-		if ( is_numeric( $offset ) ) {
+		// offset must be an int
+		if ( is_integer( $offset ) ) {
 			// offset must be gte zero
 			if ( 0 <= $offset ) {
 				// offet is good
-				return (integer) $offset;
+				return $offset;
 			}
 			// offset out of range
 			throw new OutOfRangeException( __( 'Offset must be greater or equal to zero.', 'wp-sdl' ) );
 		}
 		// invalid offset
-		throw new InvalidArgumentException( __( 'Offset must be numeric.', 'wp-sdl' ) );
+		throw new InvalidArgumentException( __( 'Offset must be an integer.', 'wp-sdl' ) );
 	}
 
 	/**
