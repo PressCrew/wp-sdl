@@ -229,7 +229,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 */
 	public function valid()
 	{
-		return true;
+		return ( null !== key( $this->list ) );
 	}
 
 	/**
