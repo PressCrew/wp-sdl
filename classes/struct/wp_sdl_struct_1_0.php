@@ -665,12 +665,12 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	}
 
 	/**
-	 * Add or overwrite value at specified key.
+	 * Add value at specified key.
 	 *
 	 * @param integer $key Numeric key. Must be greater or equal to zero.
 	 * @param mixed $value The value to store.
 	 * @param $safe_mode Set to false to disable safe mode check.
-	 * @throws OverflowException If the key has been previously set.
+	 * @throws OverflowException If safe mode strict enabled and the key has been previously set.
 	 */
 	public function add( $key, $value, $safe_mode = true )
 	{
