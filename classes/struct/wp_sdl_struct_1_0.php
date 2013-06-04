@@ -503,11 +503,11 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	}
 
 	/**
-	 * Reset value at specified key.
+	 * Erase value at specified key.
 	 *
 	 * @param integer $key Numeric key. Must be greater or equal to zero.
 	 */
-	public function reset( $key )
+	public function erase( $key )
 	{
 		// since this is a fixed length list, overwrite value
 		// with null to preserve the key in the list.
