@@ -346,7 +346,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 */
 	public function is_empty()
 	{
-		return ( 0 === $this->count() );
+		return empty( $this->list );
 	}
 
 	/**
