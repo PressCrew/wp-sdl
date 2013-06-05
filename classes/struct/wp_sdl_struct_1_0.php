@@ -819,7 +819,7 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function prev()
 	{
 		// a stack's logic is reversed (LI/FO)
-		return parent::next();
+		parent::next();
 	}
 
 	/**
@@ -828,7 +828,7 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function next()
 	{
 		// a stack's logic is reversed (LI/FO)
-		return parent::prev();
+		parent::prev();
 	}
 }
 
