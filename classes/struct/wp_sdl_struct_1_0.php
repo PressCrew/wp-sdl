@@ -183,6 +183,17 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
+	 * Call a sort function against the list.
+	 *
+	 * @param string $callback
+	 * @param integer $sort_flags
+	 */
+	protected function sort( $callback = 'sort', $sort_flags = SORT_REGULAR )
+	{
+		call_user_func( $callback, $this->list, $sort_flags );
+	}
+
+	/**
 	 * Pop the last item off the end of the list.
 	 *
 	 * @return mixed
