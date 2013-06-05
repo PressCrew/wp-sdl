@@ -185,12 +185,21 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	/**
 	 * Call a sort function against the list.
 	 *
-	 * @param string $callback
-	 * @param integer $sort_flags
+	 * @param callable $callback A valid callback.
+	 * @param array $user_args Additional args to pass to callback.
 	 */
-	protected function sort( $callback = 'sort', $sort_flags = SORT_REGULAR )
+	protected function sort( $callback = 'sort', $user_args = array() )
 	{
-		call_user_func( $callback, &$this->list, $sort_flags );
+		// args to pass to the callback
+		$args = array_merge(
+			// reference to list must be first arg
+			array( &$this->list ),
+			// append additional user args
+			$user_args
+		);
+
+		// exec callback
+		call_user_func_array( $callback, $args );
 	}
 
 	/**
