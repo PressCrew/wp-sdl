@@ -665,6 +665,18 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	}
 
 	/**
+	 * Set value at specified key.
+	 *
+	 * @param integer $key Numeric key. Must be greater or equal to zero.
+	 * @param mixed $value The value to store.
+	 */
+	public function set( $key, $value )
+	{
+		// insert if key is within valid range
+		$this->insert( $this->offset( $key ), $value );
+	}
+	
+	/**
 	 * Add value at specified key.
 	 *
 	 * @param integer $key Numeric key. Must be greater or equal to zero.
