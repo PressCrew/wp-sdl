@@ -309,7 +309,11 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 */
 	protected function last()
 	{
-		return end( $this->list );
+		// dont call end on empty array, because it will return FALSE
+		if ( false === empty( $this->list ) ) {
+			// seek to end and return it
+			return end( $this->list );
+		}
 	}
 
 	/**
@@ -319,7 +323,11 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 */
 	protected function first()
 	{
-		return reset( $this->list );
+		// dont call reset on empty array, because it will return FALSE
+		if ( false === empty( $this->list ) ) {
+			// seek to beginning and return it
+			return reset( $this->list );
+		}
 	}
 
 	/**
