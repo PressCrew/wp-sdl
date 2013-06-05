@@ -417,6 +417,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 * @param $key The key.
 	 * @param $value New value.
 	 * @param $safe_mode Set to true to perform a safe mode check.
+	 * @return integer|string|null The inserted/modified key, or null if nothing changed.
 	 * @throws OverflowException If the key has been previously set.
 	 */
 	final protected function insert( $key, $value, $safe_mode = false )
@@ -425,6 +426,10 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 		if ( null === $key ) {
 			// yep, just append it
 			$this->list[] = $value;
+			// seek to end
+			end( $this->list );
+			// get inserted key
+			$key = key( $this->list );
 		} else {
 			// safe mode check?
 			if (
@@ -449,6 +454,9 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 
 		// wipe the count
 		$this->count = null;
+
+		// return key that was affected
+		return $key;
 	}
 
 	/**
@@ -456,6 +464,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 *
 	 * @param mixed $key The key.
 	 * @param boolean $safe_mode Set to false to disable safe mode check.
+	 * @return integer|string|null The key that was deleted, or null if nothing changed.
 	 * @throws InvalidArgumentException If the key is null.
 	 * @throws OutOfBoundsException If safe mode is enabled and the key does not exist.
 	 */
@@ -469,21 +478,22 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 			);
 		}
 
-		// does key exist?
+		// key is not null, does it exist?
 		if ( true === $this->exists( $key ) ) {
-
 			// yep, unset the given key
 			unset( $this->list[ $key ] );
-			
 			// wipe the count
 			$this->count = null;
+			// return the deleted key
+			return $key;
+		}
 
-		// do a safe mode check?
-		} else if (
+		// key does not exist, maybe do a safe mode check
+		if (
 			true === $safe_mode &&
 			true === $this->safe_mode_is( self::SAFE_MODE_ENABLE | self::SAFE_MODE_STRICT )
 		) {
-			// yep, throw exception
+			// safe mode violation, throw exception
 			throw new OutOfBoundsException(
 				__( 'Safe mode strict is enabled and the key does not exist.', 'wp-sdl' )
 			);
