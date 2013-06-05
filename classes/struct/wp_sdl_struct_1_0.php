@@ -419,7 +419,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 * @param $safe_mode Set to true to perform a safe mode check.
 	 * @throws OverflowException If the key has been previously set.
 	 */
-	protected function insert( $key, $value, $safe_mode = false )
+	final protected function insert( $key, $value, $safe_mode = false )
 	{
 		// is key null?
 		if ( null === $key ) {
@@ -459,7 +459,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 * @throws InvalidArgumentException If the key is null.
 	 * @throws OutOfBoundsException If safe mode is enabled and the key does not exist.
 	 */
-	protected function delete( $key, $safe_mode = true )
+	final protected function delete( $key, $safe_mode = true )
 	{
 		// is key null?
 		if ( null === $key ) {
@@ -1086,7 +1086,7 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function add( $key, $value, $safe_mode = true )
 	{
-		return $this->insert( $key, $value, $safe_mode );
+		$this->insert( $key, $value, $safe_mode );
 	}
 
 	/**
@@ -1099,6 +1099,6 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function remove( $key, $safe_mode = true )
 	{
-		return $this->delete( $key, $safe_mode );
+		$this->delete( $key, $safe_mode );
 	}
 }
