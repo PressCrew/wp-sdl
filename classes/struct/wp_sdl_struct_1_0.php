@@ -190,7 +190,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 */
 	protected function sort( $callback = 'sort', $sort_flags = SORT_REGULAR )
 	{
-		call_user_func( $callback, $this->list, $sort_flags );
+		call_user_func( $callback, &$this->list, $sort_flags );
 	}
 
 	/**
