@@ -303,20 +303,6 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
-	 * Return the item at the end of the list.
-	 *
-	 * @return mixed
-	 */
-	protected function last()
-	{
-		// dont call end on empty array, because it will return FALSE
-		if ( false === empty( $this->list ) ) {
-			// seek to end and return it
-			return end( $this->list );
-		}
-	}
-
-	/**
 	 * Return the item at the beginning of the list.
 	 *
 	 * @return mixed
@@ -327,6 +313,20 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 		if ( false === empty( $this->list ) ) {
 			// seek to beginning and return it
 			return reset( $this->list );
+		}
+	}
+	
+	/**
+	 * Return the item at the end of the list.
+	 *
+	 * @return mixed
+	 */
+	protected function last()
+	{
+		// dont call end on empty array, because it will return FALSE
+		if ( false === empty( $this->list ) ) {
+			// seek to end and return it
+			return end( $this->list );
 		}
 	}
 
