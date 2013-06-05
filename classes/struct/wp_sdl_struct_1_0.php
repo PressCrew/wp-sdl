@@ -400,7 +400,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 *
 	 * @param mixed $key The key.
 	 * @return mixed
-	 * @throws OutOfRangeException If the offset is either invalid or out of range.
+	 * @throws OutOfBoundsException If the key is not valid.
 	 */
 	public function get( $key )
 	{
@@ -408,7 +408,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 			return $this->list[ $key ];
 		}
 		
-		throw new OutOfRangeException( __( 'Offset invalid or out of range', 'wp-sdl' ) );
+		throw new OutOfBoundsException( __( 'Invalid key', 'wp-sdl' ) );
 	}
 
 	/**
@@ -457,7 +457,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 * @param mixed $key The key.
 	 * @param boolean $safe_mode Set to false to disable safe mode check.
 	 * @throws InvalidArgumentException If the key is null.
-	 * @throws OutOfRangeException If safe mode is enabled and the key does not exist.
+	 * @throws OutOfBoundsException If safe mode is enabled and the key does not exist.
 	 */
 	protected function delete( $key, $safe_mode = true )
 	{
@@ -484,7 +484,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 			true === $this->safe_mode_is( self::SAFE_MODE_ENABLE | self::SAFE_MODE_STRICT )
 		) {
 			// yep, throw exception
-			throw new OutOfRangeException(
+			throw new OutOfBoundsException(
 				__( 'Safe mode strict is enabled and the key does not exist.', 'wp-sdl' )
 			);
 		}
@@ -704,7 +704,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 * @param integer $key Numeric key. Must be greater or equal to zero.
 	 * @param boolean $safe_mode Set to false to disable safe mode check.
 	 * @throws InvalidArgumentException If the key is null.
-	 * @throws OutOfRangeException If safe mode is enabled and the key does not exist.
+	 * @throws OutOfBoundsException If safe mode is enabled and the key does not exist.
 	 */
 	public function remove( $key, $safe_mode = true )
 	{
@@ -1095,7 +1095,7 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 	 * @param mixed $key The key.
 	 * @param boolean $safe_mode Set to false to disable safe mode check.
 	 * @throws InvalidArgumentException If the key is null.
-	 * @throws OutOfRangeException If safe mode is enabled and the key does not exist.
+	 * @throws OutOfBoundsException If safe mode is enabled and the key does not exist.
 	 */
 	public function remove( $key, $safe_mode = true )
 	{
