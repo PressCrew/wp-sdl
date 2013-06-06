@@ -305,6 +305,16 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
+	 * Return an array of all list keys.
+	 *
+	 * @return array
+	 */
+	public function keys()
+	{
+		return array_keys( $this->list );
+	}
+
+	/**
 	 * Returns true if current key is valid.
 	 *
 	 * @return boolean
