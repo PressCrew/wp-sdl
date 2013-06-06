@@ -895,10 +895,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function append( $data )
 	{
 		// increment high index and insert
-		if ( null !== $this->insert( ++$this->index_high, $data ) ) {
-			// force key sort
-			$this->index_resort = true;
-		}
+		$this->insert( ++$this->index_high, $data );
 	}
 
 	/**
