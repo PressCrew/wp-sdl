@@ -187,6 +187,7 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 *
 	 * @param callable $callback A valid callback.
 	 * @param array $user_args Additional args to pass to callback.
+	 * @return mixed The value returned by the callback.
 	 */
 	protected function sort( $callback = 'sort', $user_args = array() )
 	{
@@ -198,8 +199,8 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 			$user_args
 		);
 
-		// exec callback
-		call_user_func_array( $callback, $args );
+		// exec callback and return result
+		return call_user_func_array( $callback, $args );
 	}
 
 	/**
