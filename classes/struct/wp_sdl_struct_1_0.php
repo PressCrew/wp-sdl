@@ -565,27 +565,27 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	}
 
 	/**
-	 * Returns offset if its within valid range.
+	 * Returns index if its within valid range.
 	 *
-	 * @param integer $offset
+	 * @param integer $index
 	 * @return integer
-	 * @throws InvalidArgumentException When offset is not numeric.
-	 * @throws OutOfRangeException When offset is out of range.
+	 * @throws InvalidArgumentException When index is not numeric.
+	 * @throws OutOfRangeException When index is out of range.
 	 */
-	private function offset( $offset )
+	private function index( $index )
 	{
-		// offset must be an integer
-		if ( is_integer( $offset ) ) {
-			// offset must be gte zero and lte length minus one
-			if ( 0 <= $offset && $this->length > $offset ) {
+		// index must be an integer
+		if ( is_integer( $index ) ) {
+			// index must be gte zero and lte length minus one
+			if ( 0 <= $index && $this->length > $index ) {
 				// offet is good
-				return $offset;
+				return $index;
 			}
-			// offset out of range
-			throw new OutOfRangeException( __( 'Offset is out of range.', 'wp-sdl' ) );
+			// index out of range
+			throw new OutOfRangeException( __( 'Index is out of range.', 'wp-sdl' ) );
 		}
-		// invalid offset
-		throw new InvalidArgumentException( __( 'Offset must be an integer.', 'wp-sdl' ) );
+		// invalid index
+		throw new InvalidArgumentException( __( 'Index must be an integer.', 'wp-sdl' ) );
 	}
 
 	/**
@@ -608,7 +608,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function set( $key, $value )
 	{
 		// insert if key is within valid range
-		$this->insert( $this->offset( $key ), $value );
+		$this->insert( $this->index( $key ), $value );
 	}
 
 	/**
@@ -622,7 +622,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function add( $key, $value, $safe_mode = true )
 	{
 		// check key
-		$this->offset( $key );
+		$this->index( $key );
 
 		// existing value can be null
 		if ( $this->is_null( $key ) ) {
@@ -643,7 +643,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	{
 		// since this is a fixed length list, overwrite value
 		// with null to preserve the key in the list.
-		$this->insert( $this->offset( $key ), null );
+		$this->insert( $this->index( $key ), null );
 	}
 
 	/**
@@ -723,7 +723,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 			return $index;
 		}
 		// invalid index
-		throw new InvalidArgumentException( __( 'Offset must be an integer.', 'wp-sdl' ) );
+		throw new InvalidArgumentException( __( 'Index must be an integer.', 'wp-sdl' ) );
 	}
 
 	/**
