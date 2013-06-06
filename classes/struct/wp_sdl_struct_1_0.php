@@ -252,20 +252,6 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
-	 * Inserts an item at the beginning of the list.
-	 *
-	 * @param $data Variable to add to the list.
-	 * @return integer The new number of elements in the list.
-	 */
-	protected function unshift( $data )
-	{
-		// wipe the count
-		$this->count = null;
-		// shift data onto list
-		return array_unshift( $this->list, $data );
-	}
-
-	/**
 	 * Return the item for the current key.
 	 *
 	 * @return mixed
