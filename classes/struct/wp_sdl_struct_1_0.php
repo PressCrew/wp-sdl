@@ -690,27 +690,123 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 {
 	/**
-	 * Returns offset if its within valid range.
+	 * The lowest index.
 	 *
-	 * @param integer $offset The offset to check.
-	 * @return integer
-	 * @throws InvalidArgumentException When offset is not numeric.
-	 * @throws OutOfRangeException When offset is out of range.
+	 * @var integer
 	 */
-	private function offset( $offset )
+	private $index_low = 1;
+
+	/**
+	 * The highest index.
+	 *
+	 * @var integer
+	 */
+	private $index_high = -1;
+
+	/**
+	 * Resort toggle.
+	 *
+	 * @var boolean
+	 */
+	private $index_resort = false;
+	
+	/**
+	 * Returns index if its within valid range.
+	 *
+	 * @param integer $index The index to check.
+	 * @return integer
+	 * @throws InvalidArgumentException When index is not an integer.
+	 */
+	private function index( $index )
 	{
-		// offset must be an int
-		if ( is_integer( $offset ) ) {
-			// offset must be gte zero
-			if ( 0 <= $offset ) {
-				// offet is good
-				return $offset;
-			}
-			// offset out of range
-			throw new OutOfRangeException( __( 'Offset must be greater or equal to zero.', 'wp-sdl' ) );
+		// index must be an int
+		if ( is_integer( $index ) ) {
+			// offet is good
+			return $index;
 		}
-		// invalid offset
+		// invalid index
 		throw new InvalidArgumentException( __( 'Offset must be an integer.', 'wp-sdl' ) );
+	}
+
+	/**
+	 * Update indexes as applicable.
+	 *
+	 * @param integer $index A potentially range extending index.
+	 */
+	private function index_range( $index )
+	{
+		// index MUST be an integer
+		if ( is_integer( $index ) ) {
+			// if high index is less than low index, this is the first run
+			if ( $this->index_high < $this->index_low ) {
+				// make them identical!
+				$this->index_low = $index;
+				$this->index_high = $index;
+			} else if ( $index > $this->index_high ) {
+				// index is higher than high index, use it.
+				$this->index_high = $index;
+			} else if ( $index < $this->index_low ) {
+				// index is lower than low index, use it.
+				$this->index_low = $index;
+			}
+		}
+	}
+
+	/**
+	 * Operations to take when an index has been removed.
+	 *
+	 * @param integer $index
+	 */
+	private function index_unset( $index )
+	{
+		// does index match either end of range?
+		if (
+			$index === $this->index_high ||
+			$index === $this->index_low
+		) {
+			// yes, force resort
+			$this->index_resort = true;
+		}
+	}
+
+	/**
+	 * Rewind is special for a dynamic list!
+	 */
+	public function rewind()
+	{
+		// sort by keys
+		$this->key_sort();
+		// call parent
+		parent::rewind();
+	}
+
+	/**
+	 * Sort the list by keys.
+	 *
+	 * @return boolean
+	 */
+	public function key_sort()
+	{
+		// need to re-sort?
+		if ( true === $this->index_resort ) {
+			// yep, sort it by keys
+			if ( true === $this->sort( 'ksort' ) ) {
+				// set low index
+				$this->index_low = $this->key();
+				// seek to end
+				$this->last();
+				// set high index key
+				$this->index_high = $this->key();
+			} else {
+				// sort failed
+				return false;
+			}
+			// toggle index sort off
+			$this->index_resort = false;
+		}
+
+		// success
+		return true;
 	}
 
 	/**
@@ -722,7 +818,12 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function set( $key, $value )
 	{
 		// insert if key is within valid range
-		$this->insert( $this->offset( $key ), $value );
+		if ( $key === $this->insert( $this->index( $key ), $value ) ) {
+			// update indexes
+			$this->index_range( $key );
+			// force key sort
+			$this->index_resort = true;
+		}
 	}
 	
 	/**
@@ -736,7 +837,12 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function add( $key, $value, $safe_mode = true )
 	{
 		// insert if key is within valid range
-		$this->insert( $this->offset( $key ), $value, $safe_mode );
+		if ( $key === $this->insert( $this->index( $key ), $value, $safe_mode ) ) {
+			// update indexes
+			$this->index_range( $key );
+			// force key sort
+			$this->index_resort = true;
+		}
 	}
 
 	/**
@@ -750,7 +856,9 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function remove( $key, $safe_mode = true )
 	{
 		// completely delete item
-		$this->delete( $this->offset( $key ), $safe_mode );
+		$this->index_unset(
+			$this->delete( $this->index( $key ), $safe_mode )
+		);
 	}
 
 	/**
@@ -760,7 +868,11 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function prepend( $data )
 	{
-		$this->unshift( $data );
+		// decrement low index and insert
+		if ( null !== $this->insert( --$this->index_low, $data ) ) {
+			// force key sort
+			$this->index_resort = true;
+		}
 	}
 
 	/**
@@ -770,7 +882,11 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function append( $data )
 	{
-		$this->insert( null, $data );
+		// increment high index and insert
+		if ( null !== $this->insert( ++$this->index_high, $data ) ) {
+			// force key sort
+			$this->index_resort = true;
+		}
 	}
 
 	/**
@@ -780,7 +896,10 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function top()
 	{
-		return $this->first();
+		if ( false === $this->is_empty() ) {
+			$this->key_sort();
+			return $this->get( $this->index_low );
+		}
 	}
 
 	/**
@@ -790,7 +909,10 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function bottom()
 	{
-		return $this->last();
+		if ( false === $this->is_empty() ) {
+			$this->key_sort();
+			return $this->get( $this->index_high );
+		}
 	}
 }
 
