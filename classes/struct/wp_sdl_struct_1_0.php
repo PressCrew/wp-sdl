@@ -691,7 +691,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
  * performance advantage over a simple array because it tracks the
  * low and high indexes internally.
  *
- * - Prepending does NOT use the expensive array_shift() function.
+ * - Prepending does NOT use the expensive array_unshift() function.
  * - The list is only sorted when required to fulfill an operation.
  * - The list is only sorted if a modification affected the order.
  * - In most cases top() and bottom() do not need to sort/seek.
