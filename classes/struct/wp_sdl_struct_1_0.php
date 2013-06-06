@@ -684,6 +684,18 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 /**
  * Dynamic List Structure.
  *
+ * A dynamic list has a variable length, and only uses numeric keys.
+ * When a new instance is created, the list is empty.
+ *
+ * If implemented carefully, this structure can have a considerable
+ * performance advantage over a simple array because it tracks the
+ * low and high indexes internally.
+ *
+ * - Prepending does NOT use the expensive array_shift() function.
+ * - The list is only sorted when required to fulfill an operation.
+ * - The list is only sorted if a modification affected the order.
+ * - In most cases top() and bottom() do not need to sort/seek.
+ *
  * @package wp-sdl\helpers
  * @version 1.0
  */
