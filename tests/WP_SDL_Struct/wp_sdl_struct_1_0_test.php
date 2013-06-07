@@ -814,3 +814,199 @@ class WP_SDL_Struct_DynamicList_1_0_Test extends WP_SDL_Struct_BaseList_1_0_Test
 	}
 	
 }
+
+/**
+ * @group struct
+ */
+class WP_SDL_Struct_Queue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
+{
+	/**
+	 * @var WP_SDL_Struct_Queue_1_0
+	 */
+	protected $list;
+
+	/**
+	 * @var array
+	 */
+	private static $expected =
+		array(
+			0 => 'zero',
+			1 => 'one',
+			2 => 'two',
+			3 => 'three',
+			4 => 'four'
+		);
+
+	protected function dummyDataEnq()
+	{
+		$this->list->enqueue( 'zero' );
+		$this->list->enqueue( 'one' );
+		$this->list->enqueue( 'two' );
+		$this->list->enqueue( 'three' );
+		$this->list->enqueue( 'four' );
+	}
+
+	public function setUp()
+	{
+		$this->list =
+			WP_SDL::support( '1.0' )
+				->struct()
+				->queue();
+	}
+
+	public function testInstance()
+	{
+		$this->assertInstanceOf( 'WP_SDL_Struct_Queue_1_0', $this->list );
+		$this->assertAttributeEquals( -1, 'index_low', $this->list );
+		$this->assertAttributeEquals( -1, 'index_high', $this->list );
+	}
+
+	public function testEnqueue()
+	{
+		$this->dummyDataEnq();
+
+		$this->assertEquals(
+			array( 0, 1, 2, 3, 4 ),
+			$this->list->keys()
+		);
+
+		$this->assertAttributeEquals( 0, 'index_low', $this->list );
+		$this->assertAttributeEquals( 4, 'index_high', $this->list );
+	}
+
+	public function testDequeue()
+	{
+		$this->dummyDataEnq();
+
+		// dequeue a couple
+		$this->assertEquals( 'zero', $this->list->dequeue() );
+		$this->assertEquals( 'one', $this->list->dequeue() );
+
+		// check keys
+		$this->assertEquals(
+			array( 2, 3, 4 ),
+			$this->list->keys()
+		);
+
+		$this->assertAttributeEquals( 2, 'index_low', $this->list );
+		$this->assertAttributeEquals( 4, 'index_high', $this->list );
+	}
+
+	public function testFront()
+	{
+		$this->dummyDataEnq();
+		$this->assertEquals( 'zero', $this->list->front() );
+	}
+
+	public function testFrontEmpty()
+	{
+		$this->assertNull($this->list->front() );
+	}
+
+	public function testBack()
+	{
+		$this->dummyDataEnq();
+		$this->assertEquals( 'four', $this->list->back() );
+	}
+
+	public function testBackEmpty()
+	{
+		$this->assertNull( $this->list->back() );
+	}
+
+	public function testIterationOrder()
+	{
+		// array of expected key/values in correct order
+ 		$expected = array(
+			2 => 'two',
+			3 => 'three',
+			4 => 'four',
+			5 => 'five',
+		);
+
+		// enqueue and dequeue items in totally random order
+		$this->assertEquals( 0, $this->list->enqueue( 'zero' ) );
+		$this->assertEquals( 1, $this->list->enqueue( 'one' ) );
+		$this->assertEquals( 2, $this->list->enqueue( 'two' ) );
+		$this->assertEquals( 'zero', $this->list->dequeue() );
+		$this->assertEquals( 3, $this->list->enqueue( 'three' ) );
+		$this->assertEquals( 4, $this->list->enqueue( 'four' ) );
+		$this->assertEquals( 'one', $this->list->dequeue() );
+		$this->assertEquals( 5, $this->list->enqueue( 'five' ) );
+		
+		// results array
+		$actual = array();
+
+		// loop the list
+		foreach( $this->list as $key => $value ) {
+			// assign to result
+			$actual[ $key ] = $value;
+		}
+
+		// should be identical
+		$this->assertEquals( $expected, $actual );
+	}
+
+}
+
+/**
+ * @group struct
+ */
+class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
+{
+	/**
+	 * @var WP_SDL_Struct_PriorityQueue_1_0
+	 */
+	protected $list;
+
+	public function setUp()
+	{
+		$this->list =
+			WP_SDL::support( '1.0' )
+				->struct()
+				->priority_queue();
+	}
+
+	public function testInstance()
+	{
+		$this->assertInstanceOf( 'WP_SDL_Struct_PriorityQueue_1_0', $this->list );
+	}
+
+	public function testIterationPrioritySort()
+	{
+		// array of expected key/values in correct order
+ 		$expected = array(
+			0 => 'zero',
+			1 => 'one',
+			2 => 'two',
+			3 => 'three',
+			4 => 'four',
+		);
+
+		// enqueue items in totally random order
+		$this->list->enqueue( 'one', 1 );
+		$this->list->enqueue( 'zero', -10 );
+		$this->list->enqueue( 'four', 20 );
+		$this->list->enqueue( 'three', 10 );
+		$this->list->enqueue( 'two', 5 );
+
+		// make sure keys look normal
+		$this->assertEquals(
+			array( 0, 1, 2, 3, 4 ),
+			$this->list->keys()
+		);
+
+		// results array
+		$actual = array();
+
+		// loop the list
+		foreach( $this->list as $value ) {
+			// assign to result
+			$actual[] = $value;
+		}
+
+		// should be identical
+		$this->assertEquals( $expected, $actual );
+	}
+
+}
