@@ -232,26 +232,6 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
-	 * Shift the first item off the beginning of the list.
-	 * 
-	 * @return mixed
-	 * @throws RuntimeException If the list is empty.
-	 */
-	protected function shift()
-	{
-		// at least one item in list?
-		if ( $this->count() >= 1 ) {
-			// wipe the count
-			$this->count = null;
-			// shift first item off
-			return array_shift( $this->list );
-		}
-
-		// not good
-		throw new RuntimeException( __( 'Shifting from an empty list is impossible', 'wp-sdl' ) );
-	}
-
-	/**
 	 * Return the item for the current key.
 	 *
 	 * @return mixed
@@ -999,23 +979,55 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 class WP_SDL_Struct_Queue_1_0 extends WP_SDL_Struct_DLL_1_0
 {
 	/**
+	 * The lowest index.
+	 *
+	 * @var integer
+	 */
+	private $index_low = -1;
+
+	/**
+	 * The highest index.
+	 *
+	 * @var integer
+	 */
+	private $index_high = -1;
+
+	/**
 	 * Return and remove the item at the front of the queue.
 	 *
 	 * @return mixed
 	 */
 	public function dequeue()
 	{
-		return $this->shift();
+		// make sure list is not empty
+		if ( false === $this->is_empty() ) {
+			// get lowest index then increment
+			$index = $this->index_low++;
+			// get data for lowest index
+			$data = $this->get( $index );
+			// remove item
+			$this->delete( $index );
+			// return the data
+			return $data;
+		}
 	}
 
 	/**
 	 * Adds an item at the end of the queue.
 	 *
 	 * @param mixed $data Variable to add to the queue.
+	 * @return integer The index that was enqueued.
 	 */
 	public function enqueue( $data )
 	{
-		return $this->push( $data );
+		// does low index need to be initialized?
+		if ( 0 > $this->index_low ) {
+			// yep, bump it
+			$this->index_low++;
+		}
+		
+		// insert item at highest index
+		return $this->insert( ++$this->index_high, $data );
 	}
 
 	/**
@@ -1025,7 +1037,11 @@ class WP_SDL_Struct_Queue_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function front()
 	{
-		return $this->first();
+		// make sure index low is initialized
+		if ( 0 <= $this->index_low ) {
+			// return item at lowest index
+			return $this->get( $this->index_low );
+		}
 	}
 
 	/**
@@ -1035,7 +1051,11 @@ class WP_SDL_Struct_Queue_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function back()
 	{
-		return $this->last();
+		// make sure index high is initialized
+		if ( 0 <= $this->index_high ) {
+			// return item at highest index
+			return $this->get( $this->index_high );
+		}
 	}
 }
 
@@ -1109,17 +1129,21 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	 *
 	 * @param mixed $data Variable to add to the queue.
 	 * @param integer $priority Priority
+	 * @return integer The index that was enqueued.
 	 */
 	public function enqueue( $data, $priority )
 	{
 		// call parent enqueue method
-		parent::enqueue( $data );
+		$index = parent::enqueue( $data );
 
 		// record priority for new item's key
-		$this->priority_map[ parent::key() ] = $priority;
+		$this->priority_map[ $index ] = $priority;
 
 		// toggle priority sort on
 		$this->priority_resort = true;
+
+		// return the new index
+		return $index;
 	}
 
 	/**
