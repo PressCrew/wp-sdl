@@ -1110,9 +1110,9 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	}
 
 	/**
-	 * Return the highest priority key.
+	 * Return the first priority map index after sort.
 	 */
-	private function priority_key()
+	private function priority_index_low()
 	{
 		// sort the priority map
 		$this->priority_sort();
@@ -1120,7 +1120,22 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 		// make sure priority map is rewound
 		reset( $this->priority_map );
 
-		// return highest priority item key
+		// return first priority map index
+		return key( $this->priority_map );
+	}
+
+	/**
+	 * Return the last priority map index after sort.
+	 */
+	private function priority_index_high()
+	{
+		// sort the priority map
+		$this->priority_sort();
+
+		// seek to end of priority map
+		end( $this->priority_map );
+
+		// return last priority map index
 		return key( $this->priority_map );
 	}
 
@@ -1154,7 +1169,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	public function dequeue()
 	{
 		// get highest priority key
-		$key = $this->priority_key();
+		$key = $this->priority_index_low();
 
 		// get value for that key
 		$data = $this->get( $key );
@@ -1176,11 +1191,14 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	 */
 	public function front()
 	{
-		// get highest priority key
-		$key = $this->priority_key();
+		// get lowest priority map index
+		$index = $this->priority_index_low();
 
-		// return value for that key
-		return $this->get( $key );
+		// have an index to lookup?
+		if ( is_integer( $index ) ) {
+			// yep, return value for that index
+			return $this->get( $index );
+		}
 	}
 
 	/**
@@ -1190,14 +1208,14 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	 */
 	public function back()
 	{
-		// make sure priorities are sorted
-		$this->priority_sort();
-		// seek to end of priority map
-		end( $this->priority_map );
-		// get very last key from priority map
-		$key = key( $this->priority_map );
-		// return value for that key
-		return $this->get( $key );
+		// get highest priority map index
+		$index = $this->priority_index_high();
+
+		// have an index to lookup?
+		if ( is_integer( $index ) ) {
+			// yep, return value for that index
+			return $this->get( $index );
+		}
 	}
 
 	/**
