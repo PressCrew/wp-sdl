@@ -753,7 +753,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function rewind()
 	{
 		// sort by keys
-		$this->key_sort();
+		$this->ksort();
 		// call parent
 		parent::rewind();
 	}
@@ -763,7 +763,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 *
 	 * @return boolean
 	 */
-	public function key_sort()
+	public function ksort()
 	{
 		// need to re-sort?
 		if ( true === $this->index_resort ) {
@@ -872,7 +872,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function top()
 	{
 		if ( false === $this->is_empty() ) {
-			$this->key_sort();
+			$this->ksort();
 			return $this->get( $this->index_low );
 		}
 	}
@@ -885,7 +885,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function bottom()
 	{
 		if ( false === $this->is_empty() ) {
-			$this->key_sort();
+			$this->ksort();
 			return $this->get( $this->index_high );
 		}
 	}
