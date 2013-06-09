@@ -1170,7 +1170,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	public function dequeue()
 	{
 		// get highest priority key
-		$key = $this->priority_index_low();
+		$key = $this->priority_index_high();
 
 		// get value for that key
 		$data = $this->get( $key );
@@ -1193,7 +1193,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	public function front()
 	{
 		// get lowest priority map index
-		$index = $this->priority_index_low();
+		$index = $this->priority_index_high();
 
 		// have an index to lookup?
 		if ( is_integer( $index ) ) {
@@ -1210,7 +1210,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	public function back()
 	{
 		// get highest priority map index
-		$index = $this->priority_index_high();
+		$index = $this->priority_index_low();
 
 		// have an index to lookup?
 		if ( is_integer( $index ) ) {
