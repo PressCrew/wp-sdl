@@ -1102,8 +1102,9 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	{
 		// need to re-sort priority map?
 		if ( true === $this->priority_resort ) {
-			// yep, sort it by value
-			asort( $this->priority_map );
+			// yep, sort it by value IN REVERSE!
+			// ascending asort() does not put "first in" indexes higher.
+			arsort( $this->priority_map );
 			// toggle priority sort off
 			$this->priority_resort = false;
 		}
@@ -1225,10 +1226,10 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	{
 		// sort priority map
 		$this->priority_sort();
-		// the first iteration key is now zero
-		$this->iterator_key = 0;
 		// build up array of keys for iterating over
 		$this->iterator_keys = array_keys( $this->priority_map );
+		// the first iteration key is LAST one
+		$this->iterator_key = count( $this->iterator_keys ) - 1;
 	}
 
 	/**
@@ -1247,7 +1248,11 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	 */
 	public function key()
 	{
-		return $this->iterator_keys[ $this->iterator_key ];
+		// is iterator key gte zero?
+		if ( $this->iterator_key >= 0 ) {
+			// yep, return value
+			return $this->iterator_keys[ $this->iterator_key ];
+		}
 	}
 
 	/**
@@ -1255,7 +1260,8 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	 */
 	public function next()
 	{
-		$this->iterator_key++;
+		// DECREMENT the iterator key
+		$this->iterator_key--;
 	}
 
 	/**
