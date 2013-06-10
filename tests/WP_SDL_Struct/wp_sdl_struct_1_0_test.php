@@ -1249,3 +1249,162 @@ class WP_SDL_Struct_Stack_1_0_Test extends PHPUnit_Framework_TestCase
 	}
 
 }
+
+/**
+ * @group struct
+ */
+class WP_SDL_Struct_Map_1_0_Test extends PHPUnit_Framework_TestCase
+{
+	/**
+	 * @var WP_SDL_Struct_Map_1_0
+	 */
+	protected $list;
+
+	/**
+	 * @var array
+	 */
+	private static $expected =
+		array(
+			'zero' => 'Zero',
+			'one' => 'One',
+			'two' => 'Two',
+			'three' => 'Three',
+			'four' => 'Four'
+		);
+
+	protected function dummyDataAdd()
+	{
+		$this->list->add( 'zero', 'Zero' );
+		$this->list->add( 'one', 'One' );
+		$this->list->add( 'two', 'Two' );
+		$this->list->add( 'three', 'Three' );
+		$this->list->add( 'four', 'Four' );
+	}
+
+	public function setUp()
+	{
+		$this->list = WP_SDL::support( '1.0' )->struct()->map();
+	}
+
+	public function testInstance()
+	{
+		$this->assertInstanceOf( 'WP_SDL_Struct_Map_1_0', $this->list );
+		$this->assertEquals( 0, $this->list->count() );
+	}
+
+	public function testAdd()
+	{
+		$this->dummyDataAdd();
+
+		// internal list array must exactly match expected array
+		$this->assertAttributeEquals( self::$expected, 'list', $this->list );
+
+		// check count
+		$this->assertEquals( 5, $this->list->count() );
+	}
+
+	public function testAddOverflow()
+	{
+		$this->dummyDataAdd();
+
+		$this->setExpectedException( 'OverflowException' );
+
+		$this->list->add( 'zero', 'foo' );
+	}
+
+	public function testAddOverflowStrict()
+	{
+		$this->dummyDataAdd();
+
+		$this->setExpectedException( 'OverflowException' );
+
+		// set safe mode with strict
+		$this->list->safe_mode(
+			WP_SDL_Struct_DLL_1_0::SAFE_MODE_ENABLE |
+			WP_SDL_Struct_DLL_1_0::SAFE_MODE_STRICT
+		);
+
+		$this->list->add( 'zero', 'foo' );
+	}
+
+	public function testAddOverflowLoose()
+	{
+		$this->dummyDataAdd();
+
+		// set safe mode without strict
+		$this->list->safe_mode(
+			WP_SDL_Struct_DLL_1_0::SAFE_MODE_ENABLE
+		);
+
+		// safe mode check with no strict
+		$this->assertNull( $this->list->add( 'one', 'Foo', true ) );
+		$this->assertEquals( 'One', $this->list->get( 'one' ) );
+
+		// completely override safe mode check at call time
+		$this->assertNull( $this->list->add( 'one', 'Foo', false ) );
+		$this->assertEquals( 'Foo', $this->list->get( 'one' ) );
+
+		// count should be same
+		$this->assertEquals( 5, $this->list->count() );
+	}
+
+	public function testRemove()
+	{
+		$this->dummyDataAdd();
+
+		$this->assertNull( $this->list->remove( 'three' ) );
+		$this->assertFalse( $this->list->exists( 'three' ) );
+		$this->assertEquals( 4, $this->list->count() );
+	}
+
+	public function testRemoveInvalidArg()
+	{
+		$this->dummyDataAdd();
+
+		$this->setExpectedException( 'InvalidArgumentException' );
+		$this->list->remove( 123 );
+	}
+
+	public function testRemoveInvalidNull()
+	{
+		$this->dummyDataAdd();
+
+		$this->setExpectedException( 'InvalidArgumentException' );
+		$this->list->remove( null );
+	}
+
+	public function testRemoveOutOfBoundsStrict()
+	{
+		$this->dummyDataAdd();
+
+		// set safe mode with strict
+		$this->list->safe_mode(
+			WP_SDL_Struct_DLL_1_0::SAFE_MODE_ENABLE |
+			WP_SDL_Struct_DLL_1_0::SAFE_MODE_STRICT
+		);
+
+		// completely override safe mode check at call time
+		$this->assertNull( $this->list->remove( 'three', false ) );
+		$this->assertFalse( $this->list->exists( 'three' ) );
+		$this->assertEquals( 4, $this->list->count() );
+
+		// expect exception for safe mode strict
+		$this->setExpectedException( 'OutOfBoundsException' );
+		$this->list->remove( 'ten', true );
+	}
+
+	public function testRemoveOutOfBoundsLoose()
+	{
+		$this->dummyDataAdd();
+
+		// set safe mode without strict
+		$this->list->safe_mode(
+			WP_SDL_Struct_DLL_1_0::SAFE_MODE_ENABLE
+		);
+
+		// safe mode check with no strict (fail to remove silently)
+		$this->assertNull( $this->list->remove( 'ten', true ) );
+		$this->assertEquals( 5, $this->list->count() );
+	}
+
+}
