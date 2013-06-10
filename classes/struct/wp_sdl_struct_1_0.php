@@ -931,10 +931,10 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function bottom()
 	{
-		// is the stack empty?
+		// is the list empty?
 		if ( false === $this->is_empty() ) {
-			// bottom of stack is always index zero
-			return $this->get( 0 );
+			// return first item in list
+			return $this->first();
 		}
 	}
 
