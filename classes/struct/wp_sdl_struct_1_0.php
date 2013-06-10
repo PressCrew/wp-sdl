@@ -864,7 +864,11 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 }
 
 /**
- * Stack Structure (last in, first out).
+ * Stack Structure (LI/FO).
+ *
+ * IMPORTANT:
+ * A stack's logic is the reverse (last in, first out)
+ * of a standard list (first in, first out).
  *
  * @package wp-sdl\helpers
  * @version 1.0
@@ -912,13 +916,16 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 
 	/**
 	 * Return last item from bottom of stack without removing.
-	 *
+	 * 
 	 * @return mixed
 	 */
 	public function bottom()
 	{
-		// a stack's logic is reversed (LI/FO)
-		return $this->first();
+		// is the stack empty?
+		if ( false === $this->is_empty() ) {
+			// bottom of stack is always index zero
+			return $this->get( 0 );
+		}
 	}
 
 	/**
