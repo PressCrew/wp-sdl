@@ -1146,3 +1146,106 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 	}
 
 }
+
+/**
+ * @group struct
+ */
+class WP_SDL_Struct_Stack_1_0_Test extends PHPUnit_Framework_TestCase
+{
+	/**
+	 * @var WP_SDL_Struct_Stack_1_0
+	 */
+	protected $list;
+
+	/**
+	 * @var array
+	 */
+	private static $expected =
+		array(
+			0 => 'zero',
+			1 => 'one',
+			2 => 'two',
+			3 => 'three',
+			4 => 'four'
+		);
+
+	protected function dummyDataPush()
+	{
+		$this->list->push( 'zero' );
+		$this->list->push( 'one' );
+		$this->list->push( 'two' );
+		$this->list->push( 'three' );
+		$this->list->push( 'four' );
+	}
+
+	public function setUp()
+	{
+		$this->list = WP_SDL::support( '1.0' )->struct()->stack();
+	}
+
+	public function testInstance()
+	{
+		$this->assertInstanceOf( 'WP_SDL_Struct_Stack_1_0', $this->list );
+		$this->assertEquals( 0, $this->list->count() );
+	}
+
+	public function testPush()
+	{
+		$this->dummyDataPush();
+
+		$this->assertNull( $this->list->push( 'five' ) );
+		$this->assertEquals( 6, $this->list->count() );
+		
+		$this->assertEquals(
+			array( 0, 1, 2, 3, 4, 5 ),
+			$this->list->keys()
+		);
+	}
+
+	public function testPop()
+	{
+		$this->list->push( 'zero' );
+		$this->list->push( 'one' );
+
+		$this->assertEquals( 2, $this->list->count() );
+
+		$this->assertEquals( 'one', $this->list->pop() );
+		$this->assertEquals( 'zero', $this->list->pop() );
+
+		$this->assertEquals( 0, $this->list->count() );
+	}
+	
+	public function testPushPopPush()
+	{
+		$this->list->push( 'zero' );
+		$this->list->push( 'one' );
+
+		$this->list->pop();
+		$this->list->pop();
+
+		$this->list->push( 'two' );
+		$this->list->push( 'three' );
+
+		$this->assertEquals( 2, $this->list->count() );
+
+		$this->assertEquals(
+			array( 0, 1 ),
+			$this->list->keys()
+		);
+	}
+
+	public function testTop()
+	{
+		$this->assertNull( $this->list->top() );
+		$this->dummyDataPush();
+		$this->assertEquals( 'four', $this->list->top() );
+	}
+
+	public function testBottom()
+	{
+		$this->assertNull( $this->list->bottom() );
+		$this->dummyDataPush();
+		$this->assertEquals( 'zero', $this->list->bottom() );
+	}
+
+}
