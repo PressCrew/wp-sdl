@@ -688,6 +688,7 @@ class WP_SDL_Struct_DynamicList_1_0_Test extends WP_SDL_Struct_BaseList_1_0_Test
 	{
 		$this->dummyDataSet();
 
+		$this->assertTrue( $this->list->exists( 3 ) );
 		$this->assertNull( $this->list->remove( 3 ) );
 		$this->assertFalse( $this->list->exists( 3 ) );
 		$this->assertEquals( self::LENGTH - 1, $this->list->count() );
@@ -738,6 +739,7 @@ class WP_SDL_Struct_DynamicList_1_0_Test extends WP_SDL_Struct_BaseList_1_0_Test
 		);
 
 		// safe mode check with no strict (fail to remove silently)
+		$this->assertFalse( $this->list->exists( 5 ) );
 		$this->assertNull( $this->list->remove( 5, true ) );
 		$this->assertListCount();
 	}
@@ -746,28 +748,38 @@ class WP_SDL_Struct_DynamicList_1_0_Test extends WP_SDL_Struct_BaseList_1_0_Test
 	{
 		$this->dummyDataAdd();
 
+		$this->assertTrue( $this->list->exists( 0 ) );
 		$this->list->remove( 0 );
 		$this->assertEquals( 'one', $this->list->top() );
 
+		$this->assertTrue( $this->list->exists( 2 ) );
 		$this->list->remove( 2 );
 		$this->assertEquals( 'one', $this->list->top() );
 
+		$this->assertTrue( $this->list->exists( 1 ) );
 		$this->list->remove( 1 );
 		$this->assertEquals( 'three', $this->list->top() );
+
+		$this->assertEquals( self::LENGTH - 3, $this->list->count() );
 	}
 
 	public function testBottomAfterRemove()
 	{
 		$this->dummyDataAdd();
 
+		$this->assertTrue( $this->list->exists( 4 ) );
 		$this->list->remove( 4 );
 		$this->assertEquals( 'three', $this->list->bottom() );
 
+		$this->assertTrue( $this->list->exists( 1 ) );
 		$this->list->remove( 1 );
 		$this->assertEquals( 'three', $this->list->bottom() );
 
+		$this->assertTrue( $this->list->exists( 3 ) );
 		$this->list->remove( 3 );
 		$this->assertEquals( 'two', $this->list->bottom() );
+
+		$this->assertEquals( self::LENGTH - 3, $this->list->count() );
 	}
 
 	public function testIterationKeySort()
@@ -811,6 +823,9 @@ class WP_SDL_Struct_DynamicList_1_0_Test extends WP_SDL_Struct_BaseList_1_0_Test
 
 		// should be identical
 		$this->assertEquals( $expected, $actual );
+
+		// check count
+		$this->assertEquals( 7, $this->list->count() );
 	}
 	
 }
@@ -1193,6 +1208,7 @@ class WP_SDL_Struct_Stack_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		$this->dummyDataPush();
 
+		$this->assertEquals( 5, $this->list->count() );
 		$this->assertNull( $this->list->push( 'five' ) );
 		$this->assertEquals( 6, $this->list->count() );
 		
@@ -1352,6 +1368,8 @@ class WP_SDL_Struct_Map_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		$this->dummyDataAdd();
 
+		$this->assertEquals( 5, $this->list->count() );
+		$this->assertTrue( $this->list->exists( 'three' ) );
 		$this->assertNull( $this->list->remove( 'three' ) );
 		$this->assertFalse( $this->list->exists( 'three' ) );
 		$this->assertEquals( 4, $this->list->count() );
@@ -1384,6 +1402,8 @@ class WP_SDL_Struct_Map_1_0_Test extends PHPUnit_Framework_TestCase
 		);
 
 		// completely override safe mode check at call time
+		$this->assertEquals( 5, $this->list->count() );
+		$this->assertTrue( $this->list->exists( 'three' ) );
 		$this->assertNull( $this->list->remove( 'three', false ) );
 		$this->assertFalse( $this->list->exists( 'three' ) );
 		$this->assertEquals( 4, $this->list->count() );
@@ -1403,6 +1423,8 @@ class WP_SDL_Struct_Map_1_0_Test extends PHPUnit_Framework_TestCase
 		);
 
 		// safe mode check with no strict (fail to remove silently)
+		$this->assertEquals( 5, $this->list->count() );
+		$this->assertFalse( $this->list->exists( 'ten', true ) );
 		$this->assertNull( $this->list->remove( 'ten', true ) );
 		$this->assertEquals( 5, $this->list->count() );
 	}
