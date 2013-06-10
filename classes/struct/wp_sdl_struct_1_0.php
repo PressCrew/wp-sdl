@@ -204,16 +204,6 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	}
 
 	/**
-	 * Push an item onto the end of the list.
-	 *
-	 * @param mixed $data
-	 */
-	protected function push( $data )
-	{
-		$this->insert( null, $data );
-	}
-
-	/**
 	 * Return the item for the current key.
 	 *
 	 * @return mixed
@@ -905,7 +895,8 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function push( $data )
 	{
-		parent::push( $data );
+		// append item to list
+		$this->insert( null, $data );
 	}
 
 	/**
