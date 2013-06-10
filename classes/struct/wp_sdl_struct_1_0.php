@@ -207,18 +207,17 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	 * Pop the last item off the end of the list.
 	 *
 	 * @return mixed
-	 * @throws RuntimeException If the stack is empty.
 	 */
 	protected function pop()
 	{
 		// at least one item in list?
-		if ( $this->count() >= 1 ) {
+		if ( false === $this->is_empty() ) {
 			// yep, return last item
 			return array_pop( $this->list );
 		}
 
-		// not good
-		throw new RuntimeException( __( 'Popping an empty list is impossible', 'wp-sdl' ) );
+		// empty list
+		return null;
 	}
 
 	/**
@@ -897,7 +896,6 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 	 * Pop the first item off the top of the stack.
 	 *
 	 * @return mixed
-	 * @throws RuntimeException If the stack is empty.
 	 */
 	public function pop()
 	{
