@@ -1281,28 +1281,53 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 {
 	/**
+	 * Returns index (key) if its a valid type.
+	 *
+	 * @param string $index
+	 * @return string
+	 * @throws InvalidArgumentException When index is not a string.
+	 */
+	private function index( $index )
+	{
+		// index must be a string
+		if ( is_string( $index ) ) {
+			// index is good
+			return $index;
+		}
+		// invalid index
+		throw new InvalidArgumentException(
+			__(
+				'Index must be a string. Wrap value in ' .
+				'quotes, or use a dynamic list instead.',
+				'wp-sdl'
+			)
+		);
+	}
+
+	/**
 	 * Defines data for the given key in the map.
 	 *
-	 * @param $key The key.
-	 * @param $value New value.
-	 * @param $safe_mode Set to false to disable safe mode check.
+	 * @param string $key The key.
+	 * @param mixed $value New value.
+	 * @param boolean $safe_mode Set to false to disable safe mode check.
 	 * @throws OverflowException If the key has been previously set.
 	 */
 	public function add( $key, $value, $safe_mode = true )
 	{
-		$this->insert( $key, $value, $safe_mode );
+		$this->insert( $this->index( $key ), $value, $safe_mode );
 	}
 
 	/**
 	 * Removes the data for the given key in the list.
 	 *
-	 * @param mixed $key The key.
+	 * @param string $key The key.
 	 * @param boolean $safe_mode Set to false to disable safe mode check.
-	 * @throws InvalidArgumentException If the key is null.
+	 * @throws InvalidArgumentException If the key is not a string.
 	 * @throws OutOfBoundsException If safe mode is enabled and the key does not exist.
 	 */
 	public function remove( $key, $safe_mode = true )
 	{
-		$this->delete( $key, $safe_mode );
+		$this->delete( $this->index( $key ), $safe_mode );
 	}
+
 }
