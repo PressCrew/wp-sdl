@@ -212,7 +212,9 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 	{
 		// at least one item in list?
 		if ( false === $this->is_empty() ) {
-			// yep, return last item
+			// yep, wipe count
+			$this->count = null;
+			// and return last item
 			return array_pop( $this->list );
 		}
 
