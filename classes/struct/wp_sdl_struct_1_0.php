@@ -889,7 +889,7 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function pop()
 	{
 		// at least one item in list?
-		if ( $this->count() >= 1 ) {
+		if ( false === $this->is_empty() ) {
 			// yep, return last item
 			return array_pop( $this->list );
 		}
