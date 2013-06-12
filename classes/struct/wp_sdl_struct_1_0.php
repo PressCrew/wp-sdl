@@ -96,7 +96,7 @@ class WP_SDL_Struct_1_0 extends WP_SDL_Helper_1_0
  * @package wp-sdl\helpers
  * @version 1.0
  */
-abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
+abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator, ArrayAccess
 {
 	/**
 	 * Safe mode enabled flag.
@@ -487,6 +487,62 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator
 			);
 		}
 	}
+
+	//
+	// ArrayAccess Implementation
+	//
+
+	/**
+	 * Returns true if offset exists.
+	 *
+	 * @param mixed $offset
+	 * @return boolean
+	 */
+	public function offsetExists( $offset )
+	{
+		return $this->exists( $offset );
+	}
+
+	/**
+	 * Returns value at given offset.
+	 *
+	 * @param mixed $offset
+	 */
+	public function offsetGet( $offset )
+	{
+		return $this->get( $offset );
+	}
+
+	/**
+	 * Sets value at given offset.
+	 *
+	 * @param mixed $offset
+	 * @param mixed $value
+	 * @throws RuntimeException
+	 */
+	public function offsetSet( $offset, $value )
+	{
+		// each structure must implement this, if feasible
+		throw new RuntimeException( sprintf(
+			__( 'The "%s" class does not support setting values with ArrayAccess.', 'wp-sdl' ),
+			get_class( $this )
+		) );
+	}
+
+	/**
+	 * Unsets value at given offset.
+	 *
+	 * @param mixed $offset
+	 * @throws RuntimeException
+	 */
+	public function offsetUnset( $offset )
+	{
+		// each structure must implement this, if feasible
+		throw new RuntimeException( sprintf(
+			__( 'The "%s" class does not support unsetting values with ArrayAccess.', 'wp-sdl' ),
+			get_class( $this )
+		) );
+	}
 }
 
 /**
@@ -635,6 +691,20 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function bottom()
 	{
 		return $this->get( $this->length - 1 );
+	}
+
+	//
+	// ArrayAccess Implementation
+	//
+	
+	public function offsetSet( $offset, $value )
+	{
+		$this->set( $offset, $value );
+	}
+
+	public function offsetUnset( $offset )
+	{
+		$this->erase( $offset );
 	}
 }
 
@@ -879,6 +949,20 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 			$this->ksort();
 			return $this->get( $this->index_high );
 		}
+	}
+
+	//
+	// ArrayAccess Implementation
+	//
+
+	public function offsetSet( $offset, $value )
+	{
+		$this->set( $offset, $value );
+	}
+
+	public function offsetUnset( $offset )
+	{
+		$this->remove( $offset );
 	}
 }
 
