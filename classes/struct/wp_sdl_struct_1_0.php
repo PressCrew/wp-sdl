@@ -1426,4 +1426,18 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 		$this->delete( $this->index( $key ), $safe_mode );
 	}
 
+	//
+	// ArrayAccess Implementation
+	//
+
+	public function offsetSet( $offset, $value )
+	{
+		$this->set( $offset, $value );
+	}
+
+	public function offsetUnset( $offset )
+	{
+		$this->remove( $offset );
+	}
+
 }
