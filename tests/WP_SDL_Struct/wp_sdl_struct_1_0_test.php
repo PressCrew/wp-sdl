@@ -519,6 +519,59 @@ abstract class WP_SDL_Struct_BaseList_1_0_Test extends WP_SDL_Struct_Base_1_0_Te
 		// should be identical
 		$this->assertEquals( self::$expected, $actual );
 	}
+	
+	public function testArrayAccessGet()
+	{
+		$this->dummyDataSet();
+		
+		// check for data that exists
+		$this->assertTrue( $this->list->offsetExists( 3 ) );
+		$this->assertEquals( 'three', $this->list->offsetGet( 3 ) );
+		$this->assertEquals( 'three', $this->list[3] );
+	}
+
+	public function testArrayAccessGetBadOffset()
+	{
+		// check for offset that does not exist
+		$this->assertFalse( $this->list->offsetExists( 9 ) );
+		$this->assertFalse( isset( $this->list[9] ) );
+
+		// try to get offset that does not exist
+		$this->setExpectedException( 'OutOfBoundsException' );
+		echo $this->list[9];
+	}
+
+	public function testArrayAccessSet()
+	{
+		$this->list[3] = 'three';
+		$this->assertTrue( isset( $this->list[3] ) );
+		$this->assertEquals( 'three', $this->list[3] );
+	}
+
+	public function testArrayAccessSetBadOffset()
+	{
+		// setting a string offset should puke
+		$this->setExpectedException( 'InvalidArgumentException' );
+		$this->list['foo'] = 'bar';
+	}
+
+	public function testArrayAccessUnset()
+	{
+		// set and check
+		$this->list[3] = 'three';
+		$this->assertTrue( isset( $this->list[3] ) );
+
+		// unset and check
+		unset( $this->list[3] );
+		$this->assertFalse( isset( $this->list[3] ) );
+	}
+
+	public function testArrayAccessUnsetBadOffset()
+	{
+		// setting a string offset should puke
+		$this->setExpectedException( 'InvalidArgumentException' );
+		unset( $this->list['foo'] );
+	}
 
 }
 
@@ -602,6 +655,18 @@ class WP_SDL_Struct_StaticList_1_0_Test extends WP_SDL_Struct_BaseList_1_0_Test
 
 		// count should NOT have changed
 		$this->assertListCount();
+	}
+
+	public function testArrayAccessUnset()
+	{
+		// set and check
+		$this->list[3] = 'three';
+		$this->assertTrue( isset( $this->list[3] ) );
+
+		// unset and check
+		unset( $this->list[3] );
+		$this->assertTrue( isset( $this->list[3] ) );
+		$this->assertNull( $this->list[3] );
 	}
 }
 
@@ -1288,6 +1353,15 @@ class WP_SDL_Struct_Map_1_0_Test extends PHPUnit_Framework_TestCase
 			'four' => 'Four'
 		);
 
+	protected function dummyDataSet()
+	{
+		$this->list->set( 'zero', 'Zero' );
+		$this->list->set( 'one', 'One' );
+		$this->list->set( 'two', 'Two' );
+		$this->list->set( 'three', 'Three' );
+		$this->list->set( 'four', 'Four' );
+	}
+
 	protected function dummyDataAdd()
 	{
 		$this->list->add( 'zero', 'Zero' );
@@ -1306,6 +1380,35 @@ class WP_SDL_Struct_Map_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		$this->assertInstanceOf( 'WP_SDL_Struct_Map_1_0', $this->list );
 		$this->assertEquals( 0, $this->list->count() );
+	}
+
+	public function testSet()
+	{
+		$this->dummyDataSet();
+
+		// check count
+		$this->assertEquals( 5, $this->list->count() );
+
+		// internal list array must exactly match expected array
+		$this->assertAttributeEquals( self::$expected, 'list', $this->list );
+
+		// test overwrite
+		$this->assertNull( $this->list->set( 'zero', 'I gotchoo!' ) );
+
+		// check count again
+		$this->assertEquals( 5, $this->list->count() );
+	}
+
+	public function testSetInvalidArgInt()
+	{
+		$this->setExpectedException( 'InvalidArgumentException' );
+		$this->list->set( 123, 'foo' );
+	}
+
+	public function testSetInvalidArgNull()
+	{
+		$this->setExpectedException( 'InvalidArgumentException' );
+		$this->list->set( null, 'foo' );
 	}
 
 	public function testAdd()
@@ -1429,4 +1532,55 @@ class WP_SDL_Struct_Map_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertEquals( 5, $this->list->count() );
 	}
 
+	public function testArrayAccessGet()
+	{
+		$this->dummyDataSet();
+
+		// check for data that exists
+		$this->assertTrue( $this->list->offsetExists( 'three' ) );
+		$this->assertEquals( 'Three', $this->list->offsetGet( 'three' ) );
+		$this->assertEquals( 'Three', $this->list['three'] );
+	}
+
+	public function testArrayAccessGetBadOffset()
+	{
+		// check for offset that does not exist
+		$this->assertFalse( $this->list->offsetExists( 'nine' ) );
+		$this->assertFalse( isset( $this->list['nine'] ) );
+
+		// try to get offset that does not exist
+		$this->setExpectedException( 'OutOfBoundsException' );
+		echo $this->list['nine'];
+	}
+
+	public function testArrayAccessSet()
+	{
+		$this->list['three'] = 'Three';
+		$this->assertTrue( isset( $this->list['three'] ) );
+		$this->assertEquals( 'Three', $this->list['three'] );
+	}
+
+	public function testArrayAccessSetBadOffset()
+	{
+		// setting a string offset should puke
+		$this->setExpectedException( 'InvalidArgumentException' );
+		$this->list[9] = 'Bar';
+	}
+
+	public function testArrayAccessUnset()
+	{
+		// set and check
+		$this->testArrayAccessSet();
+
+		// unset and check
+		unset( $this->list['three'] );
+		$this->assertFalse( isset( $this->list['three'] ) );
+	}
+
+	public function testArrayAccessUnsetBadOffset()
+	{
+		// setting a string offset should puke
+		$this->setExpectedException( 'OutOfBoundsException' );
+		unset( $this->list['foo'] );
+	}
 }
