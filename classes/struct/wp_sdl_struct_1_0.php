@@ -1389,6 +1389,18 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 	}
 
 	/**
+	 * Set value at specified key.
+	 *
+	 * @param string $key String key.
+	 * @param mixed $value The value to store.
+	 */
+	public function set( $key, $value )
+	{
+		// insert if key is valid
+		$this->insert( $this->index( $key ), $value );
+	}
+
+	/**
 	 * Defines data for the given key in the map.
 	 *
 	 * @param string $key The key.
