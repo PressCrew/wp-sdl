@@ -102,6 +102,17 @@ class WP_SDL_1_0 implements WP_SDL_Compat
 	}
 
 	/**
+	 * Return data structures helper.
+	 *
+	 * @param string $version
+	 * @return WP_SDL_Struct_1_0
+	 */
+	public function struct( $version = '1.0' )
+	{
+		return $this->helper( 'struct', $version );
+	}
+
+	/**
 	 * Return Widget helper.
 	 *
 	 * @param string $version
