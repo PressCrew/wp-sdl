@@ -1150,11 +1150,11 @@ class WP_SDL_Struct_Queue_1_0 extends WP_SDL_Struct_DLL_1_0
 class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 {
 	/**
-	 * Map of keys to list priorities.
+	 * Table of keys to list priorities.
 	 *
 	 * @var array
 	 */
-	private $priority_map = array();
+	private $priority_table = array();
 
 	/**
 	 * Toggle to determine if a sort is needed.
@@ -1178,48 +1178,48 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 	private $iterator_keys = array();
 
 	/**
-	 * Sort the priority map.
+	 * Sort the priority table.
 	 */
 	private function priority_sort()
 	{
-		// need to re-sort priority map?
+		// need to re-sort priority table?
 		if ( true === $this->priority_resort ) {
 			// yep, sort it by value IN REVERSE!
 			// ascending asort() does not put "first in" indexes higher.
-			arsort( $this->priority_map );
+			arsort( $this->priority_table );
 			// toggle priority sort off
 			$this->priority_resort = false;
 		}
 	}
 
 	/**
-	 * Return the first priority map index after sort.
+	 * Return the first priority table index after sort.
 	 */
 	private function priority_index_low()
 	{
-		// sort the priority map
+		// sort the priority table
 		$this->priority_sort();
 
-		// make sure priority map is rewound
-		reset( $this->priority_map );
+		// make sure priority table is rewound
+		reset( $this->priority_table );
 
-		// return first priority map index
-		return key( $this->priority_map );
+		// return first priority table index
+		return key( $this->priority_table );
 	}
 
 	/**
-	 * Return the last priority map index after sort.
+	 * Return the last priority table index after sort.
 	 */
 	private function priority_index_high()
 	{
-		// sort the priority map
+		// sort the priority table
 		$this->priority_sort();
 
-		// seek to end of priority map
-		end( $this->priority_map );
+		// seek to end of priority table
+		end( $this->priority_table );
 
-		// return last priority map index
-		return key( $this->priority_map );
+		// return last priority table index
+		return key( $this->priority_table );
 	}
 
 	/**
@@ -1235,7 +1235,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 		$index = $this->insert( null, $data );
 
 		// record priority for new item's key
-		$this->priority_map[ $index ] = $priority;
+		$this->priority_table[ $index ] = $priority;
 
 		// toggle priority sort on
 		$this->priority_resort = true;
@@ -1261,7 +1261,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 		$this->delete( $key );
 
 		// remove the priority entry for that key
-		unset( $this->priority_map[ $key ] );
+		unset( $this->priority_table[ $key ] );
 
 		// return the data
 		return $data;
@@ -1274,7 +1274,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function front()
 	{
-		// get lowest priority map index
+		// get lowest priority table index
 		$index = $this->priority_index_high();
 
 		// have an index to lookup?
@@ -1291,7 +1291,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function back()
 	{
-		// get highest priority map index
+		// get highest priority table index
 		$index = $this->priority_index_low();
 
 		// have an index to lookup?
@@ -1306,10 +1306,10 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function rewind()
 	{
-		// sort priority map
+		// sort priority table
 		$this->priority_sort();
 		// build up array of keys for iterating over
-		$this->iterator_keys = array_keys( $this->priority_map );
+		$this->iterator_keys = array_keys( $this->priority_table );
 		// the first iteration key is LAST one
 		$this->iterator_key = count( $this->iterator_keys ) - 1;
 	}

@@ -1073,8 +1073,8 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 	{
 		$this->assertInstanceOf( 'WP_SDL_Struct_PriorityQueue_1_0', $this->list );
 
-		$this->assertAttributeInternalType( 'array', 'priority_map', $this->list );
-		$this->assertAttributeCount( 0, 'priority_map', $this->list );
+		$this->assertAttributeInternalType( 'array', 'priority_table', $this->list );
+		$this->assertAttributeCount( 0, 'priority_table', $this->list );
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
 
 		$this->assertAttributeInternalType( 'array', 'iterator_keys', $this->list );
@@ -1095,14 +1095,14 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 		$this->assertEquals( 5, $this->list->count() );
 
 		// check priority sorting properties
-		$this->assertAttributeCount( 5, 'priority_map', $this->list );
+		$this->assertAttributeCount( 5, 'priority_table', $this->list );
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
 	}
 
 	public function testEnqueueSorting()
 	{
 		// check priority sorting properties before
-		$this->assertAttributeCount( 0, 'priority_map', $this->list );
+		$this->assertAttributeCount( 0, 'priority_table', $this->list );
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
 
 		// add dummy data
@@ -1111,8 +1111,8 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 		// check count
 		$this->assertEquals( 5, $this->list->count() );
 
-		// check number items in priority map
-		$this->assertAttributeCount( 5, 'priority_map', $this->list );
+		// check number items in priority table
+		$this->assertAttributeCount( 5, 'priority_table', $this->list );
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
 
 		// force a sort
@@ -1134,28 +1134,28 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 		$this->assertEquals( 3, $this->list->count() );
 
 		// check priority sorting properties
-		$this->assertAttributeCount( 3, 'priority_map', $this->list );
+		$this->assertAttributeCount( 3, 'priority_table', $this->list );
 		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
 	}
 
 	public function testDequeueSorting()
 	{
 		// check priority sorting properties before
-		$this->assertAttributeCount( 0, 'priority_map', $this->list );
+		$this->assertAttributeCount( 0, 'priority_table', $this->list );
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
 
 		// add dummy data
 		$this->dummyDataEnq();
 
-		// check number items in priority map
-		$this->assertAttributeCount( 5, 'priority_map', $this->list );
+		// check number items in priority table
+		$this->assertAttributeCount( 5, 'priority_table', $this->list );
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
 
 		// dequeue an item
 		$this->assertEquals( 'zero', $this->list->dequeue() );
 
 		// check priority sorting properties after
-		$this->assertAttributeCount( 4, 'priority_map', $this->list );
+		$this->assertAttributeCount( 4, 'priority_table', $this->list );
 		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
 	}
 
@@ -1196,7 +1196,7 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 		$this->dummyDataEnq();
 
 		// check priority sorting properties
-		$this->assertAttributeCount( 5, 'priority_map', $this->list );
+		$this->assertAttributeCount( 5, 'priority_table', $this->list );
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
 
 		// make sure keys look normal
