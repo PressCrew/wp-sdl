@@ -188,6 +188,29 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator, ArrayAccess
 	}
 
 	/**
+	 * Returns index if its valid.
+	 *
+	 * @param integer|null $index The index to check.
+	 * @param boolean $allow_null Whether to allow null index.
+	 * @return integer|null
+	 * @throws InvalidArgumentException When index is not valid.
+	 */
+	protected function index( $index, $allow_null = false )
+	{
+		// validate index
+		if (
+			null === $index && true === $allow_null ||
+			true === is_integer( $index )
+		) {
+			// its good!
+			return $index;
+		}
+
+		// not a valid index
+		throw new InvalidArgumentException( __( 'Index must be an integer.', 'wp-sdl' ) );
+	}
+
+	/**
 	 * Fill the list with values.
 	 *
 	 * @param integer $start_index The first index of the list.
@@ -425,25 +448,29 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator, ArrayAccess
 	 * @param $key The key.
 	 * @param $value New value.
 	 * @param $safe_mode Set to true to perform a safe mode check.
+	 * @param $index_null Set to true to allow a null index.
 	 * @return integer|string|null The inserted/modified key, or null if nothing changed.
 	 * @throws OverflowException If the key has been previously set.
 	 */
-	final protected function insert( $key, $value, $safe_mode = false )
+	final protected function insert( $key, $value, $safe_mode = false, $index_null = false )
 	{
+		// validate the key
+		$index = $this->index( $key, $index_null );
+
 		// is key null?
-		if ( null === $key ) {
+		if ( null === $index ) {
 			// yep, just append it
 			$this->list[] = $value;
 			// seek to end
 			end( $this->list );
 			// get inserted key
-			$key = key( $this->list );
+			$index = key( $this->list );
 		} else {
 			// safe mode check?
 			if (
 				true === $safe_mode &&
 				true === $this->safe_mode_is( self::SAFE_MODE_ENABLE ) &&
-				true === $this->exists( $key )
+				true === $this->exists( $index )
 			) {
 				// strict mode?
 				if ( true === $this->safe_mode_is( self::SAFE_MODE_STRICT ) ) {
@@ -457,14 +484,14 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator, ArrayAccess
 				}
 			}
 			// set the given key
-			$this->list[ $key ] = $value;
+			$this->list[ $index ] = $value;
 		}
 
 		// wipe the count
 		$this->count = null;
 
 		// return key that was affected
-		return $key;
+		return $index;
 	}
 
 	/**
@@ -619,20 +646,19 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 * @throws InvalidArgumentException When index is not numeric.
 	 * @throws OutOfRangeException When index is out of range.
 	 */
-	private function index( $index )
+	protected function index( $index )
 	{
-		// index must be an integer
-		if ( is_integer( $index ) ) {
-			// index must be gte zero and lte length minus one
-			if ( 0 <= $index && $this->length > $index ) {
-				// offet is good
-				return $index;
-			}
-			// index out of range
-			throw new OutOfRangeException( __( 'Index is out of range.', 'wp-sdl' ) );
+		// call parent
+		$index = parent::index( $index );
+
+		// index must be gte zero and lte length minus one
+		if ( 0 <= $index && $this->length > $index ) {
+			// offet is good
+			return $index;
 		}
-		// invalid index
-		throw new InvalidArgumentException( __( 'Index must be an integer.', 'wp-sdl' ) );
+		
+		// index out of range
+		throw new OutOfRangeException( __( 'Index is out of range.', 'wp-sdl' ) );
 	}
 
 	/**
@@ -655,7 +681,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function set( $key, $value )
 	{
 		// insert if key is within valid range
-		$this->insert( $this->index( $key ), $value );
+		$this->insert( $key, $value );
 	}
 
 	/**
@@ -669,7 +695,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function add( $key, $value, $safe_mode = true )
 	{
 		// check key
-		$this->index( $key );
+		$this->index( $key, true );
 
 		// existing value can be null
 		if ( $this->is_null( $key ) ) {
@@ -690,7 +716,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	{
 		// since this is a fixed length list, overwrite value
 		// with null to preserve the key in the list.
-		$this->insert( $this->index( $key ), null );
+		$this->insert( $key, null );
 	}
 
 	/**
@@ -768,24 +794,6 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 * @var boolean
 	 */
 	private $index_resort = false;
-	
-	/**
-	 * Returns index if its within valid range.
-	 *
-	 * @param integer $index The index to check.
-	 * @return integer
-	 * @throws InvalidArgumentException When index is not an integer.
-	 */
-	private function index( $index )
-	{
-		// index must be an int
-		if ( is_integer( $index ) ) {
-			// offet is good
-			return $index;
-		}
-		// invalid index
-		throw new InvalidArgumentException( __( 'Index must be an integer.', 'wp-sdl' ) );
-	}
 
 	/**
 	 * Update indexes as applicable.
@@ -877,7 +885,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function set( $key, $value )
 	{
 		// insert if key is within valid range
-		if ( $key === $this->insert( $this->index( $key ), $value ) ) {
+		if ( $key === $this->insert( $key, $value ) ) {
 			// update indexes
 			$this->index_range( $key );
 			// force key sort
@@ -896,7 +904,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function add( $key, $value, $safe_mode = true )
 	{
 		// insert if key is within valid range
-		if ( $key === $this->insert( $this->index( $key ), $value, $safe_mode ) ) {
+		if ( $key === $this->insert( $key, $value, $safe_mode ) ) {
 			// update indexes
 			$this->index_range( $key );
 			// force key sort
@@ -1016,7 +1024,7 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function push( $data )
 	{
 		// append item to list
-		$this->insert( null, $data );
+		$this->insert( null, $data, false, true );
 	}
 
 	/**
@@ -1269,31 +1277,6 @@ abstract class WP_SDL_Struct_PriorityDLL_1_0 extends WP_SDL_Struct_DLL_1_0
 	}
 
 	/**
-	 * Returns index (key) if its a valid type.
-	 *
-	 * @param integer $index
-	 * @return integer
-	 * @throws InvalidArgumentException When index is not an integer.
-	 */
-	protected function index( $index )
-	{
-		// index must be an integer
-		if ( is_integer( $index ) ) {
-			// index is good
-			return $index;
-		}
-
-		// invalid index
-		throw new InvalidArgumentException(
-			__(
-				'Index must be an integer. If your keys are ' .
-				'strings, use a priority map instead.',
-				'wp-sdl'
-			)
-		);
-	}
-
-	/**
 	 * Set value at specified key with a weighted priority.
 	 *
 	 * @param string $key String key.
@@ -1303,7 +1286,7 @@ abstract class WP_SDL_Struct_PriorityDLL_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function set( $key, $value, $priority )
 	{
 		// call insert method
-		$index = $this->insert( $this->index( $key ), $value );
+		$index = $this->insert( $key, $value );
 
 		// record priority for new item's index
 		$this->priority_set( $index, $priority );
@@ -1324,7 +1307,7 @@ abstract class WP_SDL_Struct_PriorityDLL_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function add( $key, $value, $priority, $safe_mode = true )
 	{
 		// call insert method
-		$index = $this->insert( $this->index( $key ), $value, $safe_mode );
+		$index = $this->insert( $key, $value, $safe_mode );
 
 		// record priority for new item's index
 		$this->priority_set( $index, $priority );
@@ -1456,7 +1439,7 @@ class WP_SDL_Struct_PriorityList_1_0 extends WP_SDL_Struct_PriorityDLL_1_0
 	public function append( $data, $priority )
 	{
 		// call insert with null key
-		$index = $this->insert( null, $data );
+		$index = $this->insert( null, $data, false, true );
 
 		// record priority for new item's index
 		$this->priority_set( $index, $priority );
@@ -1475,27 +1458,25 @@ class WP_SDL_Struct_PriorityList_1_0 extends WP_SDL_Struct_PriorityDLL_1_0
 class WP_SDL_Struct_PriorityMap_1_0 extends WP_SDL_Struct_PriorityDLL_1_0
 {
 	/**
-	 * Returns index (key) if its a valid type.
+	 * Returns index if its valid.
 	 *
-	 * @param string $index
-	 * @return string
-	 * @throws InvalidArgumentException When index is not a string.
+	 * @param string|null $index The index to check.
+	 * @param boolean $allow_null Whether to allow null index.
+	 * @return string|null
+	 * @throws InvalidArgumentException When index is not valid.
 	 */
-	protected function index( $index )
+	protected function index( $index, $allow_null = false )
 	{
-		// index must be a string
-		if ( is_string( $index ) ) {
-			// index is good
+		// fall back to setting
+		if (
+			null === $index && true === $allow_null ||
+			true === is_string( $index )
+		) {
 			return $index;
 		}
-		// invalid index
-		throw new InvalidArgumentException(
-			__(
-				'Index must be a string. Wrap value in ' .
-				'quotes, or use a dynamic list instead.',
-				'wp-sdl'
-			)
-		);
+
+		// not a valid index
+		throw new InvalidArgumentException( __( 'Index must be a string.', 'wp-sdl' ) );
 	}
 }
 
@@ -1517,7 +1498,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_PriorityDLL_1_0
 	public function enqueue( $data, $priority )
 	{
 		// call parent insert method
-		$index = $this->insert( null, $data );
+		$index = $this->insert( null, $data, false, true );
 
 		// record priority for new item's index
 		$this->priority_set( $index, $priority );
@@ -1586,29 +1567,27 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_PriorityDLL_1_0
 class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 {
 	/**
-	 * Returns index (key) if its a valid type.
+	 * Returns index if its valid.
 	 *
-	 * @param string $index
-	 * @return string
-	 * @throws InvalidArgumentException When index is not a string.
+	 * @param string|null $index The index to check.
+	 * @param boolean $allow_null Whether to allow null index.
+	 * @return string|null
+	 * @throws InvalidArgumentException When index is not valid.
 	 */
-	private function index( $index )
+	protected function index( $index, $allow_null = false )
 	{
-		// index must be a string
-		if ( is_string( $index ) ) {
-			// index is good
+		// fall back to setting
+		if (
+			null === $index && true === $allow_null ||
+			true === is_string( $index )
+		) {
 			return $index;
 		}
-		// invalid index
-		throw new InvalidArgumentException(
-			__(
-				'Index must be a string. Wrap value in ' .
-				'quotes, or use a dynamic list instead.',
-				'wp-sdl'
-			)
-		);
-	}
 
+		// not a valid index
+		throw new InvalidArgumentException( __( 'Index must be a string.', 'wp-sdl' ) );
+	}
+	
 	/**
 	 * Set value at specified key.
 	 *
@@ -1618,7 +1597,7 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function set( $key, $value )
 	{
 		// insert if key is valid
-		$this->insert( $this->index( $key ), $value );
+		$this->insert( $key, $value );
 	}
 
 	/**
@@ -1631,7 +1610,7 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function add( $key, $value, $safe_mode = true )
 	{
-		$this->insert( $this->index( $key ), $value, $safe_mode );
+		$this->insert( $key, $value, $safe_mode );
 	}
 
 	/**
