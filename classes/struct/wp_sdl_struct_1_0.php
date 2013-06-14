@@ -47,6 +47,16 @@ class WP_SDL_Struct_1_0 extends WP_SDL_Helper_1_0
 	}
 
 	/**
+	 * Return a new priority list data structure instance.
+	 *
+	 * @return WP_SDL_Struct_PriorityList_1_0
+	 */
+	public function priority_list()
+	{
+		return new WP_SDL_Struct_PriorityList_1_0();
+	}
+
+	/**
 	 * Return a new map data structure instance.
 	 *
 	 * @return WP_SDL_Struct_Map_1_0
@@ -54,6 +64,16 @@ class WP_SDL_Struct_1_0 extends WP_SDL_Helper_1_0
 	public function map()
 	{
 		return new WP_SDL_Struct_Map_1_0();
+	}
+
+	/**
+	 * Return a new priority map data structure instance.
+	 *
+	 * @return WP_SDL_Struct_PriorityMap_1_0
+	 */
+	public function priority_map()
+	{
+		return new WP_SDL_Struct_PriorityMap_1_0();
 	}
 
 	/**
@@ -165,6 +185,29 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator, ArrayAccess
 
 		// not a valid arg
 		throw new InvalidArgumentException( __( 'Safe mode must be an integer.', 'wp-sdl' ) );
+	}
+
+	/**
+	 * Returns index if its valid.
+	 *
+	 * @param integer|null $index The index to check.
+	 * @param boolean $allow_null Whether to allow null index.
+	 * @return integer|null
+	 * @throws InvalidArgumentException When index is not valid.
+	 */
+	protected function index( $index, $allow_null = false )
+	{
+		// validate index
+		if (
+			null === $index && true === $allow_null ||
+			true === is_integer( $index )
+		) {
+			// its good!
+			return $index;
+		}
+
+		// not a valid index
+		throw new InvalidArgumentException( __( 'Index must be an integer.', 'wp-sdl' ) );
 	}
 
 	/**
@@ -405,25 +448,29 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator, ArrayAccess
 	 * @param $key The key.
 	 * @param $value New value.
 	 * @param $safe_mode Set to true to perform a safe mode check.
+	 * @param $index_null Set to true to allow a null index.
 	 * @return integer|string|null The inserted/modified key, or null if nothing changed.
 	 * @throws OverflowException If the key has been previously set.
 	 */
-	final protected function insert( $key, $value, $safe_mode = false )
+	final protected function insert( $key, $value, $safe_mode = false, $index_null = false )
 	{
+		// validate the key
+		$index = $this->index( $key, $index_null );
+
 		// is key null?
-		if ( null === $key ) {
+		if ( null === $index ) {
 			// yep, just append it
 			$this->list[] = $value;
 			// seek to end
 			end( $this->list );
 			// get inserted key
-			$key = key( $this->list );
+			$index = key( $this->list );
 		} else {
 			// safe mode check?
 			if (
 				true === $safe_mode &&
 				true === $this->safe_mode_is( self::SAFE_MODE_ENABLE ) &&
-				true === $this->exists( $key )
+				true === $this->exists( $index )
 			) {
 				// strict mode?
 				if ( true === $this->safe_mode_is( self::SAFE_MODE_STRICT ) ) {
@@ -437,14 +484,14 @@ abstract class WP_SDL_Struct_DLL_1_0 implements Countable, Iterator, ArrayAccess
 				}
 			}
 			// set the given key
-			$this->list[ $key ] = $value;
+			$this->list[ $index ] = $value;
 		}
 
 		// wipe the count
 		$this->count = null;
 
 		// return key that was affected
-		return $key;
+		return $index;
 	}
 
 	/**
@@ -599,20 +646,19 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 * @throws InvalidArgumentException When index is not numeric.
 	 * @throws OutOfRangeException When index is out of range.
 	 */
-	private function index( $index )
+	protected function index( $index )
 	{
-		// index must be an integer
-		if ( is_integer( $index ) ) {
-			// index must be gte zero and lte length minus one
-			if ( 0 <= $index && $this->length > $index ) {
-				// offet is good
-				return $index;
-			}
-			// index out of range
-			throw new OutOfRangeException( __( 'Index is out of range.', 'wp-sdl' ) );
+		// call parent
+		$index = parent::index( $index );
+
+		// index must be gte zero and lte length minus one
+		if ( 0 <= $index && $this->length > $index ) {
+			// offet is good
+			return $index;
 		}
-		// invalid index
-		throw new InvalidArgumentException( __( 'Index must be an integer.', 'wp-sdl' ) );
+		
+		// index out of range
+		throw new OutOfRangeException( __( 'Index is out of range.', 'wp-sdl' ) );
 	}
 
 	/**
@@ -635,7 +681,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function set( $key, $value )
 	{
 		// insert if key is within valid range
-		$this->insert( $this->index( $key ), $value );
+		$this->insert( $key, $value );
 	}
 
 	/**
@@ -649,7 +695,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function add( $key, $value, $safe_mode = true )
 	{
 		// check key
-		$this->index( $key );
+		$this->index( $key, true );
 
 		// existing value can be null
 		if ( $this->is_null( $key ) ) {
@@ -670,7 +716,7 @@ class WP_SDL_Struct_StaticList_1_0 extends WP_SDL_Struct_DLL_1_0
 	{
 		// since this is a fixed length list, overwrite value
 		// with null to preserve the key in the list.
-		$this->insert( $this->index( $key ), null );
+		$this->insert( $key, null );
 	}
 
 	/**
@@ -748,24 +794,6 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	 * @var boolean
 	 */
 	private $index_resort = false;
-	
-	/**
-	 * Returns index if its within valid range.
-	 *
-	 * @param integer $index The index to check.
-	 * @return integer
-	 * @throws InvalidArgumentException When index is not an integer.
-	 */
-	private function index( $index )
-	{
-		// index must be an int
-		if ( is_integer( $index ) ) {
-			// offet is good
-			return $index;
-		}
-		// invalid index
-		throw new InvalidArgumentException( __( 'Index must be an integer.', 'wp-sdl' ) );
-	}
 
 	/**
 	 * Update indexes as applicable.
@@ -857,7 +885,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function set( $key, $value )
 	{
 		// insert if key is within valid range
-		if ( $key === $this->insert( $this->index( $key ), $value ) ) {
+		if ( $key === $this->insert( $key, $value ) ) {
 			// update indexes
 			$this->index_range( $key );
 			// force key sort
@@ -876,7 +904,7 @@ class WP_SDL_Struct_DynamicList_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function add( $key, $value, $safe_mode = true )
 	{
 		// insert if key is within valid range
-		if ( $key === $this->insert( $this->index( $key ), $value, $safe_mode ) ) {
+		if ( $key === $this->insert( $key, $value, $safe_mode ) ) {
 			// update indexes
 			$this->index_range( $key );
 			// force key sort
@@ -996,7 +1024,7 @@ class WP_SDL_Struct_Stack_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function push( $data )
 	{
 		// append item to list
-		$this->insert( null, $data );
+		$this->insert( null, $data, false, true );
 	}
 
 	/**
@@ -1142,19 +1170,19 @@ class WP_SDL_Struct_Queue_1_0 extends WP_SDL_Struct_DLL_1_0
 }
 
 /**
- * Priority Queue Structure (mixed in, highest priority out)
+ * Abstract Priority List Structure (mixed in, highest priority out)
  *
  * @package wp-sdl\helpers
  * @version 1.0
  */
-class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
+abstract class WP_SDL_Struct_PriorityDLL_1_0 extends WP_SDL_Struct_DLL_1_0
 {
 	/**
-	 * Map of keys to list priorities.
+	 * Table of keys to list priorities.
 	 *
 	 * @var array
 	 */
-	private $priority_map = array();
+	private $priority_table = array();
 
 	/**
 	 * Toggle to determine if a sort is needed.
@@ -1178,144 +1206,182 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 	private $iterator_keys = array();
 
 	/**
-	 * Sort the priority map.
+	 * Set the priority for a key in the main list.
+	 *
+	 * @param mixed $key The key to set.
+	 * @param integer $priority The priority to assign. Pass null to unset.
+	 */
+	protected function priority_set( $key, $priority )
+	{
+		// is priority null?
+		if ( null === $priority ) {
+			// yep, unset it completely
+			unset( $this->priority_table[ $key ] );
+		} else {
+			// set priority for key
+			$this->priority_table[ $key ] = $priority;
+		}
+	}
+
+	/**
+	 * Toggle priority resort on.
+	 */
+	protected function priority_resort()
+	{
+		$this->priority_resort = true;
+	}
+
+	/**
+	 * Sort the priority table.
 	 */
 	private function priority_sort()
 	{
-		// need to re-sort priority map?
+		// need to re-sort priority table?
 		if ( true === $this->priority_resort ) {
 			// yep, sort it by value IN REVERSE!
 			// ascending asort() does not put "first in" indexes higher.
-			arsort( $this->priority_map );
+			arsort( $this->priority_table );
 			// toggle priority sort off
 			$this->priority_resort = false;
 		}
 	}
 
 	/**
-	 * Return the first priority map index after sort.
+	 * Return the first priority table index after sort.
 	 */
-	private function priority_index_low()
+	protected function priority_index_low()
 	{
-		// sort the priority map
+		// sort the priority table
 		$this->priority_sort();
 
-		// make sure priority map is rewound
-		reset( $this->priority_map );
+		// make sure priority table is rewound
+		reset( $this->priority_table );
 
-		// return first priority map index
-		return key( $this->priority_map );
+		// return first priority table index
+		return key( $this->priority_table );
 	}
 
 	/**
-	 * Return the last priority map index after sort.
+	 * Return the last priority table index after sort.
 	 */
-	private function priority_index_high()
+	protected function priority_index_high()
 	{
-		// sort the priority map
+		// sort the priority table
 		$this->priority_sort();
 
-		// seek to end of priority map
-		end( $this->priority_map );
+		// seek to end of priority table
+		end( $this->priority_table );
 
-		// return last priority map index
-		return key( $this->priority_map );
+		// return last priority table index
+		return key( $this->priority_table );
 	}
 
 	/**
-	 * Adds an item at the end of the queue with a priority weight.
+	 * Set value at specified key with a weighted priority.
 	 *
-	 * @param mixed $data Variable to add to the queue.
-	 * @param integer $priority Priority
-	 * @return integer The index that was enqueued.
+	 * @param string $key String key.
+	 * @param mixed $value The value to store.
+	 * @param integer $priority The priority to assign.
 	 */
-	public function enqueue( $data, $priority )
+	public function set( $key, $value, $priority )
 	{
-		// call parent enqueue method
-		$index = $this->insert( null, $data );
+		// call insert method
+		$index = $this->insert( $key, $value );
 
-		// record priority for new item's key
-		$this->priority_map[ $index ] = $priority;
+		// record priority for new item's index
+		$this->priority_set( $index, $priority );
 
 		// toggle priority sort on
-		$this->priority_resort = true;
-
-		// return the new index
-		return $index;
+		$this->priority_resort();
 	}
 
 	/**
-	 * Return and remove the highest priority item from queue.
+	 * Adds data for the given key to the map with a weighted priority.
 	 *
-	 * @return mixed
+	 * @param string $key The key.
+	 * @param mixed $value New value.
+	 * @param integer $priority The priority to assign.
+	 * @param boolean $safe_mode Set to false to disable safe mode check.
+	 * @throws OverflowException If the key has been previously set.
 	 */
-	public function dequeue()
+	public function add( $key, $value, $priority, $safe_mode = true )
 	{
-		// get highest priority key
-		$key = $this->priority_index_high();
+		// call insert method
+		$index = $this->insert( $key, $value, $safe_mode );
 
-		// get value for that key
-		$data = $this->get( $key );
+		// record priority for new item's index
+		$this->priority_set( $index, $priority );
 
+		// toggle priority sort on
+		$this->priority_resort();
+	}
+
+	/**
+	 * Removes the data for the given key from the map.
+	 *
+	 * @param string $key The key.
+	 * @param boolean $safe_mode Set to false to disable safe mode check.
+	 * @throws InvalidArgumentException If the key is not a string.
+	 * @throws OutOfBoundsException If safe mode is enabled and the key does not exist.
+	 */
+	public function remove( $key, $safe_mode = true )
+	{
 		// remove the data for that key
-		$this->delete( $key );
+		$this->delete( $this->index( $key ), $safe_mode );
 
 		// remove the priority entry for that key
-		unset( $this->priority_map[ $key ] );
-
-		// return the data
-		return $data;
+		$this->priority_set( $key, null );
 	}
 
 	/**
-	 * Return highest priority item from the front of the queue without removing.
+	 * Return highest priority item from the top of the list without removing.
 	 *
 	 * @return mixed
 	 */
-	public function front()
+	public function top()
 	{
-		// get lowest priority map index
+		// get lowest priority table index
 		$index = $this->priority_index_high();
 
 		// have an index to lookup?
-		if ( is_integer( $index ) ) {
+		if ( null !== $index ) {
 			// yep, return value for that index
 			return $this->get( $index );
 		}
 	}
 
 	/**
-	 * Return last item from the back of the queue without removing.
+	 * Return last item from the bottom of the list without removing.
 	 *
 	 * @return mixed
 	 */
-	public function back()
+	public function bottom()
 	{
-		// get highest priority map index
+		// get highest priority table index
 		$index = $this->priority_index_low();
 
 		// have an index to lookup?
-		if ( is_integer( $index ) ) {
+		if ( null !== $index ) {
 			// yep, return value for that index
 			return $this->get( $index );
 		}
 	}
 
 	/**
-	 * Rewind is special for a priority queue!
+	 * Rewind is special for a priority list!
 	 */
 	public function rewind()
 	{
-		// sort priority map
+		// sort priority table
 		$this->priority_sort();
 		// build up array of keys for iterating over
-		$this->iterator_keys = array_keys( $this->priority_map );
+		$this->iterator_keys = array_keys( $this->priority_table );
 		// the first iteration key is LAST one
 		$this->iterator_key = count( $this->iterator_keys ) - 1;
 	}
 
 	/**
-	 * Return next highest priority item in queue.
+	 * Return next highest priority item in list.
 	 *
 	 * @return mixed
 	 */
@@ -1357,6 +1423,142 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 }
 
 /**
+ * Priority List Structure
+ *
+ * @package wp-sdl\helpers
+ * @version 1.0
+ */
+class WP_SDL_Struct_PriorityList_1_0 extends WP_SDL_Struct_PriorityDLL_1_0
+{
+	/**
+	 * Append an item onto the list with a weighted priority.
+	 *
+	 * @param mixed $data
+	 * @param integer $priority The priority to assign.
+	 */
+	public function append( $data, $priority )
+	{
+		// call insert with null key
+		$index = $this->insert( null, $data, false, true );
+
+		// record priority for new item's index
+		$this->priority_set( $index, $priority );
+
+		// toggle priority sort on
+		$this->priority_resort();
+	}
+}
+
+/**
+ * Priority Map Structure
+ *
+ * @package wp-sdl\helpers
+ * @version 1.0
+ */
+class WP_SDL_Struct_PriorityMap_1_0 extends WP_SDL_Struct_PriorityDLL_1_0
+{
+	/**
+	 * Returns index if its valid.
+	 *
+	 * @param string|null $index The index to check.
+	 * @param boolean $allow_null Whether to allow null index.
+	 * @return string|null
+	 * @throws InvalidArgumentException When index is not valid.
+	 */
+	protected function index( $index, $allow_null = false )
+	{
+		// fall back to setting
+		if (
+			null === $index && true === $allow_null ||
+			true === is_string( $index )
+		) {
+			return $index;
+		}
+
+		// not a valid index
+		throw new InvalidArgumentException( __( 'Index must be a string.', 'wp-sdl' ) );
+	}
+}
+
+/**
+ * Priority Queue Structure (mixed in, highest priority out)
+ *
+ * @package wp-sdl\helpers
+ * @version 1.0
+ */
+class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_PriorityDLL_1_0
+{
+	/**
+	 * Adds an item at the end of the queue with a priority weight.
+	 *
+	 * @param mixed $data Variable to add to the queue.
+	 * @param integer $priority Priority
+	 * @return integer The index that was enqueued.
+	 */
+	public function enqueue( $data, $priority )
+	{
+		// call parent insert method
+		$index = $this->insert( null, $data, false, true );
+
+		// record priority for new item's index
+		$this->priority_set( $index, $priority );
+
+		// toggle priority sort on
+		$this->priority_resort();
+
+		// return the new index
+		return $index;
+	}
+
+	/**
+	 * Return and remove the highest priority item from queue.
+	 *
+	 * @return mixed
+	 */
+	public function dequeue()
+	{
+		// get highest priority key
+		$key = $this->priority_index_high();
+
+		// get value for that key
+		$data = $this->get( $key );
+
+		// remove the data for that key
+		$this->delete( $key );
+
+		// remove the priority entry for that key
+		$this->priority_set( $key, null );
+
+		// return the data
+		return $data;
+	}
+
+	/**
+	 * Return highest priority item from the front of the queue without removing.
+	 *
+	 * This method is a synonym of top().
+	 *
+	 * @return mixed
+	 */
+	public function front()
+	{
+		return $this->top();
+	}
+
+	/**
+	 * Return last item from the back of the queue without removing.
+	 *
+	 * This method is a synonym of bottom().
+	 *
+	 * @return mixed
+	 */
+	public function back()
+	{
+		return $this->bottom();
+	}
+}
+
+/**
  * Map Structure
  *
  * @package wp-sdl\helpers
@@ -1365,29 +1567,27 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 {
 	/**
-	 * Returns index (key) if its a valid type.
+	 * Returns index if its valid.
 	 *
-	 * @param string $index
-	 * @return string
-	 * @throws InvalidArgumentException When index is not a string.
+	 * @param string|null $index The index to check.
+	 * @param boolean $allow_null Whether to allow null index.
+	 * @return string|null
+	 * @throws InvalidArgumentException When index is not valid.
 	 */
-	private function index( $index )
+	protected function index( $index, $allow_null = false )
 	{
-		// index must be a string
-		if ( is_string( $index ) ) {
-			// index is good
+		// fall back to setting
+		if (
+			null === $index && true === $allow_null ||
+			true === is_string( $index )
+		) {
 			return $index;
 		}
-		// invalid index
-		throw new InvalidArgumentException(
-			__(
-				'Index must be a string. Wrap value in ' .
-				'quotes, or use a dynamic list instead.',
-				'wp-sdl'
-			)
-		);
-	}
 
+		// not a valid index
+		throw new InvalidArgumentException( __( 'Index must be a string.', 'wp-sdl' ) );
+	}
+	
 	/**
 	 * Set value at specified key.
 	 *
@@ -1397,7 +1597,7 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 	public function set( $key, $value )
 	{
 		// insert if key is valid
-		$this->insert( $this->index( $key ), $value );
+		$this->insert( $key, $value );
 	}
 
 	/**
@@ -1410,7 +1610,7 @@ class WP_SDL_Struct_Map_1_0 extends WP_SDL_Struct_DLL_1_0
 	 */
 	public function add( $key, $value, $safe_mode = true )
 	{
-		$this->insert( $this->index( $key ), $value, $safe_mode );
+		$this->insert( $key, $value, $safe_mode );
 	}
 
 	/**

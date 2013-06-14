@@ -5,6 +5,19 @@
 
 class STUB_Struct_DLL_1_0 extends WP_SDL_Struct_DLL_1_0
 {
+	protected function index( $index, $allow_null = false )
+	{
+		if (
+			null === $index && true === $allow_null ||
+			true === is_scalar( $index )
+		) {
+			return $index;
+		}
+
+		// not a valid index
+		throw new InvalidArgumentException( __( 'Index is not valid', 'wp-sdl' ) );
+	}
+
 	public function ut_dummy_data()
 	{
 		$this->insert( 'a', 'aye' );
