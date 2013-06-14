@@ -1448,25 +1448,6 @@ abstract class WP_SDL_Struct_PriorityDLL_1_0 extends WP_SDL_Struct_DLL_1_0
 class WP_SDL_Struct_PriorityList_1_0 extends WP_SDL_Struct_PriorityDLL_1_0
 {
 	/**
-	 * Returns index (key) if its a valid type.
-	 *
-	 * @param integer $index
-	 * @return integer
-	 * @throws InvalidArgumentException When index is not an integer.
-	 */
-	protected function index( $index )
-	{
-		// index can be null
-		if ( null === $index ) {
-			// return it
-			return $index;
-		}
-
-		// call parent
-		return parent::index( $index );
-	}
-
-	/**
 	 * Append an item onto the list with a weighted priority.
 	 *
 	 * @param mixed $data
@@ -1474,8 +1455,14 @@ class WP_SDL_Struct_PriorityList_1_0 extends WP_SDL_Struct_PriorityDLL_1_0
 	 */
 	public function append( $data, $priority )
 	{
-		// call set with null key
-		$this->set( null, $data, $priority );
+		// call insert with null key
+		$index = $this->insert( null, $data );
+
+		// record priority for new item's index
+		$this->priority_set( $index, $priority );
+
+		// toggle priority sort on
+		$this->priority_resort();
 	}
 }
 
