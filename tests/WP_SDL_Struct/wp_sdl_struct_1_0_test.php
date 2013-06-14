@@ -1032,47 +1032,27 @@ class WP_SDL_Struct_Queue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 /**
  * @group struct
  */
-class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
+abstract class WP_SDL_Struct_PriorityDLL_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 {
 	/**
-	 * @var WP_SDL_Struct_PriorityQueue_1_0
+	 * @var WP_SDL_Struct_PriorityDLL_1_0
 	 */
 	protected $list;
-	
+
 	/**
 	 * @var array
 	 */
-	private static $expected =
-		array(
-			0 => 'zero',
-			1 => 'one',
-			2 => 'two',
-			3 => 'three',
-			4 => 'four'
-		);
+	protected static $expected = array();
 
-	protected function dummyDataEnq()
-	{
-		
-		$this->list->enqueue( 'three', 30 );
-		$this->list->enqueue( 'two', 0 );
-		$this->list->enqueue( 'zero', -100 );
-		$this->list->enqueue( 'four', 80 );
-		$this->list->enqueue( 'one', -100 );
-	}
+	/**
+	 * @var array
+	 */
+	protected static $expected_keys = array();
 
-	public function setUp()
-	{
-		$this->list =
-			WP_SDL::support( '1.0' )
-				->struct()
-				->priority_queue();
-	}
-
+	abstract protected function dummyData( $cause_trouble = true );
+	
 	public function testInstance()
 	{
-		$this->assertInstanceOf( 'WP_SDL_Struct_PriorityQueue_1_0', $this->list );
-
 		$this->assertAttributeInternalType( 'array', 'priority_table', $this->list );
 		$this->assertAttributeCount( 0, 'priority_table', $this->list );
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
@@ -1082,12 +1062,12 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 		$this->assertAttributeEquals( null, 'iterator_key', $this->list );
 	}
 
-	public function testEnqueue()
+	public function testPopulate()
 	{
-		$this->dummyDataEnq();
+		$this->dummyData();
 
 		$this->assertEquals(
-			array( 0, 1, 2, 3, 4 ),
+			self::$expected_keys,
 			$this->list->keys()
 		);
 
@@ -1099,14 +1079,14 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
 	}
 
-	public function testEnqueueSorting()
+	public function testSorting()
 	{
 		// check priority sorting properties before
 		$this->assertAttributeCount( 0, 'priority_table', $this->list );
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
 
 		// add dummy data
-		$this->dummyDataEnq();
+		$this->dummyData( true );
 
 		// check count
 		$this->assertEquals( 5, $this->list->count() );
@@ -1121,89 +1101,14 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 		// check priority sorting toggle, should be off
 		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
 	}
-
-	public function testDequeue()
-	{
-		$this->dummyDataEnq();
-
-		// dequeue a few
-		$this->assertEquals( 'zero', $this->list->dequeue() );
-		$this->assertEquals( 'one', $this->list->dequeue() );
-
-		// check count
-		$this->assertEquals( 3, $this->list->count() );
-
-		// check priority sorting properties
-		$this->assertAttributeCount( 3, 'priority_table', $this->list );
-		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
-	}
-
-	public function testDequeueSorting()
-	{
-		// check priority sorting properties before
-		$this->assertAttributeCount( 0, 'priority_table', $this->list );
-		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
-
-		// add dummy data
-		$this->dummyDataEnq();
-
-		// check number items in priority table
-		$this->assertAttributeCount( 5, 'priority_table', $this->list );
-		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
-
-		// dequeue an item
-		$this->assertEquals( 'zero', $this->list->dequeue() );
-
-		// check priority sorting properties after
-		$this->assertAttributeCount( 4, 'priority_table', $this->list );
-		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
-	}
-
-	public function testFront()
-	{
-		$this->dummyDataEnq();
-
-		// count should be five
-		$this->assertEquals( 5, $this->list->count() );
-
-		// test result and sort status
-		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
-		$this->assertEquals( 'zero', $this->list->front() );
-		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
-
-		// count should still be five
-		$this->assertEquals( 5, $this->list->count() );
-	}
-
-	public function testBack()
-	{
-		$this->dummyDataEnq();
-
-		// count should be five
-		$this->assertEquals( 5, $this->list->count() );
-
-		// test result and sort status
-		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
-		$this->assertEquals( 'four', $this->list->back() );
-		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
-
-		// count should still be five
-		$this->assertEquals( 5, $this->list->count() );
-	}
 	
 	public function testIterationPrioritySort()
 	{
-		$this->dummyDataEnq();
+		$this->dummyData( true );
 
 		// check priority sorting properties
 		$this->assertAttributeCount( 5, 'priority_table', $this->list );
 		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
-
-		// make sure keys look normal
-		$this->assertEquals(
-			array( 0, 1, 2, 3, 4 ),
-			$this->list->keys()
-		);
 
 		// results array
 		$actual = array();
@@ -1224,7 +1129,397 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_Base_1_0_Test
 		$this->assertAttributeCount( 5, 'iterator_keys', $this->list );
 		$this->assertAttributeEquals( -1, 'iterator_key', $this->list );
 	}
+}
 
+/**
+ * @group struct
+ */
+class WP_SDL_Struct_PriorityList_1_0_Test extends WP_SDL_Struct_PriorityDLL_1_0_Test
+{
+	/**
+	 * @var WP_SDL_Struct_PriorityMap_1_0
+	 */
+	protected $list;
+
+	protected function dummyData( $cause_trouble = false )
+	{
+		// add/set some items
+		$this->list->add( 0, 'Chu', 30 );
+		$this->list->set( 1, 'Baz', 0 );
+		$this->list->add( 2, 'Foo', -100 );
+		$this->list->set( 3, 'Man', 80 );
+		$this->list->append( 'Bar', -100 );
+
+		if ( true === $cause_trouble ) {
+			// remove a couple manually
+			$this->list->remove( 1 );
+			$this->list->remove( 3 );
+			$this->assertAttributeCount( 3, 'priority_table', $this->list );
+			// fix them manually
+			$this->list->add( 1, 'Baz', 0, false );
+			$this->list->set( 3, 'Man', 80 );
+			$this->assertAttributeCount( 5, 'priority_table', $this->list );
+		}
+	}
+
+	public function setUp()
+	{
+		self::$expected =
+			array(
+				0 => 'Foo',
+				1 => 'Bar',
+				2 => 'Baz',
+				3 => 'Chu',
+				4 => 'Man'
+			);
+
+		self::$expected_keys = array( 0, 1, 2, 3, 4 );
+
+		$this->list =
+			WP_SDL::support( '1.0' )
+				->struct()
+				->priority_list();
+	}
+
+	public function testInstance()
+	{
+		parent::testInstance();
+
+		$this->assertInstanceOf( 'WP_SDL_Struct_PriorityList_1_0', $this->list );
+	}
+
+	public function testRemove()
+	{
+		$this->dummyData();
+
+		// make sure they exist
+		$this->assertTrue( $this->list->exists( 0 ) );
+		$this->assertTrue( $this->list->exists( 1 ) );
+
+		// remove a couple
+		$this->assertNull( $this->list->remove( 0 ) );
+		$this->assertNull( $this->list->remove( 1 ) );
+
+		// make sure they no longer exist
+		$this->assertFalse( $this->list->exists( 0 ) );
+		$this->assertFalse( $this->list->exists( 1 ) );
+
+		// check count
+		$this->assertEquals( 3, $this->list->count() );
+
+		// check priority sorting properties
+		$this->assertAttributeCount( 3, 'priority_table', $this->list );
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+	}
+
+	public function testTop()
+	{
+		$this->dummyData( true );
+
+		// count should be five
+		$this->assertEquals( 5, $this->list->count() );
+
+		// test result and sort status
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+		$this->assertEquals( 'Foo', $this->list->top() );
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+
+		// count should still be five
+		$this->assertEquals( 5, $this->list->count() );
+	}
+
+	public function testBottom()
+	{
+		$this->dummyData( true );
+
+		// count should be five
+		$this->assertEquals( 5, $this->list->count() );
+
+		// test result and sort status
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+		$this->assertEquals( 'Man', $this->list->bottom() );
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+
+		// count should still be five
+		$this->assertEquals( 5, $this->list->count() );
+	}
+
+}
+
+/**
+ * @group struct
+ */
+class WP_SDL_Struct_PriorityMap_1_0_Test extends WP_SDL_Struct_PriorityDLL_1_0_Test
+{
+	/**
+	 * @var WP_SDL_Struct_PriorityMap_1_0
+	 */
+	protected $list;
+
+	protected function dummyData( $cause_trouble = false )
+	{
+		// add/set some items
+		$this->list->add( 'three', 'Three', 30 );
+		$this->list->set( 'two', 'Two', 0 );
+		$this->list->add( 'zero', 'Zero', -100 );
+		$this->list->set( 'four', 'Four', 80 );
+		$this->list->set( 'one', 'One', -100 );
+
+		if ( true === $cause_trouble ) {
+			// remove a couple manually
+			$this->list->remove( 'two' );
+			$this->list->remove( 'four' );
+			$this->assertAttributeCount( 3, 'priority_table', $this->list );
+			// fix them manually
+			$this->list->add( 'two', 'Two', 0, false );
+			$this->list->set( 'four', 'Four', 80 );
+			$this->assertAttributeCount( 5, 'priority_table', $this->list );
+		}
+	}
+
+	public function setUp()
+	{
+		self::$expected =
+			array(
+				0 => 'Zero',
+				1 => 'One',
+				2 => 'Two',
+				3 => 'Three',
+				4 => 'Four'
+			);
+
+		self::$expected_keys =
+			array(
+				'three',
+				'two',
+				'zero',
+				'four',
+				'one'
+			);
+
+		$this->list =
+			WP_SDL::support( '1.0' )
+				->struct()
+				->priority_map();
+	}
+
+	public function testInstance()
+	{
+		parent::testInstance();
+
+		$this->assertInstanceOf( 'WP_SDL_Struct_PriorityMap_1_0', $this->list );
+	}
+
+	public function testRemove()
+	{
+		$this->dummyData();
+
+		// make sure they exist
+		$this->assertTrue( $this->list->exists( 'zero' ) );
+		$this->assertTrue( $this->list->exists( 'one' ) );
+
+		// remove a couple
+		$this->assertNull( $this->list->remove( 'zero' ) );
+		$this->assertNull( $this->list->remove( 'one' ) );
+
+		// make sure they no longer exist
+		$this->assertFalse( $this->list->exists( 'zero' ) );
+		$this->assertFalse( $this->list->exists( 'one' ) );
+
+		// check count
+		$this->assertEquals( 3, $this->list->count() );
+
+		// check priority sorting properties
+		$this->assertAttributeCount( 3, 'priority_table', $this->list );
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+	}
+
+	public function testTop()
+	{
+		$this->dummyData( true );
+
+		// count should be five
+		$this->assertEquals( 5, $this->list->count() );
+
+		// test result and sort status
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+		$this->assertEquals( 'Zero', $this->list->top() );
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+
+		// count should still be five
+		$this->assertEquals( 5, $this->list->count() );
+	}
+
+	public function testBottom()
+	{
+		$this->dummyData( true );
+
+		// count should be five
+		$this->assertEquals( 5, $this->list->count() );
+
+		// test result and sort status
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+		$this->assertEquals( 'Four', $this->list->bottom() );
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+
+		// count should still be five
+		$this->assertEquals( 5, $this->list->count() );
+	}
+
+}
+
+/**
+ * @group struct
+ */
+class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_PriorityDLL_1_0_Test
+{
+	/**
+	 * @var WP_SDL_Struct_PriorityQueue_1_0
+	 */
+	protected $list;
+	
+	protected function dummyData( $cause_trouble = false )
+	{
+		// enqueue some items
+		$this->list->enqueue( 'three', 30 );
+		$this->list->enqueue( 'two', 0 );
+		$this->list->enqueue( 'zero', -100 );
+		// add an item
+		$this->list->add( 3, 'four', 80 );
+		// set an item
+		$this->list->set( 4, 'one', -100 );
+
+		if ( true === $cause_trouble ) {
+			// remove a couple manually
+			$this->list->remove( 1 );
+			$this->list->remove( 3 );
+			$this->assertAttributeCount( 3, 'priority_table', $this->list );
+			// fix them manually
+			$this->list->set( 1, 'two', 0 );
+			$this->list->set( 3, 'four', 80 );
+			$this->assertAttributeCount( 5, 'priority_table', $this->list );
+		}
+	}
+
+	public function setUp()
+	{
+		self::$expected =
+			array(
+				0 => 'zero',
+				1 => 'one',
+				2 => 'two',
+				3 => 'three',
+				4 => 'four'
+			);
+
+		self::$expected_keys = array( 0, 1, 2, 3, 4 );
+
+		$this->list =
+			WP_SDL::support( '1.0' )
+				->struct()
+				->priority_queue();
+	}
+
+	public function testInstance()
+	{
+		parent::testInstance();
+		
+		$this->assertInstanceOf( 'WP_SDL_Struct_PriorityQueue_1_0', $this->list );
+	}
+
+	public function testDequeue()
+	{
+		$this->dummyData( true );
+
+		// dequeue a few
+		$this->assertEquals( 'zero', $this->list->dequeue() );
+		$this->assertEquals( 'one', $this->list->dequeue() );
+
+		// check count
+		$this->assertEquals( 3, $this->list->count() );
+
+		// check priority sorting properties
+		$this->assertAttributeCount( 3, 'priority_table', $this->list );
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+	}
+
+	public function testDequeueSorting()
+	{
+		// check priority sorting properties before
+		$this->assertAttributeCount( 0, 'priority_table', $this->list );
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+
+		// add dummy data
+		$this->dummyData( true );
+
+		// check number items in priority table
+		$this->assertAttributeCount( 5, 'priority_table', $this->list );
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+
+		// dequeue an item
+		$this->assertEquals( 'zero', $this->list->dequeue() );
+
+		// check priority sorting properties after
+		$this->assertAttributeCount( 4, 'priority_table', $this->list );
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+	}
+
+	public function testRemove()
+	{
+		$this->dummyData();
+
+		// make sure they exist
+		$this->assertTrue( $this->list->exists( 0 ) );
+		$this->assertTrue( $this->list->exists( 1 ) );
+
+		// remove a couple
+		$this->assertNull( $this->list->remove( 0 ) );
+		$this->assertNull( $this->list->remove( 1 ) );
+
+		// make sure they no longer exist
+		$this->assertFalse( $this->list->exists( 0 ) );
+		$this->assertFalse( $this->list->exists( 1 ) );
+
+		// check count
+		$this->assertEquals( 3, $this->list->count() );
+
+		// check priority sorting properties
+		$this->assertAttributeCount( 3, 'priority_table', $this->list );
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+	}
+
+	public function testFront()
+	{
+		$this->dummyData( true );
+
+		// count should be five
+		$this->assertEquals( 5, $this->list->count() );
+
+		// test result and sort status
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+		$this->assertEquals( 'zero', $this->list->front() );
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+
+		// count should still be five
+		$this->assertEquals( 5, $this->list->count() );
+	}
+
+	public function testBack()
+	{
+		$this->dummyData( true );
+
+		// count should be five
+		$this->assertEquals( 5, $this->list->count() );
+
+		// test result and sort status
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+		$this->assertEquals( 'four', $this->list->back() );
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+
+		// count should still be five
+		$this->assertEquals( 5, $this->list->count() );
+	}
+	
 }
 
 /**
