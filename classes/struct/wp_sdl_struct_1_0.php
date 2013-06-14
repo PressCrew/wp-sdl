@@ -1278,7 +1278,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 		$index = $this->priority_index_high();
 
 		// have an index to lookup?
-		if ( is_integer( $index ) ) {
+		if ( null !== $index ) {
 			// yep, return value for that index
 			return $this->get( $index );
 		}
@@ -1295,7 +1295,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 		$index = $this->priority_index_low();
 
 		// have an index to lookup?
-		if ( is_integer( $index ) ) {
+		if ( null !== $index ) {
 			// yep, return value for that index
 			return $this->get( $index );
 		}
