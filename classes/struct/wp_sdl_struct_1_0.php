@@ -1147,7 +1147,7 @@ class WP_SDL_Struct_Queue_1_0 extends WP_SDL_Struct_DLL_1_0
  * @package wp-sdl\helpers
  * @version 1.0
  */
-class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
+class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_DLL_1_0
 {
 	/**
 	 * Map of keys to list priorities.
@@ -1232,7 +1232,7 @@ class WP_SDL_Struct_PriorityQueue_1_0 extends WP_SDL_Struct_Queue_1_0
 	public function enqueue( $data, $priority )
 	{
 		// call parent enqueue method
-		$index = parent::enqueue( $data );
+		$index = $this->insert( null, $data );
 
 		// record priority for new item's key
 		$this->priority_map[ $index ] = $priority;
