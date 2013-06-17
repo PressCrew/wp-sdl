@@ -1101,6 +1101,27 @@ abstract class WP_SDL_Struct_PriorityDLL_1_0_Test extends WP_SDL_Struct_Base_1_0
 		// check priority sorting toggle, should be off
 		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
 	}
+
+	public function testPriorityInvalid()
+	{
+		$key = reset( self::$expected_keys );
+		$this->setExpectedException( 'InvalidArgumentException' );
+		$this->assertNull( $this->list->set( $key, 'Fooey', 'not-an-integer' ) );
+	}
+
+	public function testPriorityUpdateNull()
+	{
+		$this->dummyData();
+		$this->setExpectedException( 'InvalidArgumentException' );
+		$this->assertNull( $this->list->priority_update( null, 123 ) );
+	}
+
+	public function testPriorityUpdateBadKey()
+	{
+		$this->dummyData();
+		$this->setExpectedException( 'OutOfBoundsException' );
+		$this->assertNull( $this->list->priority_update( 123, 123 ) );
+	}
 	
 	public function testIterationPrioritySort()
 	{
@@ -1186,6 +1207,39 @@ class WP_SDL_Struct_PriorityList_1_0_Test extends WP_SDL_Struct_PriorityDLL_1_0_
 		parent::testInstance();
 
 		$this->assertInstanceOf( 'WP_SDL_Struct_PriorityList_1_0', $this->list );
+	}
+
+	public function testPriority()
+	{
+		$this->dummyData();
+
+		// expected priority table
+		$expected = array(
+			0 => 30,
+			1 => 0,
+			2 => -100,
+			3 => 80,
+			4 => -100
+		);
+
+		// check priority table structure
+		$this->assertAttributeEquals( $expected, 'priority_table', $this->list );
+
+		// force a sort
+		$this->assertNull( $this->list->rewind() );
+
+		// check priority sorting toggle, should be OFF
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+
+		// update the priority of a key
+		$this->assertNull( $this->list->priority_update( 3, 333 ) );
+		$expected[3] = 333;
+
+		// make sure it actually changed
+		$this->assertAttributeEquals( $expected, 'priority_table', $this->list );
+
+		// check priority sorting toggle, should be ON
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
 	}
 
 	public function testRemove()
@@ -1310,6 +1364,39 @@ class WP_SDL_Struct_PriorityMap_1_0_Test extends WP_SDL_Struct_PriorityDLL_1_0_T
 		$this->assertInstanceOf( 'WP_SDL_Struct_PriorityMap_1_0', $this->list );
 	}
 
+	public function testPriority()
+	{
+		$this->dummyData();
+
+		// expected priority table
+		$expected = array(
+			'three' => 30,
+			'two' => 0,
+			'zero' => -100,
+			'four' => 80,
+			'one' => -100
+		);
+
+		// check priority table structure
+		$this->assertAttributeEquals( $expected, 'priority_table', $this->list );
+
+		// force a sort
+		$this->assertNull( $this->list->rewind() );
+
+		// check priority sorting toggle, should be OFF
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+
+		// update the priority of a key
+		$this->assertNull( $this->list->priority_update( 'four', 444 ) );
+		$expected['four'] = 444;
+
+		// make sure it actually changed
+		$this->assertAttributeEquals( $expected, 'priority_table', $this->list );
+
+		// check priority sorting toggle, should be ON
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+	}
+	
 	public function testRemove()
 	{
 		$this->dummyData();
@@ -1427,6 +1514,39 @@ class WP_SDL_Struct_PriorityQueue_1_0_Test extends WP_SDL_Struct_PriorityDLL_1_0
 		$this->assertInstanceOf( 'WP_SDL_Struct_PriorityQueue_1_0', $this->list );
 	}
 
+	public function testPriority()
+	{
+		$this->dummyData();
+
+		// expected priority table
+		$expected = array(
+			0 => 30,
+			1 => 0,
+			2 => -100,
+			3 => 80,
+			4 => -100
+		);
+
+		// check priority table structure
+		$this->assertAttributeEquals( $expected, 'priority_table', $this->list );
+
+		// force a sort
+		$this->assertNull( $this->list->rewind() );
+
+		// check priority sorting toggle, should be OFF
+		$this->assertAttributeEquals( false, 'priority_resort', $this->list );
+
+		// update the priority of a key
+		$this->assertNull( $this->list->priority_update( 2, 456 ) );
+		$expected[2] = 456;
+
+		// make sure it actually changed
+		$this->assertAttributeEquals( $expected, 'priority_table', $this->list );
+
+		// check priority sorting toggle, should be ON
+		$this->assertAttributeEquals( true, 'priority_resort', $this->list );
+	}
+	
 	public function testDequeue()
 	{
 		$this->dummyData( true );
