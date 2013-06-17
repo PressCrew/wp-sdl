@@ -1218,8 +1218,16 @@ abstract class WP_SDL_Struct_PriorityDLL_1_0 extends WP_SDL_Struct_DLL_1_0
 			// yep, unset it completely
 			unset( $this->priority_table[ $key ] );
 		} else {
-			// set priority for key
-			$this->priority_table[ $key ] = $priority;
+			// is priority an integer?
+			if ( is_integer( $priority ) ) {
+				// set priority for key
+				$this->priority_table[ $key ] = $priority;
+				// force resort
+				$this->priority_resort = true;
+			} else {
+				// invalid priority
+				throw new InvalidArgumentException( __( 'Priority must be an integer', 'wp-sdl' ) );
+			}
 		}
 	}
 
@@ -1331,6 +1339,30 @@ abstract class WP_SDL_Struct_PriorityDLL_1_0 extends WP_SDL_Struct_DLL_1_0
 
 		// remove the priority entry for that key
 		$this->priority_set( $key, null );
+	}
+
+	/**
+	 * Update the priority for a key in the main list.
+	 *
+	 * @param mixed $key The key to set.
+	 * @param integer $priority The new priority to assign.
+	 */
+	public function priority_update( $key, $priority )
+	{
+		// key can't be null
+		if ( null !== $key ) {
+			// key must exist
+			if ( true === $this->exists( $key ) ) {
+				// set new priority
+				$this->priority_set( $key, $priority );
+			} else {
+				// key not found
+				throw new OutOfBoundsException( __( 'Key does not exist', 'wp-sdl' ) );
+			}
+		} else {
+			// null key is bad
+			throw new InvalidArgumentException( __( 'Key cannot be null', 'wp-sdl' ) );
+		}
 	}
 
 	/**
