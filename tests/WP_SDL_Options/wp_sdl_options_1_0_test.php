@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group options
+ */
 class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 {
 	/**
@@ -33,7 +36,7 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 		);
 
 		// new fields instance
-		$field = new WP_SDL_Options_Field_1_0( 'the_name' );
+		$field = new WP_SDL_Options_Field_1_0( 'the_name', WP_SDL::support( '1.0' ) );
 
 		// configure it
 		$field
@@ -52,6 +55,9 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 	}
 }
 
+/**
+ * @group options
+ */
 class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 {
 	/**
@@ -64,7 +70,7 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 		// load stub
 		require_once 'stubs/options_object_1_0.php';
 
-		self::$object = new STUB_Options_Object_1_0( 'test' );
+		self::$object = new STUB_Options_Object_1_0( 'test', WP_SDL::support( '1.0' ) );
 		
 		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', self::$object );
 
@@ -81,34 +87,47 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function testChildStack()
 	{
-		$this->assertEquals( false, self::$object->has_children() );
-		$this->assertEquals( 0, self::$object->count_children() );
+		$this->assertTrue( self::$object->children()->is_empty() );
+		$this->assertEquals( 0, self::$object->children()->count() );
 
-		$obj1 = new WP_SDL_Options_Object_1_0( 'test_object1' );
-		$obj2 = new WP_SDL_Options_Object_1_0( 'test_object2' );
+		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', self::$object->subitem( 'obj1' ) );
+		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', self::$object->subitem( 'obj2' ) );
 
-		$obj1->priority( 11 );
-		$obj2->priority( 1 );
+		$this->assertFalse( self::$object->children()->is_empty() );
+		$this->assertEquals( 2, self::$object->children()->count() );
+		
+		// fetch objects
+		$obj1 = self::$object->subitem( 'obj1' );
+		$obj2 = self::$object->subitem( 'obj2' );
 
-		$this->assertEquals( 0, self::$object->cmp_children( $obj1, $obj1 ) );
-		$this->assertEquals( 1, self::$object->cmp_children( $obj1, $obj2 ) );
-		$this->assertEquals( -1, self::$object->cmp_children( $obj2, $obj1 ) );
+		// check slugs
+		$this->assertEquals( 'obj1', $obj1->property( 'slug' ) );
+		$this->assertEquals( 'obj2', $obj2->property( 'slug' ) );
 
-		self::$object->ut_add_child( 'test_object1', $obj1 );
-		self::$object->ut_add_child( 'test_object2', $obj2 );
+		// check priorities
+		$this->assertEquals( 10, $obj1->property( 'priority' ) );
+		$this->assertEquals( 10, $obj2->property( 'priority' ) );
+		
+		// change priorities
+		$obj1->priority( 99 );
+		$obj2->priority( 100 );
 
-		$this->assertEquals( true, self::$object->has_children() );
-		$this->assertEquals( 2, self::$object->count_children() );
+		// check priorities
+		$this->assertEquals( 99, $obj1->property( 'priority' ) );
+		$this->assertEquals( 100, $obj2->property( 'priority' ) );
 
-		$children = self::$object->get_children( true );
-		$this->assertEquals( 'test_object2', array_shift($children)->property( 'slug' ) );
-		$this->assertEquals( 'test_object1', array_shift($children)->property( 'slug' ) );
+		// check stack priorities
+		$this->assertAttributeEquals(
+			array( 'obj1' => 99, 'obj2' => 100 ),
+			'priority_table',
+			self::$object->children()
+		);
 	}
 
 	public function testSlugInvalid()
 	{
 		$this->setExpectedException( 'InvalidArgumentException' );
-		return new WP_SDL_Options_Object_1_0( 'bad-slug' );
+		return new STUB_Options_Object_1_0( 'bad-slug', WP_SDL::support( '1.0' ) );
 	}
 
 	public function testTitle()
@@ -154,6 +173,9 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 	}
 }
 
+/**
+ * @group options
+ */
 class WP_SDL_Options_Config_1_0_Test extends PHPUnit_Framework_TestCase
 {
 	/**
@@ -164,7 +186,7 @@ class WP_SDL_Options_Config_1_0_Test extends PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		/* @var WP_SDL_Options_Config_1_0 */
-		self::$config = new WP_SDL_Options_Config_1_0( 'test' );
+		self::$config = new WP_SDL_Options_Config_1_0( 'test', WP_SDL::support( '1.0' ) );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Config_1_0', self::$config );
 
@@ -186,6 +208,9 @@ class WP_SDL_Options_Config_1_0_Test extends PHPUnit_Framework_TestCase
 	}
 }
 
+/**
+ * @group options
+ */
 class WP_SDL_Options_Group_1_0_Test extends PHPUnit_Framework_TestCase
 {
 	/**
@@ -195,7 +220,7 @@ class WP_SDL_Options_Group_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		self::$group = new WP_SDL_Options_Group_1_0( 'test_group' );
+		self::$group = new WP_SDL_Options_Group_1_0( 'test_group', WP_SDL::support( '1.0' ) );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Group_1_0', self::$group );
 
@@ -217,6 +242,9 @@ class WP_SDL_Options_Group_1_0_Test extends PHPUnit_Framework_TestCase
 	}
 }
 
+/**
+ * @group options
+ */
 class WP_SDL_Options_Section_1_0_Test extends PHPUnit_Framework_TestCase
 {
 	/**
@@ -226,7 +254,7 @@ class WP_SDL_Options_Section_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		self::$section = new WP_SDL_Options_Section_1_0( 'test_section' );
+		self::$section = new WP_SDL_Options_Section_1_0( 'test_section', WP_SDL::support( '1.0' ) );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Section_1_0', self::$section );
 
@@ -248,6 +276,9 @@ class WP_SDL_Options_Section_1_0_Test extends PHPUnit_Framework_TestCase
 	}
 }
 
+/**
+ * @group options
+ */
 class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 {
 	/**
@@ -257,7 +288,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		self::$field = new WP_SDL_Options_Field_1_0( 'test_field' );
+		self::$field = new WP_SDL_Options_Field_1_0( 'test_field', WP_SDL::support( '1.0' ) );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Field_1_0', self::$field );
 

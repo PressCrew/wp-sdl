@@ -12,8 +12,15 @@
  */
 class STUB_Options_Object_1_0 extends WP_SDL_Options_Object_1_0
 {
-	public function ut_add_child( $slug, WP_SDL_Options_Object_1_0 $object )
+	private $subitem;
+
+	/**
+	 * @return STUB_Options_Object_1_0
+	 */
+	final public function subitem( $slug )
 	{
-		parent::add_child( $slug, $object );
+		$this->subitem = $this->get_child_auto( $slug, 'STUB_Options_Object_1_0' );
+		
+		return $this->subitem;
 	}
 }

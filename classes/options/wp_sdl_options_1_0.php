@@ -43,7 +43,7 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 	{
 		// config exists yet?
 		if ( false === isset( $this->configs[ $name ] ) ) {
-			$this->configs[ $name ] = new WP_SDL_Options_Config_1_0( $name );
+			$this->configs[ $name ] = new WP_SDL_Options_Config_1_0( $name, $this->compat() );
 		}
 		
 		// point to it locally
@@ -112,7 +112,7 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 }
 
 
-class WP_SDL_Options_Object_1_0
+abstract class WP_SDL_Options_Object_1_0
 {
 	/**
 	 * The object instance's slug.
@@ -143,20 +143,38 @@ class WP_SDL_Options_Object_1_0
 	private $priority = 10;
 
 	/**
+	 * WP_SDL compat instance.
+	 * 
+	 * @var WP_SDL_1_0
+	 */
+	private $sdl;
+
+	/**
+	 * The parent of this instance.
+	 *
+	 * @var WP_SDL_Options_Object_1_0
+	 */
+	private $parent;
+
+	/**
 	 * Children belonging to this instance.
 	 *
-	 * @var array
+	 * @var WP_SDL_Struct_PriorityMap_1_0
 	 */
-	private $children = array();
+	private $children;
 
 	/**
 	 * Constructor.
 	 * 
 	 * @param string $slug
+	 * @param WP_SDL_1_0 $sdl
+	 * @param WP_SDL_Options_Object_1_0 $parent
 	 */
-	public function __construct( $slug )
+	public function __construct( $slug, WP_SDL_1_0 $sdl, WP_SDL_Options_Object_1_0 $parent = null )
 	{
 		$this->slug( $slug );
+		$this->sdl = $sdl;
+		$this->parent = $parent;
 	}
 
 	/**
@@ -181,57 +199,13 @@ class WP_SDL_Options_Object_1_0
 		}
 	}
 
-	/**
-	 * Returns true if child exists.
-	 *
-	 * @param string $slug
-	 * @return boolean
-	 */
-	protected function has_child( $slug )
+	public function children()
 	{
-		return isset( $this->children[ $slug ] );
-	}
-	
-	/**
-	 * Add child object.
-	 *
-	 * @param string $slug
-	 * @param WP_SDL_Options_Object_1_0 $object
-	 * @throws OverflowException
-	 */
-	protected function add_child( $slug, WP_SDL_Options_Object_1_0 $object )
-	{
-		// child NOT already exists?
-		if ( false === isset( $this->children[ $slug ] ) ) {
-			// nope, add to children
-			$this->children[ $slug ] = $object;
-		} else {
-			// child already set, puke
-			throw new OverflowException(
-				sprintf( __( 'The "%s" child has already been set, cannot overwrite.', 'wp-sdl' ), $slug )
-			);
+		if ( null === $this->children ) {
+			$this->children = $this->sdl->struct()->priority_map();
 		}
-	}
 
-	/**
-	 * Return child instance for given slug.
-	 *
-	 * @param string $slug
-	 * @return WP_SDL_Options_Object_1_0
-	 * @throws InvalidArgumentException
-	 */
-	protected function get_child( $slug )
-	{
-		// child exists?
-		if ( true === isset( $this->children[ $slug ] ) ) {
-			// yep, return it
-			return $this->children[ $slug ];
-		} else {
-			// child doesn't exist, puke
-			throw new InvalidArgumentException(
-				sprintf( __( 'The "%s" child does not exist.', 'wp-sdl' ), $slug )
-			);
-		}
+		return $this->children;
 	}
 
 	/**
@@ -245,18 +219,18 @@ class WP_SDL_Options_Object_1_0
 	protected function get_child_auto( $slug, $class )
 	{
 		// child exists?
-		if ( true === $this->has_child( $slug ) ) {
+		if ( true === $this->children()->exists( $slug ) ) {
 			// yep, return it
-			return $this->get_child( $slug );
+			return $this->children()->get( $slug );
 		} else {
 			// does class exist for reals?
 			if ( class_exists( $class, false ) ) {
 				// create new instance of class
-				$instance = new $class( $slug );
+				$instance = new $class( $slug, $this->sdl, $this );
 				// add to children
-				$this->add_child( $slug, $instance );
+				$this->children()->add( $slug, $instance, $this->priority );
 				// return it
-				return $this->get_child( $slug );
+				return $instance;
 			} else {
 				// class doesn't exist, puke
 				throw new InvalidArgumentException(
@@ -264,58 +238,6 @@ class WP_SDL_Options_Object_1_0
 				);
 			}
 		}
-	}
-
-	/**
-	 * Returns true if has one or more children.
-	 *
-	 * @return boolean
-	 */
-	public function has_children()
-	{
-		return ( $this->count_children() );
-	}
-
-	/**
-	 * Return total number of children.
-	 *
-	 * @return integer
-	 */
-	public function count_children()
-	{
-		return count( $this->children );
-	}
-
-	/**
-	 * Return all children.
-	 *
-	 * @return array
-	 */
-	public function get_children( $by_priority = false )
-	{
-		// sort by priority?
-		if ( true === $by_priority ) {
-			// copy children array
-			$result = $this->children;
-			// sort, preserving keys
-			uasort( $result, array( $this, 'cmp_children' ) );
-			// return sorted array
-			return $result;
-		} else {
-			// return as is
-			return $this->children;
-		}
-	}
-
-	/**
-	 * Comparison callback method to sort children by the given property
-	 * @param WP_SDL_Options_Object_1_0 $a
-	 * @param WP_SDL_Options_Object_1_0 $b
-	 * @return type
-	 */
-	public function cmp_children( WP_SDL_Options_Object_1_0 $a, WP_SDL_Options_Object_1_0 $b )
-	{
-		return strcmp( $a->property( 'priority' ), $b->property( 'priority' ) );
 	}
 
 	/**
@@ -390,7 +312,13 @@ class WP_SDL_Options_Object_1_0
 	{
 		// set attributes
 		if ( is_numeric( $priority ) ) {
+			// update priority property
 			$this->priority = (integer) $priority;
+			// have a parent?
+			if ( null !== $this->parent ) {
+				// update priority in parent for sorting
+				$this->parent->children()->priority_update( $this->slug, $this->priority );
+			}
 		} else {
 			throw new InvalidArgumentException(
 				__( 'The $priority parameter must be a number.', 'wp-sdl' )
