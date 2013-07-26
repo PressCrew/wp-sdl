@@ -20,13 +20,6 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 	protected static $VERSION = '1.0';
 
 	/**
-	 * The current config instance.
-	 *
-	 * @var WP_SDL_Options_Config_1_0
-	 */
-	private $config;
-
-	/**
 	 * The config instances stack.
 	 *
 	 * @var array
@@ -43,72 +36,37 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 	{
 		// config exists yet?
 		if ( false === isset( $this->configs[ $name ] ) ) {
+			// create it
 			$this->configs[ $name ] = new WP_SDL_Options_Config_1_0( $name, $this->compat() );
 		}
 		
-		// point to it locally
-		$this->config = $this->configs[ $name ];
-
 		// return it!
-		return $this->config;
-	}
-
-	public function register_settings()
-	{
-		if ( $this->config ) {
-
-		}
-
-		foreach ($wpsf_settings as $section) {
-			if (isset($section['section_id']) && $section['section_id'] && isset($section['section_title'])) {
-				add_settings_section($section['section_id'], $section['section_title'], array(&$this, 'section_intro'), $this->option_group);
-				if (isset($section['fields']) && is_array($section['fields']) && !empty($section['fields'])) {
-					foreach ($section['fields'] as $field) {
-						if (isset($field['id']) && $field['id'] && isset($field['title'])) {
-							add_settings_field($field['id'], $field['title'], array(&$this, 'generate_setting'), $this->option_group, $section['section_id'], array('section' => $section, 'field' => $field));
-						}
-					}
-				}
-			}
-		}
+		return $this->configs[ $name ];
 	}
 
 	/**
-	 * Render one field.
-	 * 
-	 * @param WP_SDL_Options_Field_1_0 $field
+	 * Output the settings form for the given config name.
 	 */
-	public function render_field( WP_SDL_Options_Field_1_0 $field )
+	function settings( $config_name, $group_name )
 	{
-		/* @var $html_helper WP_SDL_Html_1_0 */
-		$html_helper = $this->compat()->html();
+		// get the config
+		$config = $this->config( $config_name );
 
-		// params
-		$type = $field->property( 'type' );
-		$name = $field->property( 'slug' );
-		$desc = $field->property( 'description' );
-		$value = $field->property( 'value' );
-		$c_value = $field->property( 'current_value' );
-		$atts = $field->property( 'attributes' );
+		// get the group
+		$group = $config->group( $group_name );
 
-		// set id att to name if missing
-		if ( false === isset( $atts['id'] ) ) {
-			$atts['id'] = $name;
-		}
+		// format option page name
+		$option_page = 'wpsdl_' . $config->id();
 
-		// render the field
-		$html_helper->field( $type, $name, $value, $atts, $c_value );
-
-		// render the description?
-		if ( $desc ) {
-			// yep, wrap it in a paragraph
-			$html_helper
-				->open( 'p', array( 'class' => 'description' ) )
-					->content( $desc )
-				->close();
-		}
+		// render the form ?>
+		<form action="options.php" method="POST">
+			<?php settings_fields( $option_page ); ?>
+			<?php do_settings_sections( $group->id() ); ?>
+			<p class="submit">
+				<input type="submit" class="button-primary" value="<?php _e( 'Save Changes', 'wp-sdl' ); ?>">
+			</p>
+		</form><?php
 	}
-
 }
 
 
@@ -199,6 +157,16 @@ abstract class WP_SDL_Options_Object_1_0
 		}
 	}
 
+	protected function sdl()
+	{
+		return $this->sdl;
+	}
+
+	public function parent()
+	{
+		return $this->parent;
+	}
+	
 	public function children()
 	{
 		if ( null === $this->children ) {
@@ -328,16 +296,86 @@ abstract class WP_SDL_Options_Object_1_0
 		// maintain the chain
 		return $this;
 	}
+
+	/**
+	 * Return unique object id.
+	 * 
+	 * @return string
+	 */
+	abstract public function id();
 }
 
 class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 {
+	/**
+	 * Save mode "all"
+	 */
+	const SAVE_MODE_ALL = 'all';
+
+	/**
+	 * Save mode "group"
+	 */
+	const SAVE_MODE_GROUP = 'group';
+
+	/**
+	 * Save mode "section"
+	 */
+	const SAVE_MODE_SECTION = 'section';
+
+	/**
+	 * The current save mode.
+	 *
+	 * @var string
+	 */
+	private $save_mode = self::SAVE_MODE_ALL;
+
 	/**
 	 * The current group instance.
 	 *
 	 * @var WP_SDL_Options_Group_1_0
 	 */
 	private $group;
+
+	/**
+	 */
+	final public function id()
+	{
+		return $this->property( 'slug' );
+	}
+
+	/**
+	 * Register all of this config's settings.
+	 */
+	final public function register()
+	{
+		// loop all group
+		foreach ( $this->children() as $group ) {
+			// register each group
+			$group->register( $this );
+		}
+
+		// maybe register setting
+		if ( $this->save_mode_is( 'all' ) ) {
+			// option name is config slug
+			$this->register_setting( $this );
+		}
+
+		// maintain the chain
+		return $this;
+	}
+
+	public function register_setting( WP_SDL_Options_Object_1_0 $object )
+	{
+		// register the setting with wp
+		register_setting(
+			'wpsdl_' . $this->id(),
+			$object->id() . '_settings',
+			array( $this, 'validate' )
+		);
+
+		// maintain the chain
+		return $this;
+	}
 
 	/**
 	 * Return group instance for given slug.
@@ -353,6 +391,54 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		// return it!
 		return $this->group;
 	}
+
+	/**
+	 * Set the save mode for this config.
+	 *
+	 * @param string $mode
+	 * @return WP_SDL_Options_Config_1_0
+	 * @throws InvalidArgumentException
+	 */
+	final public function save_mode( $mode )
+	{
+		// make sure its valid
+		switch ( $mode ) {
+			case self::SAVE_MODE_ALL:
+			case self::SAVE_MODE_GROUP:
+			case self::SAVE_MODE_SECTION:
+				// set it
+				$this->save_mode = $mode;
+				break;
+			default:
+				throw new InvalidArgumentException(
+					sprintf( __( 'The "%s" save mode is not valid.', 'wp-sdl' ) , $mode )
+				);
+		}
+		
+		// maintain the chain
+		return $this;
+	}
+
+	/**
+	 * Returns true if given mode matches current save mode.
+	 *
+	 * @param string $mode
+	 * @return boolean
+	 */
+	final public function save_mode_is( $mode )
+	{
+		return ( $mode === $this->save_mode );
+	}
+
+	final public function settings( $group_name )
+	{
+		$this->sdl()->options()->settings( $this->id(), $group_name );
+	}
+
+	final public function validate( $data )
+	{
+		return $data;
+	}
 }
 
 class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Object_1_0
@@ -363,7 +449,38 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Object_1_0
 	 * @var WP_SDL_Options_Section_1_0
 	 */
 	private $section;
-	
+
+	/**
+	 */
+	final public function id()
+	{
+		return $this->parent()->id() . '_' . $this->property( 'slug' );
+	}
+
+	/**
+	 * Register all of this groups's settings.
+	 *
+	 * @param WP_SDL_Options_Config_1_0 $config
+	 * @return WP_SDL_Options_Group_1_0
+	 */
+	final public function register( WP_SDL_Options_Config_1_0 $config )
+	{
+		// loop all sections
+		foreach( $this->children() as $section ) {
+			// register each section
+			$section->register( $config );
+		}
+
+		// maybe register setting
+		if ( $config->save_mode_is( 'group' ) ) {
+			// option name is group name
+			$config->register_setting( $this );
+		}
+
+		// maintain the chain
+		return $this;
+	}
+
 	/**
 	 * Return section instance for given slug.
 	 *
@@ -388,6 +505,66 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 	 * @var WP_SDL_Options_Field_1_0
 	 */
 	private $field;
+
+	/**
+	 */
+	final public function id()
+	{
+		return $this->parent()->id() . '_' . $this->property( 'slug' );
+	}
+
+	/**
+	 * Register all of this section's settings.
+	 * 
+	 * @param WP_SDL_Options_Config_1_0 $config
+	 * @return WP_SDL_Options_Section_1_0
+	 */
+	final public function register( WP_SDL_Options_Config_1_0 $config )
+	{
+		// register section
+		add_settings_section(
+			$this->id(),
+			$this->property( 'title' ),
+			array( $this, 'render' ),
+			$this->parent()->id()
+		);
+
+		// loop all fields
+		foreach( $this->children() as $field ) {
+			// register each field
+			$field->register( $config );
+		}
+
+		// maybe register setting
+		if ( $config->save_mode_is( 'section' ) ) {
+			// option name is section name
+			$config->register_setting( $this );
+		}
+
+		// maintain the chain
+		return $this;
+	}
+
+	/**
+	 * Render section intro content.
+	 */
+	public function render()
+	{
+		/* @var $html_helper WP_SDL_Html_1_0 */
+		$html_helper = $this->sdl()->html();
+
+		// get the section description
+		$desc = $this->property( 'description' );
+
+		// render the description?
+		if ( $desc ) {
+			// yep, wrap it in a paragraph
+			$html_helper
+				->open( 'p' )
+					->content( $desc )
+				->close();
+		}
+	}
 
 	/**
 	 * Return field instance for given slug.
@@ -450,6 +627,73 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Object_1_0
 			default:
 				return parent::property( $name );
 		}
+	}
+
+	/**
+	 */
+	final public function id()
+	{
+		return $this->parent()->parent()->id() . '_' . $this->property( 'slug' );
+	}
+
+	/**
+	 * Register all of this field's settings.
+	 *
+	 * @param WP_SDL_Options_Config_1_0 $config
+	 * @return WP_SDL_Options_Field_1_0
+	 */
+	final public function register( WP_SDL_Options_Config_1_0 $config )
+	{
+		// register the field
+		add_settings_field(
+			$this->id(),
+			$this->property( 'title' ),
+			array( $this, 'render' ),
+			$this->parent()->parent()->id(),
+			$this->parent()->id()
+		);
+
+		// maintain the chain
+		return $this;
+	}
+
+	/**
+	 * Render this field.
+	 */
+	public function render()
+	{
+		/* @var $html_helper WP_SDL_Html_1_0 */
+		$html_helper = $this->sdl()->html();
+
+		// params
+		$type = $this->property( 'type' );
+		$name = $this->property( 'slug' );
+		$desc = $this->property( 'description' );
+		$value = $this->property( 'value' );
+		$c_value = $this->property( 'current_value' );
+		$atts = $this->property( 'attributes' );
+
+		// set id att to name if missing
+		if ( false === isset( $atts['id'] ) ) {
+			$atts['id'] = $name;
+		}
+
+		// render the field
+		$html_helper->field( $type, $name, $value, $atts, $c_value );
+
+		// render the description?
+		if ( $desc ) {
+			// yep, wrap it in a paragraph
+			$html_helper
+				->open( 'p', array( 'class' => 'description' ) )
+					->content( $desc )
+				->close();
+		}
+	}
+
+	public function validate( $data )
+	{
+		return $data;
 	}
 
 	/**

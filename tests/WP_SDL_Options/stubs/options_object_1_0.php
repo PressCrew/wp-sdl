@@ -15,6 +15,14 @@ class STUB_Options_Object_1_0 extends WP_SDL_Options_Object_1_0
 	private $subitem;
 
 	/**
+	 * @return string
+	 */
+	final public function id()
+	{
+		return $this->property( 'slug' );
+	}
+
+	/**
 	 * @return STUB_Options_Object_1_0
 	 */
 	final public function subitem( $slug )
