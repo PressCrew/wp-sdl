@@ -337,7 +337,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	 */
 	final public function id()
 	{
-		return $this->property( 'slug' );
+		return $this->property( 'slug' ) . '_config';
 	}
 
 	/**
@@ -365,7 +365,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	{
 		// register the setting with wp
 		register_setting(
-			'wpsdl_' . $this->id(),
+			'wpsdl_' . $this->property( 'slug' ),
 			$object->id() . '_settings',
 			array( $this, 'validate' )
 		);
@@ -451,7 +451,7 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Object_1_0
 	 */
 	final public function id()
 	{
-		return $this->parent()->id() . '_' . $this->property( 'slug' );
+		return $this->parent()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_group';
 	}
 
 	/**
@@ -507,7 +507,7 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 	 */
 	final public function id()
 	{
-		return $this->parent()->id() . '_' . $this->property( 'slug' );
+		return $this->parent()->parent()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_section';
 	}
 
 	/**
@@ -630,7 +630,7 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Object_1_0
 	 */
 	final public function id()
 	{
-		return $this->parent()->parent()->id() . '_' . $this->property( 'slug' );
+		return $this->parent()->parent()->parent()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_field';
 	}
 
 	/**
@@ -663,8 +663,8 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Object_1_0
 		$html_helper = $this->compat()->html();
 
 		// params
+		$name = $this->id();
 		$type = $this->property( 'type' );
-		$name = $this->property( 'slug' );
 		$desc = $this->property( 'description' );
 		$value = $this->property( 'value' );
 		$c_value = $this->property( 'current_value' );

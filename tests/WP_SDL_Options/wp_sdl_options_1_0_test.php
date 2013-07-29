@@ -23,7 +23,7 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function testConfig()
 	{
-		$config = self::$options->config( 'test' );
+		$config = self::$options->config( 'app' );
 		$this->assertInstanceOf( 'WP_SDL_Options_Config_1_0', $config );
 	}
 
@@ -35,7 +35,7 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 		require_once( ABSPATH . 'wp-admin/includes/admin.php' );
 
 		// get config
-		$config = self::$options->config( 'test' )->save_mode( 'all' );
+		$config = self::$options->config( 'app' )->save_mode( 'all' );
 
 		// set up the config
 		$design = $config->group( 'design' );
@@ -88,42 +88,42 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 //		var_dump( $wp_settings_sections, $wp_settings_fields, $new_whitelist_options );
 
 		// expected setting sections
-		$this->assertArrayHasKey( 'test_design', $wp_settings_sections );
-		$this->assertArrayHasKey( 'test_design_colors', $wp_settings_sections['test_design'] );
+		$this->assertArrayHasKey( 'app_design_group', $wp_settings_sections );
+		$this->assertArrayHasKey( 'app_colors_section', $wp_settings_sections['app_design_group'] );
 
 		// expected colors section config
-		$section_colors = $wp_settings_sections['test_design']['test_design_colors'];
-		$this->assertEquals( 'test_design_colors', $section_colors['id'] );
+		$section_colors = $wp_settings_sections['app_design_group']['app_colors_section'];
+		$this->assertEquals( 'app_colors_section', $section_colors['id'] );
 		$this->assertEquals( 'Colors', $section_colors['title'] );
 		$this->assertCount( 2, $section_colors['callback'] );
 		$this->assertInstanceOf( 'WP_SDL_Options_Section_1_0', $section_colors['callback'][0] );
 		$this->assertEquals( 'render', $section_colors['callback'][1] );
 
 		// expected setting fields
-		$this->assertArrayHasKey( 'test_design', $wp_settings_fields );
-		$this->assertArrayHasKey( 'test_design_colors', $wp_settings_fields['test_design'] );
-		$this->assertArrayHasKey( 'test_design_dark', $wp_settings_fields['test_design']['test_design_colors'] );
-		$this->assertArrayHasKey( 'test_design_light', $wp_settings_fields['test_design']['test_design_colors'] );
+		$this->assertArrayHasKey( 'app_design_group', $wp_settings_fields );
+		$this->assertArrayHasKey( 'app_colors_section', $wp_settings_fields['app_design_group'] );
+		$this->assertArrayHasKey( 'app_dark_field', $wp_settings_fields['app_design_group']['app_colors_section'] );
+		$this->assertArrayHasKey( 'app_light_field', $wp_settings_fields['app_design_group']['app_colors_section'] );
 
 		// expected dark colors field config
-		$field_dark_colors = $wp_settings_fields['test_design']['test_design_colors']['test_design_dark'];
-		$this->assertEquals( 'test_design_dark', $field_dark_colors['id'] );
+		$field_dark_colors = $wp_settings_fields['app_design_group']['app_colors_section']['app_dark_field'];
+		$this->assertEquals( 'app_dark_field', $field_dark_colors['id'] );
 		$this->assertEquals( 'Dark Colors', $field_dark_colors['title'] );
 		$this->assertCount( 2, $field_dark_colors['callback'] );
 		$this->assertInstanceOf( 'WP_SDL_Options_Field_1_0', $field_dark_colors['callback'][0] );
 		$this->assertEquals( 'render', $field_dark_colors['callback'][1] );
 
 		// expected light colors field config
-		$field_light_colors = $wp_settings_fields['test_design']['test_design_colors']['test_design_light'];
-		$this->assertEquals( 'test_design_light', $field_light_colors['id'] );
+		$field_light_colors = $wp_settings_fields['app_design_group']['app_colors_section']['app_light_field'];
+		$this->assertEquals( 'app_light_field', $field_light_colors['id'] );
 		$this->assertEquals( 'Light Colors', $field_light_colors['title'] );
 		$this->assertCount( 2, $field_light_colors['callback'] );
 		$this->assertInstanceOf( 'WP_SDL_Options_Field_1_0', $field_light_colors['callback'][0] );
 		$this->assertEquals( 'render', $field_light_colors['callback'][1] );
 
 		// expected new white list options
-		$this->assertArrayHasKey( 'wpsdl_test', $new_whitelist_options );
-		$this->assertContains( 'test_settings', $new_whitelist_options['wpsdl_test'] );
+		$this->assertArrayHasKey( 'wpsdl_app', $new_whitelist_options );
+		$this->assertContains( 'app_config_settings', $new_whitelist_options['wpsdl_app'] );
 
 		// Whew!
 	}
@@ -136,7 +136,7 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 		require_once( ABSPATH . 'wp-admin/includes/admin.php' );
 
 		// get config
-		$config = self::$options->config( 'test2' )->save_mode( 'all' );
+		$config = self::$options->config( 'app2' )->save_mode( 'all' );
 
 		// set up some groups
 		$wood = $config->group( 'wood' );
@@ -154,9 +154,9 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 		$config->register();
 
 		// expected new white list options
-		$this->assertArrayHasKey( 'wpsdl_test2', $new_whitelist_options );
-		$this->assertCount( 1, $new_whitelist_options['wpsdl_test2'] );
-		$this->assertContains( 'test2_settings', $new_whitelist_options['wpsdl_test2'] );
+		$this->assertArrayHasKey( 'wpsdl_app2', $new_whitelist_options );
+		$this->assertCount( 1, $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_config_settings', $new_whitelist_options['wpsdl_app2'] );
 
 		// save mode group
 		$new_whitelist_options = array();
@@ -164,10 +164,10 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 		$config->register();
 
 		// expected new white list options
-		$this->assertArrayHasKey( 'wpsdl_test2', $new_whitelist_options );
-		$this->assertCount( 2, $new_whitelist_options['wpsdl_test2'] );
-		$this->assertContains( 'test2_wood_settings', $new_whitelist_options['wpsdl_test2'] );
-		$this->assertContains( 'test2_brick_settings', $new_whitelist_options['wpsdl_test2'] );
+		$this->assertArrayHasKey( 'wpsdl_app2', $new_whitelist_options );
+		$this->assertCount( 2, $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_wood_group_settings', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_brick_group_settings', $new_whitelist_options['wpsdl_app2'] );
 
 		// save mode section
 		$new_whitelist_options = array();
@@ -175,12 +175,12 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 		$config->register();
 
 		// expected new white list options
-		$this->assertArrayHasKey( 'wpsdl_test2', $new_whitelist_options );
-		$this->assertCount( 4, $new_whitelist_options['wpsdl_test2'] );
-		$this->assertContains( 'test2_wood_pine_settings', $new_whitelist_options['wpsdl_test2'] );
-		$this->assertContains( 'test2_wood_oak_settings', $new_whitelist_options['wpsdl_test2'] );
-		$this->assertContains( 'test2_brick_clay_settings', $new_whitelist_options['wpsdl_test2'] );
-		$this->assertContains( 'test2_brick_sand_settings', $new_whitelist_options['wpsdl_test2'] );
+		$this->assertArrayHasKey( 'wpsdl_app2', $new_whitelist_options );
+		$this->assertCount( 4, $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_pine_section_settings', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_oak_section_settings', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_clay_section_settings', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_sand_section_settings', $new_whitelist_options['wpsdl_app2'] );
 
 	}
 }
@@ -200,12 +200,12 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 		// load stub
 		require_once 'stubs/options_object_1_0.php';
 
-		self::$object = new STUB_Options_Object_1_0( 'test', WP_SDL::support( '1.0' ) );
+		self::$object = new STUB_Options_Object_1_0( 'app', WP_SDL::support( '1.0' ) );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', self::$object );
 
 		$this->assertEquals(
-			'test',
+			'app',
 			self::$object->property( 'slug' )
 		);
 	}
@@ -217,11 +217,11 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function testParent()
 	{
-		$child = new STUB_Options_Object_1_0( 'test_child', WP_SDL::support( '1.0' ) );
+		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' ) );
 		$child->parent( self::$object );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', $child->parent() );
-		$this->assertEquals( 'test', $child->parent()->property( 'slug' ) );
+		$this->assertEquals( 'app', $child->parent()->property( 'slug' ) );
 	}
 
 	public function testChildStack()
@@ -325,12 +325,12 @@ class WP_SDL_Options_Config_1_0_Test extends PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		/* @var WP_SDL_Options_Config_1_0 */
-		self::$config = new WP_SDL_Options_Config_1_0( 'test', WP_SDL::support( '1.0' ) );
+		self::$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' ) );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Config_1_0', self::$config );
 
 		$this->assertEquals(
-			'test',
+			'app',
 			self::$config->property( 'slug' )
 		);
 	}
@@ -342,12 +342,12 @@ class WP_SDL_Options_Config_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function testId()
 	{
-		$this->assertEquals( 'test', self::$config->id() );
+		$this->assertEquals( 'app_config', self::$config->id() );
 	}
 
 	public function testGroup()
 	{
-		$group = self::$config->group( 'test_group' );
+		$group = self::$config->group( 'colors' );
 		$this->assertInstanceOf( 'WP_SDL_Options_Group_1_0', $group );
 	}
 
@@ -392,13 +392,13 @@ class WP_SDL_Options_Group_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		$config = new WP_SDL_Options_Config_1_0( 'test_conf', WP_SDL::support( '1.0' ) );
-		self::$group = $config->group( 'test_group' );
+		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' ) );
+		self::$group = $config->group( 'foo' );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Group_1_0', self::$group );
 
 		$this->assertEquals(
-			'test_group',
+			'foo',
 			self::$group->property( 'slug' )
 		);
 	}
@@ -410,13 +410,13 @@ class WP_SDL_Options_Group_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function testId()
 	{
-		$this->assertEquals( 'test_conf_test_group', self::$group->id() );
+		$this->assertEquals( 'app_foo_group', self::$group->id() );
 	}
 
 
 	public function testSection()
 	{
-		$section = self::$group->section( 'test_section' );
+		$section = self::$group->section( 'bar' );
 		$this->assertInstanceOf( 'WP_SDL_Options_Section_1_0', $section );
 	}
 }
@@ -433,13 +433,13 @@ class WP_SDL_Options_Section_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		$config = new WP_SDL_Options_Config_1_0( 'test_conf', WP_SDL::support( '1.0' ) );
-		self::$section = $config->group('test_group')->section('test_section');
+		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' ) );
+		self::$section = $config->group('foo')->section('bar');
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Section_1_0', self::$section );
 
 		$this->assertEquals(
-			'test_section',
+			'bar',
 			self::$section->property( 'slug' )
 		);
 	}
@@ -467,12 +467,12 @@ class WP_SDL_Options_Section_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function testId()
 	{
-		$this->assertEquals( 'test_conf_test_group_test_section', self::$section->id() );
+		$this->assertEquals( 'app_bar_section', self::$section->id() );
 	}
 
 	public function testField()
 	{
-		$field = self::$section->field( 'test_field' );
+		$field = self::$section->field( 'baz' );
 		$this->assertInstanceOf( 'WP_SDL_Options_Field_1_0', $field );
 	}
 }
@@ -489,13 +489,13 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		$config = new WP_SDL_Options_Config_1_0( 'test_conf', WP_SDL::support( '1.0' ) );
-		self::$field = $config->group('test_group')->section('test_section')->field('test_field');
+		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' ) );
+		self::$field = $config->group('foo')->section('bar')->field('baz');
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Field_1_0', self::$field );
 
 		$this->assertEquals(
-			'test_field',
+			'baz',
 			self::$field->property( 'slug' )
 		);
 	}
@@ -507,7 +507,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function testId()
 	{
-		$this->assertEquals( 'test_conf_test_group_test_field', self::$field->id() );
+		$this->assertEquals( 'app_baz_field', self::$field->id() );
 	}
 
 	public function testType()
@@ -602,7 +602,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		// expected markup
 		$this->expectOutputString(
-			'<input class="pretty" id="test_field" type="text" name="test_field" value="A short string"/>' .
+			'<input class="pretty" id="app_baz_field" type="text" name="app_baz_field" value="A short string"/>' .
 			'<p class="description">Field Description</p>'
 		);
 
