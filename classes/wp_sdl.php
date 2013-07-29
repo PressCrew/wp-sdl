@@ -164,12 +164,29 @@ interface WP_SDL_Compat
 }
 
 /**
+ * WP-SDL: auxiliary interface
+ *
+ * @internal
+ * @package wp-sdl
+ */
+interface WP_SDL_Auxiliary
+{
+	/**
+	 * Set/Get compat instance.
+	 *
+	 * @param WP_SDL_Compat $wpsdl
+	 * @return WP_SDL_Compat
+	 */
+	public function compat( WP_SDL_Compat $wpsdl = null );
+}
+
+/**
  * WP-SDL: helper interface
  *
  * @internal
  * @package wp-sdl\helpers
  */
-interface WP_SDL_Helper
+interface WP_SDL_Helper extends WP_SDL_Auxiliary
 {
-	public function compat( WP_SDL_Compat $wpsdl = null );
+	// nothing special yet
 }
