@@ -146,7 +146,7 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 				);
 		}
 	}
-
+	
 	/**
 	 * Set/Get parent instance.
 	 *
@@ -293,25 +293,11 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	private $save_mode = self::SAVE_MODE_ALL;
 
 	/**
-	 * Group instances stack.
+	 * Items instances stack.
 	 *
 	 * @var array
 	 */
-	private $groups = array();
-
-	/**
-	 * Section instances stack.
-	 *
-	 * @var array
-	 */
-	private $sections = array();
-
-	/**
-	 * Field instances stack.
-	 *
-	 * @var array
-	 */
-	private $fields = array();
+	private $items = array();
 	
 	/**
 	 */
@@ -354,6 +340,33 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		return $this;
 	}
 
+	final public function item( $slug, WP_SDL_Options_Object_1_0 $parent )
+	{
+		// get class of parent
+		$class = get_class( $parent );
+
+		// child exists for parent?
+		if ( false === isset( $this->items[ $class ][ $slug ] ) ) {
+			// nope, create new instance of class
+			$this->items[ $class ][ $slug ] = $parent->subitem( $slug );
+		}
+
+		// return it
+		return $this->items[ $class ][ $slug ];
+	}
+
+	final public function subitem( $slug )
+	{
+		// new group instance
+		$group = new WP_SDL_Options_Group_1_0( $slug, $this->helper() );
+		// set myself as parent
+		$group->parent( $this );
+		// add to my children
+		$this->children()->add( $slug, $group, 0 );
+		// return it
+		return $group;
+	}
+
 	/**
 	 * Return group instance for given slug.
 	 *
@@ -362,76 +375,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	 */
 	final public function group( $slug )
 	{
-		// child exists?
-		if ( false === isset( $this->groups[ $slug ] ) ) {
-			// nope, create new instance of class
-			$group = new WP_SDL_Options_Group_1_0( $slug, $this->helper() );
-			// set parent
-			$group->parent( $this );
-			// add to children
-			$this->children()->add( $slug, $group, 0 );
-			// add to groups
-			$this->groups[ $slug ] = $group;
-			// return it
-			return $group;
-		}
-
-		// return it
-		return $this->groups[ $slug ];
-	}
-
-	/**
-	 * Return section instance for given slug.
-	 *
-	 * @param string $slug
-	 * @param WP_SDL_Options_Group_1_0 $group
-	 * @return WP_SDL_Options_Section_1_0
-	 */
-	final public function section( $slug, WP_SDL_Options_Group_1_0 $group )
-	{
-		// child exists?
-		if ( false === isset( $this->sections[ $slug ] ) ) {
-			// nope, create new instance of class
-			$section = new WP_SDL_Options_Section_1_0( $slug, $this->helper() );
-			// set parent
-			$section->parent( $group );
-			// add to children
-			$group->children()->add( $slug, $section, 0 );
-			// add to sections
-			$this->sections[ $slug ] = $section;
-			// return it
-			return $section;
-		}
-
-		// return it
-		return $this->sections[ $slug ];
-	}
-
-	/**
-	 * Return field instance for given slug.
-	 *
-	 * @param string $slug
-	 * @param WP_SDL_Options_Section_1_0 $section
-	 * @return WP_SDL_Options_Field_1_0
-	 */
-	final public function field( $slug, WP_SDL_Options_Section_1_0 $section )
-	{
-		// child exists?
-		if ( false === isset( $this->fields[ $slug ] ) ) {
-			// nope, create new instance of class
-			$field = new WP_SDL_Options_Field_1_0( $slug, $this->helper() );
-			// set parent
-			$field->parent( $section );
-			// add to children
-			$section->children()->add( $slug, $field, 0 );
-			// add to sections
-			$this->fields[ $slug ] = $field;
-			// return it
-			return $field;
-		}
-
-		// return it
-		return $this->fields[ $slug ];
+		return $this->item( $slug, $this );
 	}
 
 	/**
@@ -492,6 +436,18 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Object_1_0
 		return $this->parent()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_group';
 	}
 
+	final public function subitem( $slug )
+	{
+		// new section instance
+		$section = new WP_SDL_Options_Section_1_0( $slug, $this->helper() );
+		// set myself as parent
+		$section->parent( $this );
+		// add to my children
+		$this->children()->add( $slug, $section, 0 );
+		// return it
+		return $section;
+	}
+
 	/**
 	 * Register all of this groups's settings.
 	 *
@@ -525,7 +481,7 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Object_1_0
 	final public function section( $slug )
 	{
 		// get section for slug
-		return $this->parent()->section( $slug, $this );
+		return $this->parent()->item( $slug, $this );
 	}
 }
 
@@ -536,6 +492,18 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 	final public function id()
 	{
 		return $this->parent()->parent()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_section';
+	}
+
+	final public function subitem( $slug )
+	{
+		// new field instance
+		$field = new WP_SDL_Options_Field_1_0( $slug, $this->helper() );
+		// set myself as parent
+		$field->parent( $this );
+		// add to my children
+		$this->children()->add( $slug, $field, 0 );
+		// return it
+		return $field;
 	}
 
 	/**
@@ -600,7 +568,7 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 	final public function field( $slug )
 	{
 		// set current section
-		return $this->parent()->parent()->field( $slug, $this );
+		return $this->parent()->parent()->item( $slug, $this );
 	}
 }
 
