@@ -24,7 +24,8 @@ class WP_SDL_1_0 implements WP_SDL_Compat
 	 */
 	public function __construct()
 	{
-		// all helpers require this base classs
+		// all helpers require these base classes
+		WP_SDL::load_class( 'WP_SDL_Auxiliary_1_0' );
 		WP_SDL::load_class( 'WP_SDL_Helper_1_0' );
 	}
 

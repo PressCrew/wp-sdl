@@ -69,8 +69,7 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 	}
 }
 
-
-abstract class WP_SDL_Options_Object_1_0
+abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 {
 	/**
 	 * The object instance's slug.
@@ -101,13 +100,6 @@ abstract class WP_SDL_Options_Object_1_0
 	private $priority = 10;
 
 	/**
-	 * WP_SDL compat instance.
-	 * 
-	 * @var WP_SDL_1_0
-	 */
-	private $sdl;
-
-	/**
 	 * The parent of this instance.
 	 *
 	 * @var WP_SDL_Options_Object_1_0
@@ -125,14 +117,12 @@ abstract class WP_SDL_Options_Object_1_0
 	 * Constructor.
 	 * 
 	 * @param string $slug
-	 * @param WP_SDL_1_0 $sdl
 	 * @param WP_SDL_Options_Object_1_0 $parent
 	 */
-	public function __construct( $slug, WP_SDL_1_0 $sdl, WP_SDL_Options_Object_1_0 $parent = null )
+	public function __construct( $slug, WP_SDL_Compat $compat )
 	{
 		$this->slug( $slug );
-		$this->sdl = $sdl;
-		$this->parent = $parent;
+		$this->compat( $compat );
 	}
 
 	/**
@@ -157,20 +147,25 @@ abstract class WP_SDL_Options_Object_1_0
 		}
 	}
 
-	protected function sdl()
+	/**
+	 * Set/Get parent instance.
+	 *
+	 * @param WP_SDL_Options_Object_1_0 $parent
+	 * @return WP_SDL_Options_Object_1_0
+	 */
+	public function parent( WP_SDL_Options_Object_1_0 $parent = null )
 	{
-		return $this->sdl;
-	}
+		if ( null !== $parent ) {
+			$this->parent = $parent;
+		}
 
-	public function parent()
-	{
 		return $this->parent;
 	}
 	
 	public function children()
 	{
 		if ( null === $this->children ) {
-			$this->children = $this->sdl->struct()->priority_map();
+			$this->children = $this->compat()->struct()->priority_map();
 		}
 
 		return $this->children;
@@ -194,7 +189,9 @@ abstract class WP_SDL_Options_Object_1_0
 			// does class exist for reals?
 			if ( class_exists( $class, false ) ) {
 				// create new instance of class
-				$instance = new $class( $slug, $this->sdl, $this );
+				$instance = new $class( $slug, $this->compat() );
+				// set parent
+				$instance->parent( $this );
 				// add to children
 				$this->children()->add( $slug, $instance, $this->priority );
 				// return it
@@ -432,7 +429,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 
 	final public function settings( $group_name )
 	{
-		$this->sdl()->options()->settings( $this->id(), $group_name );
+		$this->compat()->options()->settings( $this->id(), $group_name );
 	}
 
 	final public function validate( $data )
@@ -551,7 +548,7 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 	public function render()
 	{
 		/* @var $html_helper WP_SDL_Html_1_0 */
-		$html_helper = $this->sdl()->html();
+		$html_helper = $this->compat()->html();
 
 		// get the section description
 		$desc = $this->property( 'description' );
@@ -663,7 +660,7 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Object_1_0
 	public function render()
 	{
 		/* @var $html_helper WP_SDL_Html_1_0 */
-		$html_helper = $this->sdl()->html();
+		$html_helper = $this->compat()->html();
 
 		// params
 		$type = $this->property( 'type' );

@@ -201,7 +201,7 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 		require_once 'stubs/options_object_1_0.php';
 
 		self::$object = new STUB_Options_Object_1_0( 'test', WP_SDL::support( '1.0' ) );
-		
+
 		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', self::$object );
 
 		$this->assertEquals(
@@ -217,7 +217,8 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function testParent()
 	{
-		$child = new STUB_Options_Object_1_0( 'test_child', WP_SDL::support( '1.0' ), self::$object );
+		$child = new STUB_Options_Object_1_0( 'test_child', WP_SDL::support( '1.0' ) );
+		$child->parent( self::$object );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', $child->parent() );
 		$this->assertEquals( 'test', $child->parent()->property( 'slug' ) );

@@ -24,6 +24,7 @@ WP_SDL::init(
 	$wp_sdl_class_path,
 	array(
 		'WP_SDL_1_0' => '',
+		'WP_SDL_Auxiliary_1_0' => '',
 		'WP_SDL_Helper_1_0' => '',
 		'WP_SDL_Html_1_0' => 'html',
 		'WP_SDL_Options_1_0' => 'options',

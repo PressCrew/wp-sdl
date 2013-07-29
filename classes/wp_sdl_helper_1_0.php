@@ -10,31 +10,7 @@
  * @package wp-sdl\helpers
  * @version 1.0
  */
-abstract class WP_SDL_Helper_1_0 implements WP_SDL_Helper
+abstract class WP_SDL_Helper_1_0 extends WP_SDL_Auxiliary_1_0 implements WP_SDL_Helper
 {
-	/**
-	 * The instance which owns this helper
-	 *
-	 * @var WP_SDL_Compat
-	 */
-	private $compat;
-
-	/**
-	 * Set/Get compat instance.
-	 *
-	 * @param WP_SDL_Compat $wpsdl
-	 * @return WP_SDL_Compat
-	 */
-	final public function compat( WP_SDL_Compat $wpsdl = null )
-	{
-		if ( $wpsdl ) {
-			if ( null === $this->compat ) {
-				$this->compat = $wpsdl;
-			} else {
-				throw new OverflowException( __( 'Compat instance cannot be overwritten once set.', 'wp-sdl' ) );
-			}
-		}
-
-		return $this->compat;
-	}
+	// nothing special yet
 }

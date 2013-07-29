@@ -43,7 +43,7 @@ final class WP_SDL
 	 * @param array $class_names
 	 */
 	final static public function init( $class_path, $class_names )
-	{
+	{		
 		// loop all versions
 		foreach ( $class_names as $class_name => $class_ns ) {
 			// already registered?
