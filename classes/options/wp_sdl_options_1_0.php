@@ -327,13 +327,6 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	private $save_mode = self::SAVE_MODE_ALL;
 
 	/**
-	 * The current group instance.
-	 *
-	 * @var WP_SDL_Options_Group_1_0
-	 */
-	private $group;
-
-	/**
 	 */
 	final public function id()
 	{
@@ -383,10 +376,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	final public function group( $slug )
 	{
 		// set current section
-		$this->group = $this->get_child_auto( $slug, 'WP_SDL_Options_Group_1_0' );
-
-		// return it!
-		return $this->group;
+		return $this->get_child_auto( $slug, 'WP_SDL_Options_Group_1_0' );
 	}
 
 	/**
@@ -441,13 +431,6 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Object_1_0
 {
 	/**
-	 * The current section instance.
-	 *
-	 * @var WP_SDL_Options_Section_1_0
-	 */
-	private $section;
-
-	/**
 	 */
 	final public function id()
 	{
@@ -487,22 +470,12 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Object_1_0
 	final public function section( $slug )
 	{
 		// set current section
-		$this->section = $this->get_child_auto( $slug, 'WP_SDL_Options_Section_1_0' );
-
-		// return it!
-		return $this->section;
+		return $this->get_child_auto( $slug, 'WP_SDL_Options_Section_1_0' );
 	}
 }
 
 class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 {
-	/**
-	 * The current field instance.
-	 *
-	 * @var WP_SDL_Options_Field_1_0
-	 */
-	private $field;
-
 	/**
 	 */
 	final public function id()
@@ -572,10 +545,7 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 	final public function field( $slug )
 	{
 		// set current section
-		$this->field = $this->get_child_auto( $slug, 'WP_SDL_Options_Field_1_0' );
-
-		// return it!
-		return $this->field;
+		return $this->get_child_auto( $slug, 'WP_SDL_Options_Field_1_0' );
 	}
 }
 
