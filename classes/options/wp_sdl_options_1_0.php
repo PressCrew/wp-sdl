@@ -172,40 +172,6 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 	}
 
 	/**
-	 * Get child instance, create new one if necessary.
-	 *
-	 * @param string $slug
-	 * @param string $class A valid PHP class name.
-	 * @return WP_SDL_Options_Object_1_0
-	 * @throws InvalidArgumentException
-	 */
-	protected function get_child_auto( $slug, $class )
-	{
-		// child exists?
-		if ( true === $this->children()->exists( $slug ) ) {
-			// yep, return it
-			return $this->children()->get( $slug );
-		} else {
-			// does class exist for reals?
-			if ( class_exists( $class, false ) ) {
-				// create new instance of class
-				$instance = new $class( $slug, $this->helper() );
-				// set parent
-				$instance->parent( $this );
-				// add to children
-				$this->children()->add( $slug, $instance, $this->priority );
-				// return it
-				return $instance;
-			} else {
-				// class doesn't exist, puke
-				throw new InvalidArgumentException(
-					sprintf( __( 'The "%s" class does not exist.', 'wp-sdl' ), $class )
-				);
-			}
-		}
-	}
-
-	/**
 	 * Set the slug property.
 	 *
 	 * Slug must start with a lowercase letter followed by only lowercase
@@ -327,6 +293,27 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	private $save_mode = self::SAVE_MODE_ALL;
 
 	/**
+	 * Group instances stack.
+	 *
+	 * @var array
+	 */
+	private $groups = array();
+
+	/**
+	 * Section instances stack.
+	 *
+	 * @var array
+	 */
+	private $sections = array();
+
+	/**
+	 * Field instances stack.
+	 *
+	 * @var array
+	 */
+	private $fields = array();
+	
+	/**
 	 */
 	final public function id()
 	{
@@ -375,8 +362,76 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	 */
 	final public function group( $slug )
 	{
-		// set current section
-		return $this->get_child_auto( $slug, 'WP_SDL_Options_Group_1_0' );
+		// child exists?
+		if ( false === isset( $this->groups[ $slug ] ) ) {
+			// nope, create new instance of class
+			$group = new WP_SDL_Options_Group_1_0( $slug, $this->helper() );
+			// set parent
+			$group->parent( $this );
+			// add to children
+			$this->children()->add( $slug, $group, 0 );
+			// add to groups
+			$this->groups[ $slug ] = $group;
+			// return it
+			return $group;
+		}
+
+		// return it
+		return $this->groups[ $slug ];
+	}
+
+	/**
+	 * Return section instance for given slug.
+	 *
+	 * @param string $slug
+	 * @param WP_SDL_Options_Group_1_0 $group
+	 * @return WP_SDL_Options_Section_1_0
+	 */
+	final public function section( $slug, WP_SDL_Options_Group_1_0 $group )
+	{
+		// child exists?
+		if ( false === isset( $this->sections[ $slug ] ) ) {
+			// nope, create new instance of class
+			$section = new WP_SDL_Options_Section_1_0( $slug, $this->helper() );
+			// set parent
+			$section->parent( $group );
+			// add to children
+			$group->children()->add( $slug, $section, 0 );
+			// add to sections
+			$this->sections[ $slug ] = $section;
+			// return it
+			return $section;
+		}
+
+		// return it
+		return $this->sections[ $slug ];
+	}
+
+	/**
+	 * Return field instance for given slug.
+	 *
+	 * @param string $slug
+	 * @param WP_SDL_Options_Section_1_0 $section
+	 * @return WP_SDL_Options_Field_1_0
+	 */
+	final public function field( $slug, WP_SDL_Options_Section_1_0 $section )
+	{
+		// child exists?
+		if ( false === isset( $this->fields[ $slug ] ) ) {
+			// nope, create new instance of class
+			$field = new WP_SDL_Options_Field_1_0( $slug, $this->helper() );
+			// set parent
+			$field->parent( $section );
+			// add to children
+			$section->children()->add( $slug, $field, 0 );
+			// add to sections
+			$this->fields[ $slug ] = $field;
+			// return it
+			return $field;
+		}
+
+		// return it
+		return $this->fields[ $slug ];
 	}
 
 	/**
@@ -469,8 +524,8 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Object_1_0
 	 */
 	final public function section( $slug )
 	{
-		// set current section
-		return $this->get_child_auto( $slug, 'WP_SDL_Options_Section_1_0' );
+		// get section for slug
+		return $this->parent()->section( $slug, $this );
 	}
 }
 
@@ -545,7 +600,7 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 	final public function field( $slug )
 	{
 		// set current section
-		return $this->get_child_auto( $slug, 'WP_SDL_Options_Field_1_0' );
+		return $this->parent()->parent()->field( $slug, $this );
 	}
 }
 

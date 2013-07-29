@@ -12,7 +12,7 @@
  */
 class STUB_Options_Object_1_0 extends WP_SDL_Options_Object_1_0
 {
-	private $subitem;
+	private $items = array();
 
 	/**
 	 * @return string
@@ -23,12 +23,28 @@ class STUB_Options_Object_1_0 extends WP_SDL_Options_Object_1_0
 	}
 
 	/**
-	 * @return STUB_Options_Object_1_0
+	 * Return group instance for given slug.
+	 *
+	 * @param string $slug
+	 * @return WP_SDL_Options_Group_1_0
 	 */
-	final public function subitem( $slug )
+	public function subitem( $slug )
 	{
-		$this->subitem = $this->get_child_auto( $slug, 'STUB_Options_Object_1_0' );
-		
-		return $this->subitem;
+		// child exists?
+		if ( false === isset( $this->items[ $slug ] ) ) {
+			// create new instance of class
+			$item = new STUB_Options_Object_1_0( $slug, $this->helper() );
+			// set parent
+			$item->parent( $this );
+			// add to children
+			$this->children()->add( $slug, $item, 0 );
+			// add to items
+			$this->items[ $slug ] = $item;
+			// return it
+			return $item;
+		}
+
+		// return it
+		return $this->items[ $slug ];
 	}
 }

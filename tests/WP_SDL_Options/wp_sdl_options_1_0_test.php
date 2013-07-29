@@ -229,8 +229,11 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertTrue( self::$object->children()->is_empty() );
 		$this->assertEquals( 0, self::$object->children()->count() );
 
-		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', self::$object->subitem( 'obj1' ) );
-		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', self::$object->subitem( 'obj2' ) );
+		$new_obj1 = self::$object->subitem( 'obj1' );
+		$new_obj2 = self::$object->subitem( 'obj2' );
+
+		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', $new_obj1 );
+		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', $new_obj2 );
 
 		$this->assertFalse( self::$object->children()->is_empty() );
 		$this->assertEquals( 2, self::$object->children()->count() );
