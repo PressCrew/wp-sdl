@@ -164,12 +164,12 @@ interface WP_SDL_Compat
 }
 
 /**
- * WP-SDL: auxiliary interface
+ * WP-SDL: helper interface
  *
  * @internal
- * @package wp-sdl
+ * @package wp-sdl\helpers
  */
-interface WP_SDL_Auxiliary
+interface WP_SDL_Helper
 {
 	/**
 	 * Set/Get compat instance.
@@ -181,12 +181,18 @@ interface WP_SDL_Auxiliary
 }
 
 /**
- * WP-SDL: helper interface
+ * WP-SDL: auxiliary interface
  *
  * @internal
- * @package wp-sdl\helpers
+ * @package wp-sdl
  */
-interface WP_SDL_Helper extends WP_SDL_Auxiliary
+interface WP_SDL_Auxiliary
 {
-	// nothing special yet
+	/**
+	 * Set/Get helper instance.
+	 *
+	 * @param WP_SDL_Helper $helper
+	 * @return WP_SDL_Helper
+	 */
+	public function helper( WP_SDL_Helper $helper = null );
 }

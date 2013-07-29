@@ -13,28 +13,28 @@
 abstract class WP_SDL_Auxiliary_1_0 implements WP_SDL_Auxiliary
 {
 	/**
-	 * The compat which owns this instance
+	 * The helper which owns this instance
 	 *
-	 * @var WP_SDL_Compat
+	 * @var WP_SDL_Helper
 	 */
-	private $compat;
+	private $helper;
 
 	/**
-	 * Set/Get compat instance.
+	 * Set/Get helper instance.
 	 *
-	 * @param WP_SDL_Compat $wpsdl
-	 * @return WP_SDL_Compat
+	 * @param WP_SDL_Helper $helper
+	 * @return WP_SDL_Helper
 	 */
-	final public function compat( WP_SDL_Compat $wpsdl = null )
+	final public function helper( WP_SDL_Helper $helper = null )
 	{
-		if ( $wpsdl ) {
-			if ( null === $this->compat ) {
-				$this->compat = $wpsdl;
+		if ( $helper ) {
+			if ( null === $this->helper ) {
+				$this->helper = $helper;
 			} else {
-				throw new OverflowException( __( 'Compat instance cannot be overwritten once set.', 'wp-sdl' ) );
+				throw new OverflowException( __( 'Helper instance cannot be overwritten once set.', 'wp-sdl' ) );
 			}
 		}
 
-		return $this->compat;
+		return $this->helper;
 	}
 }

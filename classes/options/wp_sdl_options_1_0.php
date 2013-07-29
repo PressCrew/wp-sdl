@@ -37,7 +37,7 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 		// config exists yet?
 		if ( false === isset( $this->configs[ $name ] ) ) {
 			// create it
-			$this->configs[ $name ] = new WP_SDL_Options_Config_1_0( $name, $this->compat() );
+			$this->configs[ $name ] = new WP_SDL_Options_Config_1_0( $name, $this );
 		}
 		
 		// return it!
@@ -117,12 +117,12 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 	 * Constructor.
 	 * 
 	 * @param string $slug
-	 * @param WP_SDL_Options_Object_1_0 $parent
+	 * @param WP_SDL_Helper $helper
 	 */
-	public function __construct( $slug, WP_SDL_Compat $compat )
+	public function __construct( $slug, WP_SDL_Helper $helper )
 	{
 		$this->slug( $slug );
-		$this->compat( $compat );
+		$this->helper( $helper );
 	}
 
 	/**
@@ -165,7 +165,7 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 	public function children()
 	{
 		if ( null === $this->children ) {
-			$this->children = $this->compat()->struct()->priority_map();
+			$this->children = $this->helper()->compat()->struct()->priority_map();
 		}
 
 		return $this->children;
@@ -189,7 +189,7 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 			// does class exist for reals?
 			if ( class_exists( $class, false ) ) {
 				// create new instance of class
-				$instance = new $class( $slug, $this->compat() );
+				$instance = new $class( $slug, $this->helper() );
 				// set parent
 				$instance->parent( $this );
 				// add to children
@@ -419,7 +419,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 
 	final public function settings( $group_name )
 	{
-		$this->compat()->options()->settings( $this->id(), $group_name );
+		$this->helper()->settings( $this->id(), $group_name );
 	}
 
 	final public function validate( $data )
@@ -521,7 +521,7 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 	public function render()
 	{
 		/* @var $html_helper WP_SDL_Html_1_0 */
-		$html_helper = $this->compat()->html();
+		$html_helper = $this->helper()->compat()->html();
 
 		// get the section description
 		$desc = $this->property( 'description' );
@@ -630,7 +630,7 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Object_1_0
 	public function render()
 	{
 		/* @var $html_helper WP_SDL_Html_1_0 */
-		$html_helper = $this->compat()->html();
+		$html_helper = $this->helper()->compat()->html();
 
 		// params
 		$name = $this->id();

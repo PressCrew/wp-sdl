@@ -200,7 +200,7 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 		// load stub
 		require_once 'stubs/options_object_1_0.php';
 
-		self::$object = new STUB_Options_Object_1_0( 'app', WP_SDL::support( '1.0' ) );
+		self::$object = new STUB_Options_Object_1_0( 'app', WP_SDL::support( '1.0' )->options() );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', self::$object );
 
@@ -217,7 +217,7 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function testParent()
 	{
-		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' ) );
+		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' )->options() );
 		$child->parent( self::$object );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', $child->parent() );
@@ -266,7 +266,7 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 	public function testSlugInvalid()
 	{
 		$this->setExpectedException( 'InvalidArgumentException' );
-		return new STUB_Options_Object_1_0( 'bad-slug', WP_SDL::support( '1.0' ) );
+		return new STUB_Options_Object_1_0( 'bad-slug', WP_SDL::support( '1.0' )->options() );
 	}
 
 	public function testTitle()
@@ -325,7 +325,7 @@ class WP_SDL_Options_Config_1_0_Test extends PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		/* @var WP_SDL_Options_Config_1_0 */
-		self::$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' ) );
+		self::$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' )->options() );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Config_1_0', self::$config );
 
@@ -392,7 +392,7 @@ class WP_SDL_Options_Group_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' ) );
+		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' )->options() );
 		self::$group = $config->group( 'foo' );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Group_1_0', self::$group );
@@ -433,7 +433,7 @@ class WP_SDL_Options_Section_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' ) );
+		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' )->options() );
 		self::$section = $config->group('foo')->section('bar');
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Section_1_0', self::$section );
@@ -489,7 +489,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' ) );
+		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' )->options() );
 		self::$field = $config->group('foo')->section('bar')->field('baz');
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Field_1_0', self::$field );
