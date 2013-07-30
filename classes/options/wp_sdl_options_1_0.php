@@ -93,20 +93,6 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 	private $description;
 
 	/**
-	 * Priority.
-	 *
-	 * @var integer
-	 */
-	private $priority = 10;
-
-	/**
-	 * The parent of this instance.
-	 *
-	 * @var WP_SDL_Options_Object_1_0
-	 */
-	private $parent;
-
-	/**
 	 * Children belonging to this instance.
 	 *
 	 * @var WP_SDL_Struct_PriorityMap_1_0
@@ -136,7 +122,6 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 	{
 		switch ( $name ) {
 			case 'description':
-			case 'priority':
 			case 'slug':
 			case 'title':
 				return $this->$name;
@@ -146,22 +131,46 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 				);
 		}
 	}
-	
+
 	/**
-	 * Set/Get parent instance.
+	 * Get/Set a child object.
 	 *
-	 * @param WP_SDL_Options_Object_1_0 $parent
+	 * @param string $slug
+	 * @param WP_SDL_Options_Object_1_0 $object
 	 * @return WP_SDL_Options_Object_1_0
+	 * @throws InvalidArgumentException
 	 */
-	public function parent( WP_SDL_Options_Object_1_0 $parent = null )
+	public function child( $slug, WP_SDL_Options_Object_1_0 $object = null )
 	{
-		if ( null !== $parent ) {
-			$this->parent = $parent;
+		// get an object?
+		if ( $object ) {
+			// yep, we are setting... make sure slugs match
+			if ( $object->property( 'slug' ) === $slug ) {
+				// set myself as object's parent
+				$object->parent( $this );
+				// add/update to my children
+				$this->children()->add(
+					$object->property( 'slug' ),
+					$object,
+					$object->property( 'priority' ),
+					false
+				);
+			} else {
+				throw new InvalidArgumentException(
+					__( 'The given slug does not match the object slug', 'wp-sdl' )
+				);
+			}
 		}
 
-		return $this->parent;
+		// return it
+		return $this->children()->get( $slug );
 	}
-	
+
+	/**
+	 * Return child stack.
+	 *
+	 * @return WP_SDL_Struct_PriorityMap_1_0
+	 */
 	public function children()
 	{
 		if ( null === $this->children ) {
@@ -234,33 +243,6 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 	}
 
 	/**
-	 * Set the priority property.
-	 *
-	 * @param integer $priority
-	 * @return WP_SDL_Options_Object_1_0
-	 */
-	final public function priority( $priority )
-	{
-		// set attributes
-		if ( is_numeric( $priority ) ) {
-			// update priority property
-			$this->priority = (integer) $priority;
-			// have a parent?
-			if ( null !== $this->parent ) {
-				// update priority in parent for sorting
-				$this->parent->children()->priority_update( $this->slug, $this->priority );
-			}
-		} else {
-			throw new InvalidArgumentException(
-				__( 'The $priority parameter must be a number.', 'wp-sdl' )
-			);
-		}
-
-		// maintain the chain
-		return $this;
-	}
-
-	/**
 	 * Return unique object id.
 	 * 
 	 * @return string
@@ -293,7 +275,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	private $save_mode = self::SAVE_MODE_ALL;
 
 	/**
-	 * Items instances stack.
+	 * Item instances stack.
 	 *
 	 * @var array
 	 */
@@ -327,6 +309,12 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		return $this;
 	}
 
+	/**
+	 * Register an object with the WP Settings API.
+	 *
+	 * @param WP_SDL_Options_Object_1_0 $object
+	 * @return WP_SDL_Options_Config_1_0
+	 */
 	public function register_setting( WP_SDL_Options_Object_1_0 $object )
 	{
 		// register the setting with wp
@@ -340,31 +328,46 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		return $this;
 	}
 
-	final public function item( $slug, WP_SDL_Options_Object_1_0 $parent )
+	/**
+	 * Item factory method.
+	 *
+	 * @param string $type Can be 'group', 'section', or 'field'
+	 * @param string $slug
+	 * @param WP_SDL_Options_Object_1_0 $parent
+	 * @return WP_SDL_Options_Item_1_0
+	 * @throws InvalidArgumentException
+	 */
+	public function item( $type, $slug, WP_SDL_Options_Object_1_0 $parent = null )
 	{
-		// get class of parent
-		$class = get_class( $parent );
-
 		// child exists for parent?
-		if ( false === isset( $this->items[ $class ][ $slug ] ) ) {
-			// nope, create new instance of class
-			$this->items[ $class ][ $slug ] = $parent->subitem( $slug );
+		if ( false === isset( $this->items[ $type ][ $slug ] ) ) {
+			// determing class to create
+			switch( $type ) {
+				case 'group':
+					$child_class = 'WP_SDL_Options_Group_1_0';
+					break;
+				case 'section':
+					$child_class = 'WP_SDL_Options_Section_1_0';
+					break;
+				case 'field':
+					$child_class = 'WP_SDL_Options_Field_1_0';
+					break;
+				default:
+					throw new InvalidArgumentException( __( 'Invalid type', 'wp-sdl' ) );
+			}
+			// create new instance of class
+			$item = new $child_class( $slug, $this->helper() );
+			// add to items stack
+			$this->items[ $type ][ $slug ] = $item;
+			// add to parent?
+			if ( $parent ) {
+				// do it
+				$parent->child( $slug, $item );
+			}
 		}
 
 		// return it
-		return $this->items[ $class ][ $slug ];
-	}
-
-	final public function subitem( $slug )
-	{
-		// new group instance
-		$group = new WP_SDL_Options_Group_1_0( $slug, $this->helper() );
-		// set myself as parent
-		$group->parent( $this );
-		// add to my children
-		$this->children()->add( $slug, $group, 0 );
-		// return it
-		return $group;
+		return $this->items[ $type ][ $slug ];
 	}
 
 	/**
@@ -375,7 +378,31 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	 */
 	final public function group( $slug )
 	{
-		return $this->item( $slug, $this );
+		return $this->item( 'group', $slug, $this );
+	}
+
+	/**
+	 * Return section instance for given slug.
+	 *
+	 * @param string $slug
+	 * @param WP_SDL_Options_Group_1_0 $group
+	 * @return WP_SDL_Options_Section_1_0
+	 */
+	final public function section( $slug, WP_SDL_Options_Group_1_0 $group = null )
+	{
+		return $this->item( 'section', $slug, $group );
+	}
+
+	/**
+	 * Return field instance for given slug.
+	 *
+	 * @param string $slug
+	 * @param WP_SDL_Options_Section_1_0 $section
+	 * @return WP_SDL_Options_Field_1_0
+	 */
+	final public function field( $slug, WP_SDL_Options_Section_1_0 $section = null )
+	{
+		return $this->item( 'field', $slug, $section );
 	}
 
 	/**
@@ -416,6 +443,11 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		return ( $mode === $this->save_mode );
 	}
 
+	/**
+	 * Generate settings form for a group (WordPress API).
+	 *
+	 * @param string $group_name
+	 */
 	final public function settings( $group_name )
 	{
 		$this->helper()->settings( $this->id(), $group_name );
@@ -427,25 +459,90 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	}
 }
 
-class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Object_1_0
+/**
+ * Item
+ */
+abstract class WP_SDL_Options_Item_1_0 extends WP_SDL_Options_Object_1_0
+{
+	/**
+	 * The parent of this instance.
+	 *
+	 * @var WP_SDL_Options_Object_1_0
+	 */
+	private $parent;
+
+	/**
+	 * Priority.
+	 *
+	 * @var integer
+	 */
+	private $priority = 10;
+
+	/**
+	 */
+	public function property( $name )
+	{
+		switch ( $name ) {
+			case 'priority':
+				return $this->$name;
+			default:
+				return parent::property( $name );
+		}
+	}
+
+	/**
+	 * Set/Get parent instance.
+	 *
+	 * @param WP_SDL_Options_Object_1_0 $parent
+	 * @return WP_SDL_Options_Object_1_0
+	 */
+	public function parent( WP_SDL_Options_Object_1_0 $parent = null )
+	{
+		if ( null !== $parent ) {
+			$this->parent = $parent;
+		}
+
+		return $this->parent;
+	}
+
+	/**
+	 * Set the priority property.
+	 *
+	 * @param integer $priority
+	 * @return WP_SDL_Options_Object_1_0
+	 */
+	final public function priority( $priority )
+	{
+		// set attributes
+		if ( is_numeric( $priority ) ) {
+			// update priority property
+			$this->priority = (integer) $priority;
+			// have a parent?
+			if ( null !== $this->parent ) {
+				// update priority in parent for sorting
+				$this->parent->children()->priority_update( $this->property( 'slug' ), $this->priority );
+			}
+		} else {
+			throw new InvalidArgumentException(
+				__( 'The $priority parameter must be a number.', 'wp-sdl' )
+			);
+		}
+
+		// maintain the chain
+		return $this;
+	}
+}
+
+/**
+ * Group
+ */
+class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Item_1_0
 {
 	/**
 	 */
 	final public function id()
 	{
 		return $this->parent()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_group';
-	}
-
-	final public function subitem( $slug )
-	{
-		// new section instance
-		$section = new WP_SDL_Options_Section_1_0( $slug, $this->helper() );
-		// set myself as parent
-		$section->parent( $this );
-		// add to my children
-		$this->children()->add( $slug, $section, 0 );
-		// return it
-		return $section;
 	}
 
 	/**
@@ -481,11 +578,14 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Object_1_0
 	final public function section( $slug )
 	{
 		// get section for slug
-		return $this->parent()->item( $slug, $this );
+		return $this->parent()->section( $slug, $this );
 	}
 }
 
-class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
+/**
+ * Section
+ */
+class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Item_1_0
 {
 	/**
 	 */
@@ -494,20 +594,8 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 		return $this->parent()->parent()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_section';
 	}
 
-	final public function subitem( $slug )
-	{
-		// new field instance
-		$field = new WP_SDL_Options_Field_1_0( $slug, $this->helper() );
-		// set myself as parent
-		$field->parent( $this );
-		// add to my children
-		$this->children()->add( $slug, $field, 0 );
-		// return it
-		return $field;
-	}
-
 	/**
-	 * Register all of this section's settings.
+	 * Register all of this section's settings (WordPress API).
 	 * 
 	 * @param WP_SDL_Options_Config_1_0 $config
 	 * @return WP_SDL_Options_Section_1_0
@@ -568,11 +656,14 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Object_1_0
 	final public function field( $slug )
 	{
 		// set current section
-		return $this->parent()->parent()->item( $slug, $this );
+		return $this->parent()->parent()->field( $slug, $this );
 	}
 }
 
-class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Object_1_0
+/**
+ * Field
+ */
+class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 {
 	/**
 	 * The field type.
@@ -627,7 +718,7 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Object_1_0
 	}
 
 	/**
-	 * Register all of this field's settings.
+	 * Register all of this field's settings (WordPress API).
 	 *
 	 * @param WP_SDL_Options_Config_1_0 $config
 	 * @return WP_SDL_Options_Field_1_0

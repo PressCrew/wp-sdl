@@ -10,7 +10,7 @@
  * @package wp-sdl\helpers
  * @version 1.0
  */
-class STUB_Options_Object_1_0 extends WP_SDL_Options_Object_1_0
+class STUB_Options_Object_1_0 extends WP_SDL_Options_Item_1_0
 {
 	private $items = array();
 
@@ -23,28 +23,29 @@ class STUB_Options_Object_1_0 extends WP_SDL_Options_Object_1_0
 	}
 
 	/**
-	 * Return group instance for given slug.
-	 *
-	 * @param string $slug
-	 * @return WP_SDL_Options_Group_1_0
+	 * @return STUB_Options_Object_1_0
 	 */
-	public function subitem( $slug )
+	public function stub( $slug )
 	{
-		// child exists?
+		return $this->item( $slug, $this );
+	}
+
+	/**
+	 * @return STUB_Options_Object_1_0
+	 */
+	protected function item( $slug, WP_SDL_Options_Object_1_0 $parent )
+	{
 		if ( false === isset( $this->items[ $slug ] ) ) {
 			// create new instance of class
 			$item = new STUB_Options_Object_1_0( $slug, $this->helper() );
-			// set parent
-			$item->parent( $this );
-			// add to children
-			$this->children()->add( $slug, $item, 0 );
+			// add to parent
+			$parent->child( $slug, $item );
 			// add to items
 			$this->items[ $slug ] = $item;
-			// return it
-			return $item;
 		}
 
 		// return it
 		return $this->items[ $slug ];
 	}
+
 }

@@ -224,24 +224,35 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertEquals( 'app', $child->parent()->property( 'slug' ) );
 	}
 
+	public function testChild()
+	{
+		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' )->options() );
+		$ret = self::$object->child( 'my_child', $child );
+		$this->assertInstanceOf( 'STUB_Options_Object_1_0', $ret );
+		$this->assertEquals( 'my_child', $ret->property( 'slug' ) );
+	}
+
+	public function testChildMismatchSlug()
+	{
+		$this->setExpectedException( 'InvalidArgumentException' );
+		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' )->options() );
+		self::$object->child( 'not_my_child', $child );
+	}
+
 	public function testChildStack()
 	{
 		$this->assertTrue( self::$object->children()->is_empty() );
 		$this->assertEquals( 0, self::$object->children()->count() );
 
-		$new_obj1 = self::$object->subitem( 'obj1' );
-		$new_obj2 = self::$object->subitem( 'obj2' );
+		$obj1 = self::$object->stub( 'obj1' );
+		$obj2 = self::$object->stub( 'obj2' );
 
-		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', $new_obj1 );
-		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', $new_obj2 );
+		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', $obj1 );
+		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', $obj2 );
 
 		$this->assertFalse( self::$object->children()->is_empty() );
 		$this->assertEquals( 2, self::$object->children()->count() );
 		
-		// fetch objects
-		$obj1 = self::$object->subitem( 'obj1' );
-		$obj2 = self::$object->subitem( 'obj2' );
-
 		// check slugs
 		$this->assertEquals( 'obj1', $obj1->property( 'slug' ) );
 		$this->assertEquals( 'obj2', $obj2->property( 'slug' ) );
@@ -348,10 +359,63 @@ class WP_SDL_Options_Config_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertEquals( 'app_config', self::$config->id() );
 	}
 
+	public function testItem()
+	{
+		// group type
+		$group = self::$config->item( 'group', 'foo', self::$config );
+		$this->assertInstanceOf( 'WP_SDL_Options_Group_1_0', $group );
+		$this->assertEquals( $group, self::$config->item( 'group', 'foo' ) );
+
+		// section type
+		$section = self::$config->item( 'section', 'bar', $group );
+		$this->assertInstanceOf( 'WP_SDL_Options_Section_1_0', $section );
+		$this->assertEquals( $section, self::$config->item( 'section', 'bar' ) );
+
+		// field type
+		$field = self::$config->item( 'field', 'baz', $section );
+		$this->assertInstanceOf( 'WP_SDL_Options_Field_1_0', $field );
+		$this->assertEquals( $field, self::$config->item( 'field', 'baz' ) );
+	}
+
+	public function testItemInvArg()
+	{
+		$this->setExpectedException( 'InvalidArgumentException' );
+		self::$config->item( 'invalid-type', 'foo', self::$config );
+	}
+
 	public function testGroup()
 	{
-		$group = self::$config->group( 'colors' );
+		// create obj
+		$group = self::$config->group( 'design' );
+		// new
 		$this->assertInstanceOf( 'WP_SDL_Options_Group_1_0', $group );
+		// existing
+		$this->assertEquals( $group, self::$config->group( 'design' ) );
+	}
+
+	public function testSection()
+	{
+		// create objects
+		$group = self::$config->group( 'design' );
+		$section = self::$config->section( 'colors', $group );
+
+		// new
+		$this->assertInstanceOf( 'WP_SDL_Options_Section_1_0', $section );
+		// existing
+		$this->assertEquals( $section, self::$config->section( 'colors' ) );
+	}
+
+	public function testField()
+	{
+		// create objects
+		$group = self::$config->group( 'design' );
+		$section = self::$config->section( 'colors', $group );
+		$field = self::$config->field( 'pretty', $section );
+
+		// new
+		$this->assertInstanceOf( 'WP_SDL_Options_Field_1_0', $field );
+		// existing
+		$this->assertEquals( $field, self::$config->field( 'pretty' ) );
 	}
 
 	public function testSaveMode()
