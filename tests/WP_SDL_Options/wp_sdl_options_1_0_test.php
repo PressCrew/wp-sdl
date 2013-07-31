@@ -418,6 +418,35 @@ class WP_SDL_Options_Config_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertEquals( $field, self::$config->field( 'pretty' ) );
 	}
 
+	public function testFormMode()
+	{
+		// make sure constants are correct
+		$this->assertEquals( 'default', WP_SDL_Options_Config_1_0::FORM_MODE_DEFAULT );
+		$this->assertEquals( 'settings', WP_SDL_Options_Config_1_0::FORM_MODE_SETTINGS );
+		$this->assertEquals( 'theme', WP_SDL_Options_Config_1_0::FORM_MODE_THEME );
+
+		// default must be all
+		$this->assertTrue( self::$config->form_mode_is( 'default' ) );
+
+		// check mode NOT is
+		$this->assertFalse( self::$config->form_mode_is( 'settings' ) );
+		$this->assertFalse( self::$config->form_mode_is( 'theme' ) );
+
+		// set and check
+		self::$config->form_mode( 'theme' );
+		$this->assertTrue( self::$config->form_mode_is( 'theme' ) );
+		self::$config->form_mode( 'settings' );
+		$this->assertTrue( self::$config->form_mode_is( 'settings' ) );
+		self::$config->form_mode( 'default' );
+		$this->assertTrue( self::$config->form_mode_is( 'default' ) );
+	}
+
+	public function testFormModeException()
+	{
+		$this->setExpectedException( 'InvalidArgumentException' );
+		self::$config->form_mode( 'foo' );
+	}
+
 	public function testSaveMode()
 	{
 		// make sure constants are correct

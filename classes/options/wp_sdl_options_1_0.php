@@ -253,6 +253,21 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 {
 	/**
+	 * Form mode "default"
+	 */
+	const FORM_MODE_DEFAULT = 'default';
+
+	/**
+	 * Form mode "settings"
+	 */
+	const FORM_MODE_SETTINGS = 'settings';
+
+	/**
+	 * Form mode "theme"
+	 */
+	const FORM_MODE_THEME = 'theme';
+	
+	/**
 	 * Save mode "all"
 	 */
 	const SAVE_MODE_ALL = 'all';
@@ -266,6 +281,13 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	 * Save mode "section"
 	 */
 	const SAVE_MODE_SECTION = 'section';
+
+	/**
+	 * The current form mode.
+	 *
+	 * @var string
+	 */
+	private $form_mode = self::FORM_MODE_DEFAULT;
 
 	/**
 	 * The current save mode.
@@ -441,6 +463,44 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	final public function save_mode_is( $mode )
 	{
 		return ( $mode === $this->save_mode );
+	}
+
+	/**
+	 * Set the form mode for this config.
+	 *
+	 * @param string $mode
+	 * @return WP_SDL_Options_Config_1_0
+	 * @throws InvalidArgumentException
+	 */
+	final public function form_mode( $mode )
+	{
+		// make sure its valid
+		switch ( $mode ) {
+			case self::FORM_MODE_DEFAULT:
+			case self::FORM_MODE_SETTINGS:
+			case self::FORM_MODE_THEME:
+				// set it
+				$this->form_mode = $mode;
+				break;
+			default:
+				throw new InvalidArgumentException(
+					sprintf( __( 'The "%s" form mode is not valid.', 'wp-sdl' ) , $mode )
+				);
+		}
+		
+		// maintain the chain
+		return $this;
+	}
+
+	/**
+	 * Returns true if given mode matches current form mode.
+	 *
+	 * @param string $mode
+	 * @return boolean
+	 */
+	final public function form_mode_is( $mode )
+	{
+		return ( $mode === $this->form_mode );
 	}
 
 	/**
