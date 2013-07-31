@@ -253,19 +253,19 @@ abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
 class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 {
 	/**
-	 * Form mode "default"
+	 * Form mode "api"
 	 */
-	const FORM_MODE_DEFAULT = 'default';
-
-	/**
-	 * Form mode "settings"
-	 */
-	const FORM_MODE_SETTINGS = 'settings';
+	const FORM_MODE_API = 'api';
 
 	/**
 	 * Form mode "theme"
 	 */
 	const FORM_MODE_THEME = 'theme';
+
+	/**
+	 * Form mode "custom"
+	 */
+	const FORM_MODE_CUSTOM = 'custom';
 	
 	/**
 	 * Save mode "all"
@@ -287,7 +287,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	 *
 	 * @var string
 	 */
-	private $form_mode = self::FORM_MODE_DEFAULT;
+	private $form_mode = self::FORM_MODE_API;
 
 	/**
 	 * The current save mode.
@@ -476,9 +476,9 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	{
 		// make sure its valid
 		switch ( $mode ) {
-			case self::FORM_MODE_DEFAULT:
-			case self::FORM_MODE_SETTINGS:
+			case self::FORM_MODE_API:
 			case self::FORM_MODE_THEME:
+			case self::FORM_MODE_CUSTOM:
 				// set it
 				$this->form_mode = $mode;
 				break;

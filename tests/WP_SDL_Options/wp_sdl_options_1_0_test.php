@@ -421,24 +421,25 @@ class WP_SDL_Options_Config_1_0_Test extends PHPUnit_Framework_TestCase
 	public function testFormMode()
 	{
 		// make sure constants are correct
-		$this->assertEquals( 'default', WP_SDL_Options_Config_1_0::FORM_MODE_DEFAULT );
-		$this->assertEquals( 'settings', WP_SDL_Options_Config_1_0::FORM_MODE_SETTINGS );
+		$this->assertEquals( 'api', WP_SDL_Options_Config_1_0::FORM_MODE_API );
 		$this->assertEquals( 'theme', WP_SDL_Options_Config_1_0::FORM_MODE_THEME );
+		$this->assertEquals( 'custom', WP_SDL_Options_Config_1_0::FORM_MODE_CUSTOM );
 
 		// default must be all
-		$this->assertTrue( self::$config->form_mode_is( 'default' ) );
+		$this->assertTrue( self::$config->form_mode_is( 'api' ) );
 
 		// check mode NOT is
-		$this->assertFalse( self::$config->form_mode_is( 'settings' ) );
 		$this->assertFalse( self::$config->form_mode_is( 'theme' ) );
+		$this->assertFalse( self::$config->form_mode_is( 'custom' ) );
+		$this->assertFalse( self::$config->form_mode_is( 'foo' ) );
 
 		// set and check
+		self::$config->form_mode( 'custom' );
+		$this->assertTrue( self::$config->form_mode_is( 'custom' ) );
 		self::$config->form_mode( 'theme' );
 		$this->assertTrue( self::$config->form_mode_is( 'theme' ) );
-		self::$config->form_mode( 'settings' );
-		$this->assertTrue( self::$config->form_mode_is( 'settings' ) );
-		self::$config->form_mode( 'default' );
-		$this->assertTrue( self::$config->form_mode_is( 'default' ) );
+		self::$config->form_mode( 'api' );
+		$this->assertTrue( self::$config->form_mode_is( 'api' ) );
 	}
 
 	public function testFormModeException()
