@@ -49,65 +49,9 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 	 */
 	function settings( $config_name, $group_name )
 	{
-		// get the config
-		$config = $this->config( $config_name );
-
-		// get the group
-		$group = $config->group( $group_name );
-
-		// call correct settings form renderer
-		if ( $config->form_mode_is( 'api' ) ) {
-			$this->settings_api( $config, $group );
-		} elseif ( $config->form_mode_is( 'theme' ) ) {
-			$this->settings_theme( $config, $group );
-		} elseif ( $config->form_mode_is( 'custom' ) ) {
-			$this->settings_custom( $config, $group );
-		}
+		// call the renderer
+		$this->config( $config_name )->group( $group_name )->render();
 	}
-
-	/**
-	 * Render the WordPress Settings API form.
-	 *
-	 * @param WP_SDL_Options_Config_1_0 $config
-	 * @param WP_SDL_Options_Group_1_0 $group
-	 */
-	protected function settings_api( WP_SDL_Options_Config_1_0 $config, WP_SDL_Options_Group_1_0 $group )
-	{
-		// format option page name
-		$option_page = 'wpsdl_' . $config->id();
-
-		// render the form ?>
-		<form action="options.php" method="POST">
-			<?php settings_fields( $option_page ); ?>
-			<?php do_settings_sections( $group->id() ); ?>
-			<p class="submit">
-				<input type="submit" class="button-primary" value="<?php _e( 'Save Changes', 'wp-sdl' ); ?>">
-			</p>
-		</form><?php
-	}
-
-	/**
-	 * Render the Theme Modification Settings API form.
-	 *
-	 * @param WP_SDL_Options_Config_1_0 $config
-	 * @param WP_SDL_Options_Group_1_0 $group
-	 */
-	protected function settings_theme( WP_SDL_Options_Config_1_0 $config, WP_SDL_Options_Group_1_0 $group )
-	{
-		throw new RuntimeException( 'Theme mode is not yet supported' );
-	}
-
-	/**
-	 * Render a custom settings form.
-	 *
-	 * @param WP_SDL_Options_Config_1_0 $config
-	 * @param WP_SDL_Options_Group_1_0 $group
-	 */
-	protected function settings_custom( WP_SDL_Options_Config_1_0 $config, WP_SDL_Options_Group_1_0 $group )
-	{
-		throw new RuntimeException( 'Custom mode is not yet supported' );
-	}
-	
 }
 
 abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
@@ -343,7 +287,25 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	 * @var array
 	 */
 	private $items = array();
+
+	/**
+	 * Form renderer instance.
+	 *
+	 * @var WP_SDL_Options_Form_1_0
+	 */
+	public $renderer;
 	
+	/**
+	 */
+	public function __construct( $slug, WP_SDL_Helper $helper )
+	{
+		// call parent first
+		parent::__construct($slug, $helper);
+
+		// set default form mode
+		$this->form_mode( $this->form_mode );
+	}
+
 	/**
 	 */
 	final public function id()
@@ -510,10 +472,11 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	 * Set the form mode for this config.
 	 *
 	 * @param string $mode
+	 * @param WP_SDL_Options_Form_1_0 $renderer
 	 * @return WP_SDL_Options_Config_1_0
 	 * @throws InvalidArgumentException
 	 */
-	final public function form_mode( $mode )
+	final public function form_mode( $mode, WP_SDL_Options_Form_1_0 $renderer = null )
 	{
 		// make sure its valid
 		switch ( $mode ) {
@@ -528,6 +491,29 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 					sprintf( __( 'The "%s" form mode is not valid.', 'wp-sdl' ) , $mode )
 				);
 		}
+
+		// get a custom renderer?
+		if ( null === $renderer ) {
+			// nope, set one based on form mode
+			switch ( $this->form_mode ) {
+				// api mode
+				case self::FORM_MODE_API:
+					$renderer = new WP_SDL_Options_Form_Api_1_0( $this->helper() );
+					break;
+				// theme mode
+				case self::FORM_MODE_THEME:
+					$renderer = new WP_SDL_Options_Form_Theme_1_0( $this->helper() );
+					break;
+				// custom mode
+				case self::FORM_MODE_CUSTOM:
+					// no renderer? use default
+					$renderer = new WP_SDL_Options_Form_Default_1_0( $this->helper() );
+					break;
+			}
+		}
+		
+		// set the new renderer
+		$this->renderer = $renderer;
 		
 		// maintain the chain
 		return $this;
@@ -545,18 +531,11 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	}
 
 	/**
-	 * Render the form for the given group of this config.
-	 *
-	 * @param string $group_name
-	 * @return WP_SDL_Options_Config_1_0
 	 */
-	final public function render( $group_name )
+	final public function renderer()
 	{
-		// call settings renderer in helper.
-		$this->helper()->settings( $this->property( 'slug' ), $group_name );
-
-		// maintain the chain
-		return $this;
+		// return it
+		return $this->renderer;
 	}
 
 	final public function validate( $data )
@@ -694,8 +673,8 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Item_1_0
 	 */
 	final public function render()
 	{
-		// call parent renderer with my slug
-		$this->parent()->render( $this->property( 'slug' ) );
+		// call renderer
+		$this->parent()->renderer()->group( $this );
 
 		// maintain the chain
 		return $this;
@@ -747,24 +726,17 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Item_1_0
 	}
 
 	/**
-	 * Render section intro content.
+	 * Render the markup for this section.
+	 *
+	 * @return WP_SDL_Options_Section_1_0
 	 */
-	public function render()
+	final public function render()
 	{
-		/* @var $html_helper WP_SDL_Html_1_0 */
-		$html_helper = $this->helper()->compat()->html();
+		// call renderer
+		$this->parent()->parent()->renderer()->section( $this );
 
-		// get the section description
-		$desc = $this->property( 'description' );
-
-		// render the description?
-		if ( $desc ) {
-			// yep, wrap it in a paragraph
-			$html_helper
-				->open( 'p' )
-					->content( $desc )
-				->close();
-		}
+		// maintain the chain
+		return $this;
 	}
 
 	/**
@@ -859,37 +831,17 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 	}
 
 	/**
-	 * Render this field.
+	 * Render the markup for this field.
+	 *
+	 * @return WP_SDL_Options_Field_1_0
 	 */
-	public function render()
+	final public function render()
 	{
-		/* @var $html_helper WP_SDL_Html_1_0 */
-		$html_helper = $this->helper()->compat()->html();
+		// call renderer
+		$this->parent()->parent()->parent()->renderer()->field( $this );
 
-		// params
-		$name = $this->id();
-		$type = $this->property( 'type' );
-		$desc = $this->property( 'description' );
-		$value = $this->property( 'value' );
-		$c_value = $this->property( 'current_value' );
-		$atts = $this->property( 'attributes' );
-
-		// set id att to name if missing
-		if ( false === isset( $atts['id'] ) ) {
-			$atts['id'] = $name;
-		}
-
-		// render the field
-		$html_helper->field( $type, $name, $value, $atts, $c_value );
-
-		// render the description?
-		if ( $desc ) {
-			// yep, wrap it in a paragraph
-			$html_helper
-				->open( 'p', array( 'class' => 'description' ) )
-					->content( $desc )
-				->close();
-		}
+		// maintain the chain
+		return $this;
 	}
 
 	public function validate( $data )
@@ -963,4 +915,102 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 		return $this;
 	}
 
+}
+
+abstract class WP_SDL_Options_Form_1_0 extends WP_SDL_Auxiliary_1_0
+{
+	/**
+	 * Constructor.
+	 *
+	 * @param WP_SDL_Helper $helper
+	 */
+	public function __construct( WP_SDL_Helper $helper )
+	{
+		$this->helper( $helper );
+	}
+	
+	abstract public function group( WP_SDL_Options_Group_1_0 $group );
+	abstract public function section( WP_SDL_Options_Section_1_0 $section );
+	abstract public function field( WP_SDL_Options_Field_1_0 $field );
+}
+
+class WP_SDL_Options_Form_Api_1_0 extends WP_SDL_Options_Form_1_0
+{
+	public function group( WP_SDL_Options_Group_1_0 $group )
+	{
+		// format option page name
+		$option_page = 'wpsdl_' . $group->parent()->id();
+
+		// render the form ?>
+		<form action="options.php" method="POST">
+			<?php settings_fields( $option_page ); ?>
+			<?php do_settings_sections( $group->id() ); ?>
+			<p class="submit">
+				<input type="submit" class="button-primary" value="<?php _e( 'Save Changes', 'wp-sdl' ); ?>">
+			</p>
+		</form><?php
+	}
+	
+	public function section( WP_SDL_Options_Section_1_0 $section )
+	{
+		/* @var $html_helper WP_SDL_Html_1_0 */
+		$html_helper = $this->helper()->compat()->html();
+
+		// get the section description
+		$desc = $section->property( 'description' );
+
+		// render the description?
+		if ( $desc ) {
+			// yep, wrap it in a paragraph
+			$html_helper
+				->open( 'p' )
+					->content( $desc )
+				->close();
+		}
+	}
+
+	public function field( WP_SDL_Options_Field_1_0 $field )
+	{
+		/* @var $html_helper WP_SDL_Html_1_0 */
+		$html_helper = $this->helper()->compat()->html();
+
+		// params
+		$name = $field->id();
+		$type = $field->property( 'type' );
+		$desc = $field->property( 'description' );
+		$value = $field->property( 'value' );
+		$c_value = $field->property( 'current_value' );
+		$atts = $field->property( 'attributes' );
+
+		// set id att to name if missing
+		if ( false === isset( $atts['id'] ) ) {
+			$atts['id'] = $name;
+		}
+
+		// render the field
+		$html_helper->field( $type, $name, $value, $atts, $c_value );
+
+		// render the description?
+		if ( $desc ) {
+			// yep, wrap it in a paragraph
+			$html_helper
+				->open( 'p', array( 'class' => 'description' ) )
+					->content( $desc )
+				->close();
+		}
+	}
+}
+
+class WP_SDL_Options_Form_Theme_1_0 extends WP_SDL_Options_Form_1_0
+{
+	public function group( WP_SDL_Options_Group_1_0 $group ) {}
+	public function section( WP_SDL_Options_Section_1_0 $section ) {}
+	public function field( WP_SDL_Options_Field_1_0 $field ) {}
+}
+
+class WP_SDL_Options_Form_Default_1_0 extends WP_SDL_Options_Form_1_0
+{
+	public function group( WP_SDL_Options_Group_1_0 $group ) {}
+	public function section( WP_SDL_Options_Section_1_0 $section ) {}
+	public function field( WP_SDL_Options_Field_1_0 $field ) {}
 }
