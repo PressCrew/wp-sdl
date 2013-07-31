@@ -55,6 +55,24 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 		// get the group
 		$group = $config->group( $group_name );
 
+		// call correct settings form renderer
+		if ( $config->form_mode_is( 'api' ) ) {
+			$this->settings_api( $config, $group );
+		} elseif ( $config->form_mode_is( 'theme' ) ) {
+			$this->settings_theme( $config, $group );
+		} elseif ( $config->form_mode_is( 'custom' ) ) {
+			$this->settings_custom( $config, $group );
+		}
+	}
+
+	/**
+	 * Render the WordPress Settings API form.
+	 *
+	 * @param WP_SDL_Options_Config_1_0 $config
+	 * @param WP_SDL_Options_Group_1_0 $group
+	 */
+	protected function settings_api( WP_SDL_Options_Config_1_0 $config, WP_SDL_Options_Group_1_0 $group )
+	{
 		// format option page name
 		$option_page = 'wpsdl_' . $config->id();
 
@@ -67,6 +85,29 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 			</p>
 		</form><?php
 	}
+
+	/**
+	 * Render the Theme Modification Settings API form.
+	 *
+	 * @param WP_SDL_Options_Config_1_0 $config
+	 * @param WP_SDL_Options_Group_1_0 $group
+	 */
+	protected function settings_theme( WP_SDL_Options_Config_1_0 $config, WP_SDL_Options_Group_1_0 $group )
+	{
+		throw new RuntimeException( 'Theme mode is not yet supported' );
+	}
+
+	/**
+	 * Render a custom settings form.
+	 *
+	 * @param WP_SDL_Options_Config_1_0 $config
+	 * @param WP_SDL_Options_Group_1_0 $group
+	 */
+	protected function settings_custom( WP_SDL_Options_Config_1_0 $config, WP_SDL_Options_Group_1_0 $group )
+	{
+		throw new RuntimeException( 'Custom mode is not yet supported' );
+	}
+	
 }
 
 abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
@@ -504,13 +545,18 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	}
 
 	/**
-	 * Generate settings form for a group (WordPress API).
+	 * Render the form for the given group of this config.
 	 *
 	 * @param string $group_name
+	 * @return WP_SDL_Options_Config_1_0
 	 */
-	final public function settings( $group_name )
+	final public function render( $group_name )
 	{
-		$this->helper()->settings( $this->id(), $group_name );
+		// call settings renderer in helper.
+		$this->helper()->settings( $this->property( 'slug' ), $group_name );
+
+		// maintain the chain
+		return $this;
 	}
 
 	final public function validate( $data )
@@ -639,6 +685,20 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Item_1_0
 	{
 		// get section for slug
 		return $this->parent()->section( $slug, $this );
+	}
+
+	/**
+	 * Render the form for this group.
+	 *
+	 * @return WP_SDL_Options_Group_1_0
+	 */
+	final public function render()
+	{
+		// call parent renderer with my slug
+		$this->parent()->render( $this->property( 'slug' ) );
+
+		// maintain the chain
+		return $this;
 	}
 }
 
