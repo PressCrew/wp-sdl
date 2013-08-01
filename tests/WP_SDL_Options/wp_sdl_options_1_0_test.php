@@ -123,7 +123,7 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 
 		// expected new white list options
 		$this->assertArrayHasKey( 'wpsdl_app', $new_whitelist_options );
-		$this->assertContains( 'app_config_settings', $new_whitelist_options['wpsdl_app'] );
+		$this->assertContains( 'app_all_opts', $new_whitelist_options['wpsdl_app'] );
 
 		// Whew!
 	}
@@ -156,7 +156,7 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 		// expected new white list options
 		$this->assertArrayHasKey( 'wpsdl_app2', $new_whitelist_options );
 		$this->assertCount( 1, $new_whitelist_options['wpsdl_app2'] );
-		$this->assertContains( 'app2_config_settings', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_all_opts', $new_whitelist_options['wpsdl_app2'] );
 
 		// save mode group
 		$new_whitelist_options = array();
@@ -166,8 +166,8 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 		// expected new white list options
 		$this->assertArrayHasKey( 'wpsdl_app2', $new_whitelist_options );
 		$this->assertCount( 2, $new_whitelist_options['wpsdl_app2'] );
-		$this->assertContains( 'app2_wood_group_settings', $new_whitelist_options['wpsdl_app2'] );
-		$this->assertContains( 'app2_brick_group_settings', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_wood_group_opts', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_brick_group_opts', $new_whitelist_options['wpsdl_app2'] );
 
 		// save mode section
 		$new_whitelist_options = array();
@@ -177,10 +177,10 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 		// expected new white list options
 		$this->assertArrayHasKey( 'wpsdl_app2', $new_whitelist_options );
 		$this->assertCount( 4, $new_whitelist_options['wpsdl_app2'] );
-		$this->assertContains( 'app2_pine_section_settings', $new_whitelist_options['wpsdl_app2'] );
-		$this->assertContains( 'app2_oak_section_settings', $new_whitelist_options['wpsdl_app2'] );
-		$this->assertContains( 'app2_clay_section_settings', $new_whitelist_options['wpsdl_app2'] );
-		$this->assertContains( 'app2_sand_section_settings', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_pine_section_opts', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_oak_section_opts', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_clay_section_opts', $new_whitelist_options['wpsdl_app2'] );
+		$this->assertContains( 'app2_sand_section_opts', $new_whitelist_options['wpsdl_app2'] );
 
 	}
 }
@@ -370,7 +370,7 @@ class WP_SDL_Options_Config_1_0_Test extends PHPUnit_Framework_TestCase
 
 	public function testId()
 	{
-		$this->assertEquals( 'app_config', self::$config->id() );
+		$this->assertEquals( 'app_all', self::$config->id() );
 	}
 
 	public function testItem()
@@ -726,7 +726,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		// expected markup
 		$this->expectOutputString(
-			'<input class="pretty" id="app_baz_field" type="text" name="app_config_settings[baz]" value="A short string"/>' .
+			'<input class="pretty" id="app_baz_field" type="text" name="app_all_opts[baz]" value="A short string"/>' .
 			'<p class="description">Field Description</p>'
 		);
 
@@ -741,7 +741,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		// expected markup
 		$this->expectOutputString(
-			'<input class="pretty" id="app_baz_field" type="text" name="app_foo_group_settings[baz]" value="A short string"/>' .
+			'<input class="pretty" id="app_baz_field" type="text" name="app_foo_group_opts[baz]" value="A short string"/>' .
 			'<p class="description">Field Description</p>'
 		);
 
@@ -757,7 +757,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		// expected markup
 		$this->expectOutputString(
-			'<input class="pretty" id="app_baz_field" type="text" name="app_bar_section_settings[baz]" value="A short string"/>' .
+			'<input class="pretty" id="app_baz_field" type="text" name="app_bar_section_opts[baz]" value="A short string"/>' .
 			'<p class="description">Field Description</p>'
 		);
 

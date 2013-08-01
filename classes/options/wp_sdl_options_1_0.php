@@ -314,7 +314,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	 */
 	final public function id()
 	{
-		return $this->property( 'slug' ) . '_config';
+		return $this->property( 'slug' ) . '_all';
 	}
 
 	/**
@@ -349,7 +349,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		// register the setting with wp
 		register_setting(
 			'wpsdl_' . $this->property( 'slug' ),
-			$object->id() . '_settings',
+			$object->id() . '_opts',
 			array( $this, 'validate' )
 		);
 
@@ -1024,7 +1024,7 @@ abstract class WP_SDL_Options_Form_1_0 extends WP_SDL_Auxiliary_1_0
 		}
 
 		// format the name
-		$name = sprintf( '%s_settings[%s]', $prefix, $field->property( 'slug' ) );
+		$name = sprintf( '%s_opts[%s]', $prefix, $field->property( 'slug' ) );
 
 		// handl missing id attribute
 		if ( false === isset( $atts['id'] ) ) {
