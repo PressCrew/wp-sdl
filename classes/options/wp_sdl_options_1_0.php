@@ -678,7 +678,7 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Item_1_0
 	 */
 	final public function id()
 	{
-		return $this->parent()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_group';
+		return $this->config()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_group';
 	}
 
 	/**
@@ -714,7 +714,7 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Item_1_0
 	final public function section( $slug )
 	{
 		// get section for slug
-		return $this->parent()->section( $slug, $this );
+		return $this->config()->section( $slug, $this );
 	}
 
 	/**
@@ -725,7 +725,7 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Item_1_0
 	final public function render()
 	{
 		// call renderer
-		$this->parent()->renderer()->group( $this );
+		$this->config()->renderer()->group( $this );
 
 		// maintain the chain
 		return $this;
@@ -748,7 +748,7 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Item_1_0
 	 */
 	final public function id()
 	{
-		return $this->parent()->parent()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_section';
+		return $this->config()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_section';
 	}
 
 	/**
@@ -791,7 +791,7 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Item_1_0
 	final public function render()
 	{
 		// call renderer
-		$this->parent()->parent()->renderer()->section( $this );
+		$this->config()->renderer()->section( $this );
 
 		// maintain the chain
 		return $this;
@@ -813,7 +813,7 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Item_1_0
 	final public function field( $slug )
 	{
 		// set current section
-		return $this->parent()->parent()->field( $slug, $this );
+		return $this->config()->field( $slug, $this );
 	}
 }
 
@@ -871,7 +871,7 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 	 */
 	final public function id()
 	{
-		return $this->parent()->parent()->parent()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_field';
+		return $this->config()->property( 'slug' ) . '_' . $this->property( 'slug' ) . '_field';
 	}
 
 	/**
@@ -903,7 +903,7 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 	final public function render()
 	{
 		// call renderer
-		$this->parent()->parent()->parent()->renderer()->field( $this );
+		$this->config()->renderer()->field( $this );
 
 		// maintain the chain
 		return $this;
@@ -1006,7 +1006,7 @@ class WP_SDL_Options_Form_Api_1_0 extends WP_SDL_Options_Form_1_0
 	public function group( WP_SDL_Options_Group_1_0 $group )
 	{
 		// format option page name
-		$option_page = 'wpsdl_' . $group->parent()->id();
+		$option_page = 'wpsdl_' . $group->config()->id();
 
 		// render the form ?>
 		<form action="options.php" method="POST">
