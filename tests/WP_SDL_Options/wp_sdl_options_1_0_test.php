@@ -726,7 +726,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		// expected markup
 		$this->expectOutputString(
-			'<input class="pretty" id="app_baz_field" type="text" name="app_config_settings[app_baz_field]" value="A short string"/>' .
+			'<input class="pretty" id="app_baz_field" type="text" name="app_config_settings[baz]" value="A short string"/>' .
 			'<p class="description">Field Description</p>'
 		);
 
@@ -741,7 +741,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		// expected markup
 		$this->expectOutputString(
-			'<input class="pretty" id="app_baz_field" type="text" name="app_foo_group_settings[app_baz_field]" value="A short string"/>' .
+			'<input class="pretty" id="app_baz_field" type="text" name="app_foo_group_settings[baz]" value="A short string"/>' .
 			'<p class="description">Field Description</p>'
 		);
 
@@ -757,7 +757,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		// expected markup
 		$this->expectOutputString(
-			'<input class="pretty" id="app_baz_field" type="text" name="app_bar_section_settings[app_baz_field]" value="A short string"/>' .
+			'<input class="pretty" id="app_baz_field" type="text" name="app_bar_section_settings[baz]" value="A short string"/>' .
 			'<p class="description">Field Description</p>'
 		);
 

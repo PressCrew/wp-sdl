@@ -348,7 +348,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	{
 		// register the setting with wp
 		register_setting(
-			'wpsdl_' . $this->id(),
+			'wpsdl_' . $this->property( 'slug' ),
 			$object->id() . '_settings',
 			array( $this, 'validate' )
 		);
@@ -1044,7 +1044,7 @@ class WP_SDL_Options_Form_Api_1_0 extends WP_SDL_Options_Form_1_0
 	public function group( WP_SDL_Options_Group_1_0 $group )
 	{
 		// format option page name
-		$option_page = 'wpsdl_' . $group->config()->id();
+		$option_page = 'wpsdl_' . $group->config()->property( 'slug' );
 
 		// render the form ?>
 		<form action="options.php" method="POST">
