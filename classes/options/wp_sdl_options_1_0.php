@@ -625,6 +625,14 @@ abstract class WP_SDL_Options_Item_1_0 extends WP_SDL_Options_Object_1_0
 	 * Render the markup for this item.
 	 */
 	abstract public function render();
+
+	/**
+	 * Validate all data submitted for this item.
+	 *
+	 * @param array $data
+	 * @return array
+	 */
+	abstract public function validate( $data );
 }
 
 /**
@@ -688,6 +696,13 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Item_1_0
 		// maintain the chain
 		return $this;
 	}
+
+	/**
+	 */
+	public function validate( $data )
+	{
+		return $data;
+	}
 }
 
 /**
@@ -746,6 +761,13 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Item_1_0
 
 		// maintain the chain
 		return $this;
+	}
+
+	/**
+	 */
+	public function validate( $data )
+	{
+		return $data;
 	}
 
 	/**
@@ -853,6 +875,8 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 		return $this;
 	}
 
+	/**
+	 */
 	public function validate( $data )
 	{
 		return $data;
