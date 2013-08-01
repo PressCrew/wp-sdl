@@ -239,11 +239,15 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 {
 	/**
 	 * Form mode "api"
+	 *
+	 * @link http://codex.wordpress.org/Settings_API
 	 */
 	const FORM_MODE_API = 'api';
 
 	/**
 	 * Form mode "theme"
+	 *
+	 * @link http://codex.wordpress.org/Theme_Modification_API
 	 */
 	const FORM_MODE_THEME = 'theme';
 
