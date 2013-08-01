@@ -620,6 +620,11 @@ abstract class WP_SDL_Options_Item_1_0 extends WP_SDL_Options_Object_1_0
 		// maintain the chain
 		return $this;
 	}
+
+	/**
+	 * Render the markup for this item.
+	 */
+	abstract public function render();
 }
 
 /**
