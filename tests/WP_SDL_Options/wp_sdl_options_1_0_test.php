@@ -602,18 +602,31 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' )->options() );
 		self::$field = $config->group('foo')->section('bar')->field('baz');
-
-		$this->assertInstanceOf( 'WP_SDL_Options_Field_1_0', self::$field );
-
-		$this->assertEquals(
-			'baz',
-			self::$field->property( 'slug' )
-		);
 	}
 
 	public function tearDown()
 	{
 		self::$field = null;
+	}
+
+	private function populateField()
+	{
+		self::$field
+			->title( 'Field Title' )
+			->description( 'Field Description' )
+			->type( 'text' )
+			->value( 'A short string' )
+			->attributes(
+				array(
+					'class' => 'pretty'
+				)
+			);
+	}
+
+	public function testObjects()
+	{
+		$this->assertInstanceOf( 'WP_SDL_Options_Field_1_0', self::$field );
+		$this->assertEquals( 'baz', self::$field->property( 'slug' ) );
 	}
 
 	public function testId()
@@ -709,26 +722,49 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 		self::$field->attributes( 'not an array' );
 	}
 
-	public function testRender()
+	public function testRenderAllMode()
 	{
 		// expected markup
 		$this->expectOutputString(
-			'<input class="pretty" id="app_baz_field" type="text" name="app_baz_field" value="A short string"/>' .
+			'<input class="pretty" id="app_baz_field" type="text" name="app_config_settings[app_baz_field]" value="A short string"/>' .
 			'<p class="description">Field Description</p>'
 		);
 
 		// configure it
-		self::$field
-			->title( 'Field Title' )
-			->description( 'Field Description' )
-			->type( 'text' )
-			->value( 'A short string' )
-			->attributes(
-				array(
-					'class' => 'pretty'
-				)
-			);
+		$this->populateField();
 
+		// render it
+		self::$field->render();
+	}
+
+	public function testRenderGroupMode()
+	{
+		// expected markup
+		$this->expectOutputString(
+			'<input class="pretty" id="app_baz_field" type="text" name="app_foo_group_settings[app_baz_field]" value="A short string"/>' .
+			'<p class="description">Field Description</p>'
+		);
+
+		// configure it
+		$this->populateField();
+		// change save mode
+		self::$field->config()->save_mode( 'group' );
+		// render it
+		self::$field->render();
+	}
+
+	public function testRenderSectionMode()
+	{
+		// expected markup
+		$this->expectOutputString(
+			'<input class="pretty" id="app_baz_field" type="text" name="app_bar_section_settings[app_baz_field]" value="A short string"/>' .
+			'<p class="description">Field Description</p>'
+		);
+
+		// configure it
+		$this->populateField();
+		// change save mode
+		self::$field->config()->save_mode( 'section' );
 		// render it
 		self::$field->render();
 	}

@@ -348,7 +348,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	{
 		// register the setting with wp
 		register_setting(
-			'wpsdl_' . $this->property( 'slug' ),
+			'wpsdl_' . $this->id(),
 			$object->id() . '_settings',
 			array( $this, 'validate' )
 		);
@@ -998,7 +998,45 @@ abstract class WP_SDL_Options_Form_1_0 extends WP_SDL_Auxiliary_1_0
 	
 	abstract public function group( WP_SDL_Options_Group_1_0 $group );
 	abstract public function section( WP_SDL_Options_Section_1_0 $section );
-	abstract public function field( WP_SDL_Options_Field_1_0 $field );
+
+	public function field( WP_SDL_Options_Field_1_0 $field )
+	{
+		// params
+		$type = $field->property( 'type' );
+		$value = $field->property( 'value' );
+		$c_value = $field->property( 'current_value' );
+		$atts = $field->property( 'attributes' );
+		
+		// get config
+		$config = $field->config();
+
+		// is group mode?
+		if ( $config->save_mode_is( 'group' ) ) {
+			// use group id
+			$prefix = $field->parent()->parent()->id();
+		// is section mode?
+		} elseif ( $config->save_mode_is( 'section' ) ) {
+			// use section id
+			$prefix = $field->parent()->id();
+		} else {
+			// use "all" prefix by default
+			$prefix = $config->id();
+		}
+
+		// format the name
+		$name = sprintf( '%s_settings[%s]', $prefix, $field->property( 'slug' ) );
+
+		// handl missing id attribute
+		if ( false === isset( $atts['id'] ) ) {
+			$atts['id'] = $field->id();
+		}
+
+		/* @var $html_helper WP_SDL_Html_1_0 */
+		$html_helper = $this->helper()->compat()->html();
+		
+		// render the field
+		$html_helper->field( $type, $name, $value, $atts, $c_value );
+	}
 }
 
 class WP_SDL_Options_Form_Api_1_0 extends WP_SDL_Options_Form_1_0
@@ -1038,27 +1076,16 @@ class WP_SDL_Options_Form_Api_1_0 extends WP_SDL_Options_Form_1_0
 
 	public function field( WP_SDL_Options_Field_1_0 $field )
 	{
-		/* @var $html_helper WP_SDL_Html_1_0 */
-		$html_helper = $this->helper()->compat()->html();
+		// call parent
+		parent::field( $field, $name );
 
-		// params
-		$name = $field->id();
-		$type = $field->property( 'type' );
+		// get description
 		$desc = $field->property( 'description' );
-		$value = $field->property( 'value' );
-		$c_value = $field->property( 'current_value' );
-		$atts = $field->property( 'attributes' );
-
-		// set id att to name if missing
-		if ( false === isset( $atts['id'] ) ) {
-			$atts['id'] = $name;
-		}
-
-		// render the field
-		$html_helper->field( $type, $name, $value, $atts, $c_value );
 
 		// render the description?
 		if ( $desc ) {
+			/* @var $html_helper WP_SDL_Html_1_0 */
+			$html_helper = $this->helper()->compat()->html();
 			// yep, wrap it in a paragraph
 			$html_helper
 				->open( 'p', array( 'class' => 'description' ) )
