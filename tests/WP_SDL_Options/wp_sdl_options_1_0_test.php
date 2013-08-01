@@ -191,6 +191,11 @@ class WP_SDL_Options_1_0_Test extends PHPUnit_Framework_TestCase
 class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 {
 	/**
+	 * @var WP_SDL_Options_Config_1_0
+	 */
+	protected static $config;
+
+	/**
 	 * @var WP_SDL_Options_Object_1_0
 	 */
 	protected static $object;
@@ -200,33 +205,42 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 		// load stub
 		require_once 'stubs/options_object_1_0.php';
 
-		self::$object = new STUB_Options_Object_1_0( 'app', WP_SDL::support( '1.0' )->options() );
-
-		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', self::$object );
-
-		$this->assertEquals(
-			'app',
-			self::$object->property( 'slug' )
-		);
+		self::$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' )->options() );
+		self::$object = new STUB_Options_Object_1_0( 'foo', WP_SDL::support( '1.0' )->options(), self::$config );
 	}
 
 	public function tearDown()
 	{
+		self::$config = null;
 		self::$object = null;
+	}
+
+	public function testObjects()
+	{
+		$this->assertInstanceOf( 'WP_SDL_Options_Config_1_0', self::$config );
+		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', self::$object );
+		$this->assertEquals( 'app', self::$config->property( 'slug' ) );
+		$this->assertEquals( 'foo', self::$object->property( 'slug' ) );
+	}
+
+	public function testConfig()
+	{
+		$this->assertInstanceOf( 'WP_SDL_Options_Config_1_0', self::$object->config() );
+		$this->assertEquals( 'app', self::$object->config()->property( 'slug' ) );
 	}
 
 	public function testParent()
 	{
-		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' )->options() );
+		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' )->options(), self::$object->config() );
 		$child->parent( self::$object );
 
 		$this->assertInstanceOf( 'WP_SDL_Options_Object_1_0', $child->parent() );
-		$this->assertEquals( 'app', $child->parent()->property( 'slug' ) );
+		$this->assertEquals( self::$object, $child->parent() );
 	}
 
 	public function testChild()
 	{
-		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' )->options() );
+		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' )->options(), self::$object->config() );
 		$ret = self::$object->child( 'my_child', $child );
 		$this->assertInstanceOf( 'STUB_Options_Object_1_0', $ret );
 		$this->assertEquals( 'my_child', $ret->property( 'slug' ) );
@@ -235,7 +249,7 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 	public function testChildMismatchSlug()
 	{
 		$this->setExpectedException( 'InvalidArgumentException' );
-		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' )->options() );
+		$child = new STUB_Options_Object_1_0( 'my_child', WP_SDL::support( '1.0' )->options(), self::$object->config() );
 		self::$object->child( 'not_my_child', $child );
 	}
 
@@ -280,7 +294,7 @@ class WP_SDL_Options_Object_1_0_Test extends PHPUnit_Framework_TestCase
 	public function testSlugInvalid()
 	{
 		$this->setExpectedException( 'InvalidArgumentException' );
-		return new STUB_Options_Object_1_0( 'bad-slug', WP_SDL::support( '1.0' )->options() );
+		return new STUB_Options_Object_1_0( 'bad-slug', WP_SDL::support( '1.0' )->options(), self::$object->config() );
 	}
 
 	public function testTitle()

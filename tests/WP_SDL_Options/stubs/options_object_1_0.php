@@ -37,7 +37,7 @@ class STUB_Options_Object_1_0 extends WP_SDL_Options_Item_1_0
 	{
 		if ( false === isset( $this->items[ $slug ] ) ) {
 			// create new instance of class
-			$item = new STUB_Options_Object_1_0( $slug, $this->helper() );
+			$item = new STUB_Options_Object_1_0( $slug, $this->helper(), $parent->config() );
 			// add to parent
 			$parent->child( $slug, $item );
 			// add to items

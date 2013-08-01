@@ -385,7 +385,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 					throw new InvalidArgumentException( __( 'Invalid type', 'wp-sdl' ) );
 			}
 			// create new instance of class
-			$item = new $child_class( $slug, $this->helper() );
+			$item = new $child_class( $slug, $this->helper(), $this );
 			// add to items stack
 			$this->items[ $type ][ $slug ] = $item;
 			// add to parent?
@@ -554,6 +554,13 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 abstract class WP_SDL_Options_Item_1_0 extends WP_SDL_Options_Object_1_0
 {
 	/**
+	 * The config which "owns" this item.
+	 *
+	 * @var WP_SDL_Options_Config_1_0
+	 */
+	private $config;
+
+	/**
 	 * The parent of this instance.
 	 *
 	 * @var WP_SDL_Options_Object_1_0
@@ -568,6 +575,22 @@ abstract class WP_SDL_Options_Item_1_0 extends WP_SDL_Options_Object_1_0
 	private $priority = 10;
 
 	/**
+	 * Constructor
+	 * 
+	 * @param string $slug
+	 * @param WP_SDL_Helper $helper
+	 * @param WP_SDL_Options_Config_1_0 $config
+	 */
+	public function __construct( $slug, WP_SDL_Helper $helper, WP_SDL_Options_Config_1_0 $config )
+	{
+		// run parent
+		parent::__construct( $slug, $helper );
+		
+		// set config
+		$this->config = $config;
+	}
+
+	/**
 	 */
 	public function property( $name )
 	{
@@ -577,6 +600,17 @@ abstract class WP_SDL_Options_Item_1_0 extends WP_SDL_Options_Object_1_0
 			default:
 				return parent::property( $name );
 		}
+	}
+
+	/**
+	 * Get config instance.
+	 *
+	 * @return WP_SDL_Options_Config_1_0
+	 */
+	public function config()
+	{
+		// return it
+		return $this->config;
 	}
 
 	/**
