@@ -705,6 +705,11 @@ abstract class WP_SDL_Options_Item_1_0 extends WP_SDL_Options_Object_1_0
 	}
 
 	/**
+	 * Register all settings for this item.
+	 */
+	abstract public function register();
+
+	/**
 	 * Render the markup for this item.
 	 */
 	abstract public function render();

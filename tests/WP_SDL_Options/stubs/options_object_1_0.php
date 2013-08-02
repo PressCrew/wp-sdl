@@ -48,6 +48,7 @@ class STUB_Options_Object_1_0 extends WP_SDL_Options_Item_1_0
 		return $this->items[ $slug ];
 	}
 
+	public function register() {}
 	public function render() {}
 	public function validate( $data ) {}
 
