@@ -47,7 +47,7 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 	/**
 	 * Output the settings form for the given config name.
 	 */
-	function settings( $config_name, $group_name )
+	function form( $config_name, $group_name )
 	{
 		// call the renderer
 		$this->config( $config_name )->group( $group_name )->render();
