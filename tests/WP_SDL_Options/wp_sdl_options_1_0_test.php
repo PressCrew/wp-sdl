@@ -594,18 +594,24 @@ class WP_SDL_Options_Section_1_0_Test extends PHPUnit_Framework_TestCase
 class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 {
 	/**
+	 * @var WP_SDL_Options_Config_1_0
+	 */
+	private static $config;
+
+	/**
 	 * @var WP_SDL_Options_Field_1_0
 	 */
 	private static $field;
 
 	public function setUp()
 	{
-		$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' )->options() );
-		self::$field = $config->group('foo')->section('bar')->field('baz');
+		self::$config = new WP_SDL_Options_Config_1_0( 'app', WP_SDL::support( '1.0' )->options() );
+		self::$field = self::$config->group('foo')->section('bar')->field('baz');
 	}
 
 	public function tearDown()
 	{
+		self::$config = null;
 		self::$field = null;
 	}
 
@@ -621,6 +627,28 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 					'class' => 'pretty'
 				)
 			);
+	}
+
+	private function bumpMysql()
+	{
+		global $wpdb;
+		$wpdb->db_connect();
+	}
+
+	private function clearOption( $option_name )
+	{
+		// make sure mysql is alive
+		$this->bumpMysql();
+
+		// kill it!
+		delete_option( $option_name );
+		wp_cache_delete( $option_name, 'options' );
+
+		// flush options cache
+		wp_cache_delete( 'alloptions', 'options' );
+
+		// make sure its empty
+		$this->assertFalse( get_option( $option_name ) );
 	}
 
 	public function testObjects()
@@ -767,6 +795,36 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 		self::$field->config()->save_mode( 'section' );
 		// render it
 		self::$field->render();
+	}
+
+	public function testOption()
+	{
+		$this->populateField();
+
+		$modes = array(
+			'all' => 'app_all_opts',
+			'group' => 'app_foo_group_opts',
+			'section' => 'app_bar_section_opts'
+		);
+
+		// loop all save modes
+		foreach( $modes as $mode => $option_name ) {
+
+			// clear it before!
+			$this->clearOption( $option_name );
+
+			// set save mode and confirm
+			self::$config->save_mode( $mode );
+			$this->assertTrue( self::$config->save_mode_is( $mode ) );
+
+			// should be null to start, then set it, then make sure it saved
+			$this->assertNull( self::$field->option() );
+			$this->assertEquals( 'brown', self::$field->option( 'brown' ) );
+			$this->assertEquals( 'brown', self::$field->option() );
+
+			// clear it after!
+			$this->clearOption( $option_name );
+		}
 	}
 
 }

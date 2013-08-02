@@ -52,6 +52,31 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 		// call the renderer
 		$this->config( $config_name )->group( $group_name )->render();
 	}
+
+	/**
+	 * Get/Set the option value for the given config and field name.
+	 *
+	 * @param string $config_name
+	 * @param string $field_name
+	 * @param mixed $newvalue
+	 */
+	final public function option( $config_name, $field_name, $newvalue = null )
+	{
+		// look up field
+		$field = $this->config( $config_name )->field( $field_name );
+
+		// get num args
+		$num_args = func_num_args();
+
+		// call field's option method
+		if ( 2 === $num_args ) {
+			// getting
+			return $field->option();
+		} else {
+			// setting
+			return $field->option( $newvalue );
+		}
+	}
 }
 
 abstract class WP_SDL_Options_Object_1_0 extends WP_SDL_Auxiliary_1_0
@@ -315,6 +340,30 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	final public function id()
 	{
 		return $this->property( 'slug' ) . '_all';
+	}
+
+	/**
+	 * Get/Set the option value for the given field name.
+	 *
+	 * @param string $field_name
+	 * @param mixed $newvalue
+	 */
+	final public function option( $field_name, $newvalue = null )
+	{
+		// look up field
+		$field = $this->field( $field_name );
+
+		// get num args
+		$num_args = func_num_args();
+
+		// call field's option method
+		if ( 1 === $num_args ) {
+			// getting
+			return $field->option();
+		} else {
+			// setting
+			return $field->option( $newvalue );
+		}
 	}
 
 	/**
@@ -980,6 +1029,65 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 
 		// maintain the chain
 		return $this;
+	}
+
+	/**
+	 * Get/Set the *stored* option value for this field.
+	 *
+	 * @param mixed $newvalue
+	 * @return mixed
+	 */
+	final public function option( $newvalue = null )
+	{
+		// get config instance
+		$config = $this->config();
+
+		// determine option item
+		if ( $config->save_mode_is( 'all' ) ) {
+			// use config
+			$option_item = $config;
+		} elseif ( $config->save_mode_is( 'group' ) ) {
+			// use group
+			$option_item = $this->parent()->parent();
+		} elseif ( $config->save_mode_is( 'section' ) ) {
+			// use section
+			$option_item = $this->parent();
+		}
+
+		// determine option name
+		$option_name = $option_item->id() . '_opts';
+
+		// get option value
+		$option_value = get_option( $option_name );
+
+		// handle false result
+		if ( false === $option_value ) {
+			// empty array
+			$option_value = array();
+		}
+
+		// get field slug
+		$field_slug = $this->property( 'slug' );
+
+		// get num args
+		$num_args = func_num_args();
+
+		// setting?
+		if ( 1 === $num_args ) {
+			// yep, update array
+			$option_value[ $field_slug ] = $newvalue;
+			// update database
+			update_option( $option_name, $option_value );
+		}
+
+		// is field value set?
+		if ( isset( $option_value[ $field_slug ] ) ) {
+			// yep, return it
+			return $option_value[ $field_slug ];
+		} else {
+			// nope, return null
+			return null;
+		}
 	}
 
 }
