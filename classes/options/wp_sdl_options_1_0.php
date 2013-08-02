@@ -374,7 +374,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		// loop all group
 		foreach ( $this->children() as $group ) {
 			// register each group
-			$group->register( $this );
+			$group->register();
 		}
 
 		// maybe register setting
@@ -733,21 +733,20 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Item_1_0
 	/**
 	 * Register all of this groups's settings.
 	 *
-	 * @param WP_SDL_Options_Config_1_0 $config
 	 * @return WP_SDL_Options_Group_1_0
 	 */
-	final public function register( WP_SDL_Options_Config_1_0 $config )
+	final public function register()
 	{
 		// loop all sections
 		foreach( $this->children() as $section ) {
 			// register each section
-			$section->register( $config );
+			$section->register();
 		}
 
 		// maybe register setting
-		if ( $config->save_mode_is( 'group' ) ) {
+		if ( $this->config()->save_mode_is( 'group' ) ) {
 			// option name is group name
-			$config->register_setting( $this );
+			$this->config()->register_setting( $this );
 		}
 
 		// maintain the chain
@@ -803,10 +802,9 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Item_1_0
 	/**
 	 * Register all of this section's settings (WordPress API).
 	 * 
-	 * @param WP_SDL_Options_Config_1_0 $config
 	 * @return WP_SDL_Options_Section_1_0
 	 */
-	final public function register( WP_SDL_Options_Config_1_0 $config )
+	final public function register()
 	{
 		// register section
 		add_settings_section(
@@ -819,13 +817,13 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Item_1_0
 		// loop all fields
 		foreach( $this->children() as $field ) {
 			// register each field
-			$field->register( $config );
+			$field->register();
 		}
 
 		// maybe register setting
-		if ( $config->save_mode_is( 'section' ) ) {
+		if ( $this->config()->save_mode_is( 'section' ) ) {
 			// option name is section name
-			$config->register_setting( $this );
+			$this->config()->register_setting( $this );
 		}
 
 		// maintain the chain
@@ -926,10 +924,9 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 	/**
 	 * Register all of this field's settings (WordPress API).
 	 *
-	 * @param WP_SDL_Options_Config_1_0 $config
 	 * @return WP_SDL_Options_Field_1_0
 	 */
-	final public function register( WP_SDL_Options_Config_1_0 $config )
+	final public function register()
 	{
 		// register the field
 		add_settings_field(
