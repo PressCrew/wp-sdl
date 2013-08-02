@@ -1054,26 +1054,14 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 	 */
 	final public function option( $newvalue = null )
 	{
-		// get config instance
-		$config = $this->config();
-
-		// determine option item
-		if ( $config->save_mode_is( 'all' ) ) {
-			// use config
-			$option_item = $config;
-		} elseif ( $config->save_mode_is( 'group' ) ) {
-			// use group
-			$option_item = $this->parent()->parent();
-		} elseif ( $config->save_mode_is( 'section' ) ) {
-			// use section
-			$option_item = $this->parent();
-		}
-
-		// determine option name
-		$option_name = $option_item->id() . '_opts';
+		// get option name
+		$option_name = $this->option_name();
 
 		// get option value
 		$option_value = get_option( $option_name );
+
+		// get option key
+		$option_key = $this->option_key();
 
 		// handle false result
 		if ( false === $option_value ) {
@@ -1081,28 +1069,65 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 			$option_value = array();
 		}
 
-		// get field slug
-		$field_slug = $this->property( 'slug' );
-
 		// get num args
 		$num_args = func_num_args();
 
 		// setting?
 		if ( 1 === $num_args ) {
 			// yep, update array
-			$option_value[ $field_slug ] = $newvalue;
+			$option_value[ $option_key ] = $newvalue;
 			// update database
 			update_option( $option_name, $option_value );
 		}
 
 		// is field value set?
-		if ( isset( $option_value[ $field_slug ] ) ) {
+		if ( isset( $option_value[ $option_key ] ) ) {
 			// yep, return it
-			return $option_value[ $field_slug ];
+			return $option_value[ $option_key ];
 		} else {
 			// nope, return null
 			return null;
 		}
+	}
+
+	/**
+	 * Return option name to pass to get_option().
+	 *
+	 * @return string
+	 */
+	final public function option_name()
+	{
+		// get save mode
+		$save_mode = $this->config()->property( 'save_mode' );
+
+		// determine which object to use
+		switch ( $save_mode ) {
+			case 'all':
+				// use config
+				$option_item = $this->config();
+				break;
+			case 'group':
+				// use group
+				$option_item = $this->parent()->parent();
+				break;
+			case 'section':
+				// use section
+				$option_item = $this->parent();
+				break;
+		}
+
+		// return option name
+		return $option_item->id() . '_opts';
+	}
+
+	/**
+	 * Return "sub" key that option value is stored under.
+	 *
+	 * @return string
+	 */
+	final public function option_key()
+	{
+		return $this->property( 'slug' );
 	}
 
 }
@@ -1130,24 +1155,8 @@ abstract class WP_SDL_Options_Form_1_0 extends WP_SDL_Auxiliary_1_0
 		$c_value = $field->property( 'current_value' );
 		$atts = $field->property( 'attributes' );
 		
-		// get config
-		$config = $field->config();
-
-		// is group mode?
-		if ( $config->save_mode_is( 'group' ) ) {
-			// use group id
-			$prefix = $field->parent()->parent()->id();
-		// is section mode?
-		} elseif ( $config->save_mode_is( 'section' ) ) {
-			// use section id
-			$prefix = $field->parent()->id();
-		} else {
-			// use "all" prefix by default
-			$prefix = $config->id();
-		}
-
 		// format the name
-		$name = sprintf( '%s_opts[%s]', $prefix, $field->property( 'slug' ) );
+		$name = sprintf( '%s[%s]', $field->option_name(), $field->option_key() );
 
 		// handl missing id attribute
 		if ( false === isset( $atts['id'] ) ) {
