@@ -337,6 +337,19 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 
 	/**
 	 */
+	public function property( $name )
+	{
+		switch ( $name ) {
+			case 'form_mode':
+			case 'save_mode':
+				return $this->$name;
+			default:
+				return parent::property( $name );
+		}
+	}
+
+	/**
+	 */
 	final public function id()
 	{
 		return $this->property( 'slug' ) . '_all';
