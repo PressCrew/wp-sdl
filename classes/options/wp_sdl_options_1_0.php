@@ -27,6 +27,112 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 	private $configs = array();
 
 	/**
+	 * Initialize a configuration.
+	 *
+	 * @param string $config_name The name of the configuration to initialize.
+	 * @param string $page_name The plugin, theme, or other page name on which to initialize.
+	 * @return WP_SDL_Options_1_0
+	 */
+	public function init( $config_name, $page_name = null )
+	{
+		// get config and register
+		$config = $this->config( $config_name );
+
+		// call applicable init method for configured form mode
+		switch ( $config->property( 'form_mode' ) ) {
+			// api mode
+			case 'api':
+				$this->init_api( $config, $page_name );
+				break;
+			// theme mode
+			case 'theme':
+				$this->init_theme( $config, $page_name );
+				break;
+			// custom mode
+			case 'custom':
+				$this->init_custom( $config, $page_name );
+				break;
+		}
+
+		// maintain the chain
+		return $this;
+	}
+
+	/**
+	 * Settings API initialization.
+	 * 
+	 * @param WP_SDL_Options_Config_1_0 $config
+	 * @param string $page
+	 */
+	protected function init_api( WP_SDL_Options_Config_1_0 $config, $page )
+	{
+		// dashboard logic
+		if ( is_admin() ) {
+			// check page
+			if ( $page == $this->get_plugin_page() ) {
+				// register settings
+				$config->register();
+				// hook settings errors to admin notices
+				add_action( 'admin_notices', 'settings_errors' );
+			}
+		}
+	}
+
+	/**
+	 * Theme Modifications API initialization.
+	 *
+	 * @param WP_SDL_Options_Config_1_0 $config
+	 * @param string $page
+	 */
+	protected function init_theme( WP_SDL_Options_Config_1_0 $config, $page )
+	{
+		// TODO
+	}
+
+	/**
+	 * Custom initialization.
+	 *
+	 * @param WP_SDL_Options_Config_1_0 $config
+	 * @param string $page
+	 */
+	protected function init_custom( WP_SDL_Options_Config_1_0 $config, $page = null )
+	{
+		// TODO
+	}
+
+	/**
+	 * Get the internal wpsdl plugin page.
+	 *
+	 * @return string|null
+	 */
+	final public function get_plugin_page()
+	{
+		global $plugin_page;
+
+		if ( is_admin() && $plugin_page ) {
+			return $plugin_page;
+		} elseif ( isset( $_POST['wpsdl_plugin_page'] ) ) {
+			return $_POST['wpsdl_plugin_page'];
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Get the internal wpsdl option group.
+	 *
+	 * @return string|null
+	 */
+	final public function get_option_group()
+	{
+		if ( isset( $_POST['wpsdl_option_group'] ) ) {
+			return $_POST['wpsdl_option_group'];
+		} else {
+			return null;
+		}
+	}
+	
+	/**
 	 * Set and return the current config instance.
 	 *
 	 * @param string $name
@@ -1181,11 +1287,18 @@ class WP_SDL_Options_Form_Api_1_0 extends WP_SDL_Options_Form_1_0
 {
 	public function group( WP_SDL_Options_Group_1_0 $group )
 	{
+		global $plugin_page;
+		
 		// format option page name
 		$option_page = 'wpsdl_' . $group->config()->property( 'slug' );
 
+		// format option group name
+		$option_group = $group->property( 'slug' );
+
 		// render the form ?>
 		<form action="options.php" method="POST">
+			<input type="hidden" name="wpsdl_plugin_page" value="<?php echo esc_attr( $plugin_page ) ?>">
+			<input type="hidden" name="wpsdl_option_group" value="<?php echo esc_attr( $option_group ) ?>">
 			<?php settings_fields( $option_page ); ?>
 			<?php do_settings_sections( $group->id() ); ?>
 			<p class="submit">
