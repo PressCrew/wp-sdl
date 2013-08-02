@@ -760,6 +760,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 
 		// configure it
 		$this->populateField();
+		$this->bumpMysql();
 
 		// render it
 		self::$field->render();
@@ -775,6 +776,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 
 		// configure it
 		$this->populateField();
+		$this->bumpMysql();
 		// change save mode
 		self::$field->config()->save_mode( 'group' );
 		// render it
@@ -791,6 +793,7 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 
 		// configure it
 		$this->populateField();
+		$this->bumpMysql();
 		// change save mode
 		self::$field->config()->save_mode( 'section' );
 		// render it

@@ -1139,6 +1139,12 @@ abstract class WP_SDL_Options_Form_1_0 extends WP_SDL_Auxiliary_1_0
 			$atts['id'] = $field->id();
 		}
 
+		// handle null current value
+		if ( null === $c_value ) {
+			// use stored value
+			$c_value = $field->option();
+		}
+
 		/* @var $html_helper WP_SDL_Html_1_0 */
 		$html_helper = $this->helper()->compat()->html();
 		
