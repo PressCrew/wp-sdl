@@ -702,7 +702,11 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		return ( $mode === $this->form_mode );
 	}
 
+
 	/**
+	 * Return current form renderer instance.
+	 *
+	 * @return WP_SDL_Options_Form_1_0
 	 */
 	final public function renderer()
 	{
