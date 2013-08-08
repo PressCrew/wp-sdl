@@ -35,69 +35,14 @@ class WP_SDL_Options_1_0 extends WP_SDL_Helper_1_0
 	 */
 	public function init( $config_name, $page_name = null )
 	{
-		// get config and register
+		// get config
 		$config = $this->config( $config_name );
 
-		// call applicable init method for configured form mode
-		switch ( $config->property( 'form_mode' ) ) {
-			// api mode
-			case 'api':
-				$this->init_api( $config, $page_name );
-				break;
-			// theme mode
-			case 'theme':
-				$this->init_theme( $config, $page_name );
-				break;
-			// custom mode
-			case 'custom':
-				$this->init_custom( $config, $page_name );
-				break;
-		}
+		// call init method of renderer
+		$config->renderer()->init( $config, $page_name );
 
 		// maintain the chain
 		return $this;
-	}
-
-	/**
-	 * Settings API initialization.
-	 * 
-	 * @param WP_SDL_Options_Config_1_0 $config
-	 * @param string $page
-	 */
-	protected function init_api( WP_SDL_Options_Config_1_0 $config, $page )
-	{
-		// dashboard logic
-		if ( is_admin() ) {
-			// check page
-			if ( $page == $this->get_plugin_page() ) {
-				// register settings
-				$config->register();
-				// hook settings errors to admin notices
-				add_action( 'admin_notices', 'settings_errors' );
-			}
-		}
-	}
-
-	/**
-	 * Theme Modifications API initialization.
-	 *
-	 * @param WP_SDL_Options_Config_1_0 $config
-	 * @param string $page
-	 */
-	protected function init_theme( WP_SDL_Options_Config_1_0 $config, $page )
-	{
-		// TODO
-	}
-
-	/**
-	 * Custom initialization.
-	 *
-	 * @param WP_SDL_Options_Config_1_0 $config
-	 * @param string $page
-	 */
-	protected function init_custom( WP_SDL_Options_Config_1_0 $config, $page = null )
-	{
-		// TODO
 	}
 
 	/**
@@ -1342,6 +1287,7 @@ abstract class WP_SDL_Options_Form_1_0 extends WP_SDL_Auxiliary_1_0
 		$this->helper( $helper );
 	}
 	
+	abstract public function init( WP_SDL_Options_Config_1_0 $config, $page_name = null );
 	abstract public function error( WP_SDL_Options_Field_1_0 $field );
 	abstract public function group( WP_SDL_Options_Group_1_0 $group );
 	abstract public function section( WP_SDL_Options_Section_1_0 $section );
@@ -1378,6 +1324,21 @@ abstract class WP_SDL_Options_Form_1_0 extends WP_SDL_Auxiliary_1_0
 
 class WP_SDL_Options_Form_Api_1_0 extends WP_SDL_Options_Form_1_0
 {
+
+	public function init( WP_SDL_Options_Config_1_0 $config, $page_name = null )
+	{
+		// dashboard logic
+		if ( is_admin() ) {
+			// check page
+			if ( $page_name == $this->helper()->get_plugin_page() ) {
+				// register settings
+				$config->register();
+				// hook settings errors to admin notices
+				add_action( 'admin_notices', 'settings_errors' );
+			}
+		}
+	}
+	
 	public function error( WP_SDL_Options_Field_1_0 $field )
 	{
 		/* @var $error WP_Error */
@@ -1453,6 +1414,7 @@ class WP_SDL_Options_Form_Api_1_0 extends WP_SDL_Options_Form_1_0
 
 class WP_SDL_Options_Form_Theme_1_0 extends WP_SDL_Options_Form_1_0
 {
+	public function init( WP_SDL_Options_Config_1_0 $config, $page_name = null ) {}
 	public function error( WP_SDL_Options_Field_1_0 $field ) {}
 	public function group( WP_SDL_Options_Group_1_0 $group ) {}
 	public function section( WP_SDL_Options_Section_1_0 $section ) {}
@@ -1461,6 +1423,7 @@ class WP_SDL_Options_Form_Theme_1_0 extends WP_SDL_Options_Form_1_0
 
 class WP_SDL_Options_Form_Default_1_0 extends WP_SDL_Options_Form_1_0
 {
+	public function init( WP_SDL_Options_Config_1_0 $config, $page_name = null ) {}
 	public function error( WP_SDL_Options_Field_1_0 $field ) {}
 	public function group( WP_SDL_Options_Group_1_0 $group ) {}
 	public function section( WP_SDL_Options_Section_1_0 $section ) {}
