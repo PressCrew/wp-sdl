@@ -750,6 +750,60 @@ class WP_SDL_Options_Field_1_0_Test extends PHPUnit_Framework_TestCase
 		self::$field->attributes( 'not an array' );
 	}
 
+	public function testSanitizeCallback()
+	{
+		self::$field->sanitize_callback( 'stripslashes' );
+		self::$field->sanitize_callback( array( new EmptyIterator(), 'current' ) );
+	}
+
+	public function testSanitizeCallbackInvalid()
+	{
+		$this->setExpectedException( 'InvalidArgumentException' );
+		self::$field->sanitize_callback( 'abc' );
+	}
+
+	public function doSanitizeValue( $value, WP_SDL_Options_Field_1_0 $field )
+	{
+		$field->error( new WP_Error() );
+		return trim( $value );
+	}
+
+	public function testSanitizeValue()
+	{
+		self::$field->sanitize_callback( array( $this, 'doSanitizeValue' ) );
+		// return val should be trimmed
+		$this->assertEquals( 'hello', self::$field->sanitize( ' hello ' ) );
+		// should have an error
+		$this->assertTrue( self::$field->has_error() );
+	}
+
+	public function testError()
+	{
+		self::$field->error( new WP_Error() );
+		$this->assertInstanceOf( 'WP_Error', self::$field->error() );
+	}
+
+	public function testErrorString()
+	{
+		self::$field->error( 'This is an error' );
+		$this->assertInstanceOf( 'WP_Error', self::$field->error() );
+		$this->assertEquals( 'baz', self::$field->error()->get_error_code() );
+		$this->assertEquals( 'This is an error', self::$field->error()->get_error_message() );
+	}
+
+	public function testErrorInvalid()
+	{
+		$this->setExpectedException( 'InvalidArgumentException' );
+		self::$field->error( new stdClass() );
+	}
+	
+	public function testHasError()
+	{
+		$this->assertFalse( self::$field->has_error() );
+		self::$field->error( new WP_Error() );
+		$this->assertTrue( self::$field->has_error() );
+	}
+
 	public function testRenderAllMode()
 	{
 		// expected markup

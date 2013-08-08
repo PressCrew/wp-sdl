@@ -518,7 +518,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		register_setting(
 			'wpsdl_' . $this->property( 'slug' ),
 			$object->id() . '_opts',
-			array( $this, 'validate' )
+			array( $this, 'sanitize_fields' )
 		);
 
 		// maintain the chain
@@ -702,7 +702,6 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		return ( $mode === $this->form_mode );
 	}
 
-
 	/**
 	 * Return current form renderer instance.
 	 *
@@ -714,9 +713,32 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		return $this->renderer;
 	}
 
-	final public function validate( $data )
+	/**
+	 * Sanitize all submitted data.
+	 *
+	 * @param array $data Raw data.
+	 * @return array Sanitized data.
+	 */
+	final public function sanitize_fields( $data )
 	{
-		return $data;
+		// array of clean data to return
+		$clean_data = array();
+
+		// loop all fields, key is important
+		foreach( $data as $field_slug => $field_value ) {
+			// get field
+			$field = $this->field( $field_slug );
+			// call field sanitizer on value, and set in clean data array
+			$clean_data[ $field_slug ] = $field->sanitize( $field_value );
+			// check for error
+			if ( $field->has_error() ) {
+				// error occurred, call error handler of renderer
+				$this->renderer()->error( $field );
+			}
+		}
+
+		// return clean data
+		return $clean_data;
 	}
 }
 
@@ -836,14 +858,6 @@ abstract class WP_SDL_Options_Item_1_0 extends WP_SDL_Options_Object_1_0
 	 * Render the markup for this item.
 	 */
 	abstract public function render();
-
-	/**
-	 * Validate all data submitted for this item.
-	 *
-	 * @param array $data
-	 * @return array
-	 */
-	abstract public function validate( $data );
 }
 
 /**
@@ -906,13 +920,6 @@ class WP_SDL_Options_Group_1_0 extends WP_SDL_Options_Item_1_0
 		// maintain the chain
 		return $this;
 	}
-
-	/**
-	 */
-	public function validate( $data )
-	{
-		return $data;
-	}
 }
 
 /**
@@ -973,13 +980,6 @@ class WP_SDL_Options_Section_1_0 extends WP_SDL_Options_Item_1_0
 	}
 
 	/**
-	 */
-	public function validate( $data )
-	{
-		return $data;
-	}
-
-	/**
 	 * Return field instance for given slug.
 	 *
 	 * @param string $slug
@@ -1026,6 +1026,20 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 	 * @var mixed
 	 */
 	private $current_value;
+
+	/**
+	 * The field's sanitization callback.
+	 *
+	 * @var callable
+	 */
+	private $sanitize_callback;
+
+	/**
+	 * Error object (if an error occured).
+	 *
+	 * @var WP_Error|null
+	 */
+	private $error;
 
 	/**
 	 */
@@ -1084,10 +1098,63 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 	}
 
 	/**
+	 * Return sanitized value using this field's sanitize callback if applicable.
+	 *
+	 * @param mixed $value
+	 * @return mixed
 	 */
-	public function validate( $data )
+	final public function sanitize( $value )
 	{
-		return $data;
+		// have a sanitize callback?
+		if ( is_callable( $this->sanitize_callback ) ) {
+			// yep, call it
+			return call_user_func( $this->sanitize_callback, $value, $this );
+		} else {
+			// return value untouched
+			return $value;
+		}
+	}
+
+	/**
+	 * Get/Set an error for this field.
+	 * 
+	 * @param WP_Error|string|null $error
+	 * @return WP_Error|null
+	 */
+	final public function error( $error = null )
+	{
+		// get number of args
+		$num_args = func_num_args();
+
+		// setting?
+		if ( 1 === $num_args ) {
+			// is it an error object?
+			if ( $error instanceof WP_Error ) {
+				// yep, set error property
+				$this->error = $error;
+			} elseif ( true === is_string( $error ) ) {
+				// create error automagically
+				$this->error = new WP_Error( $this->property( 'slug' ), $error );
+			} else {
+				// not good
+				throw new InvalidArgumentException(
+					__( 'The $error arg must be an instance of WP_Error or a string.', 'wp-sdl' )
+				);
+			}
+		}
+
+		// return it
+		return $this->error;
+	}
+
+	/**
+	 * Return true if an error condition exists.
+	 *
+	 * @return boolean
+	 */
+	final public function has_error()
+	{
+		return ( $this->error instanceof WP_Error );
 	}
 
 	/**
@@ -1151,6 +1218,27 @@ class WP_SDL_Options_Field_1_0 extends WP_SDL_Options_Item_1_0
 	{
 		// set current value
 		$this->current_value = $value;
+
+		// maintain the chain
+		return $this;
+	}
+
+	/**
+	 * Set the sanitize callback.
+	 *
+	 * @param callable $callback
+	 * @return WP_SDL_Options_Field_1_0
+	 */
+	final public function sanitize_callback( $callback )
+	{
+		// make sure its callable
+		if ( true === is_callable( $callback ) ) {
+			// set it
+			$this->sanitize_callback = $callback;
+		} else {
+			// invalid argument
+			throw new InvalidArgumentException( __( 'Sanitize callback must be callable.', 'wp-sdl' ) );
+		}
 
 		// maintain the chain
 		return $this;
@@ -1254,6 +1342,7 @@ abstract class WP_SDL_Options_Form_1_0 extends WP_SDL_Auxiliary_1_0
 		$this->helper( $helper );
 	}
 	
+	abstract public function error( WP_SDL_Options_Field_1_0 $field );
 	abstract public function group( WP_SDL_Options_Group_1_0 $group );
 	abstract public function section( WP_SDL_Options_Section_1_0 $section );
 
@@ -1289,6 +1378,18 @@ abstract class WP_SDL_Options_Form_1_0 extends WP_SDL_Auxiliary_1_0
 
 class WP_SDL_Options_Form_Api_1_0 extends WP_SDL_Options_Form_1_0
 {
+	public function error( WP_SDL_Options_Field_1_0 $field )
+	{
+		/* @var $error WP_Error */
+		$error = $field->error();
+		// add error to settings api
+		add_settings_error(
+			$field->property( 'title' ),
+			$error->get_error_code(),
+			$error->get_error_message()
+		);
+	}
+
 	public function group( WP_SDL_Options_Group_1_0 $group )
 	{
 		global $plugin_page;
@@ -1352,6 +1453,7 @@ class WP_SDL_Options_Form_Api_1_0 extends WP_SDL_Options_Form_1_0
 
 class WP_SDL_Options_Form_Theme_1_0 extends WP_SDL_Options_Form_1_0
 {
+	public function error( WP_SDL_Options_Field_1_0 $field ) {}
 	public function group( WP_SDL_Options_Group_1_0 $group ) {}
 	public function section( WP_SDL_Options_Section_1_0 $section ) {}
 	public function field( WP_SDL_Options_Field_1_0 $field ) {}
@@ -1359,6 +1461,7 @@ class WP_SDL_Options_Form_Theme_1_0 extends WP_SDL_Options_Form_1_0
 
 class WP_SDL_Options_Form_Default_1_0 extends WP_SDL_Options_Form_1_0
 {
+	public function error( WP_SDL_Options_Field_1_0 $field ) {}
 	public function group( WP_SDL_Options_Group_1_0 $group ) {}
 	public function section( WP_SDL_Options_Section_1_0 $section ) {}
 	public function field( WP_SDL_Options_Field_1_0 $field ) {}
