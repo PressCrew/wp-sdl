@@ -352,7 +352,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 	 *
 	 * @var string
 	 */
-	private $form_mode = self::FORM_MODE_API;
+	private $form_mode;
 
 	/**
 	 * The current save mode.
@@ -383,7 +383,7 @@ class WP_SDL_Options_Config_1_0 extends WP_SDL_Options_Object_1_0
 		parent::__construct($slug, $helper);
 
 		// set default form mode
-		$this->form_mode( $this->form_mode );
+		$this->form_mode( self::FORM_MODE_API );
 	}
 
 	/**
