@@ -91,7 +91,7 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 *
 	 * @example html/attributes.php
 	 * @param array $atts An array of attributes to render. Keys are attribute names, values are unescaped attribute values.
-	 * @return string
+	 * @return string|false
 	 */
 	public function attributes( $atts )
 	{
@@ -103,6 +103,8 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 				__( 'The $atts parameter must be an array.', 'wp-sdl' ),
 				self::$VERSION
 			);
+			// return false in case errors are suppressed
+			return false;
 		}
 
 		// normalize attributes
@@ -128,6 +130,8 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 					sprintf( __( 'The attribute "%s" is not valid.', 'wp-sdl' ), $att_name ),
 					self::$VERSION
 				);
+				// return false in case errors are suppressed
+				return false;
 			}
 		}
 
@@ -237,7 +241,7 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	 * Auto brackets are ON by default.
 	 * 
 	 * @param boolean $toggle Pass true/false to toggle on/off.
-	 * @return WP_SDL_Html_1_0
+	 * @return WP_SDL_Html_1_0|false
 	 */
 	public function auto_brackets( $toggle )
 	{
@@ -252,6 +256,8 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 				__( 'Argument must be true/false (boolean).', 'wp-sdl' ),
 				self::$VERSION
 			);
+			// return false in case errors are suppressed
+			return false;
 		}
 
 		// maintain the chain
