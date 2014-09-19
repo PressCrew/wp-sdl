@@ -42,12 +42,11 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertAttributeEquals( true, 'auto_brackets', $this->html );
 	}
 
-	/**
-	 * @expectedException PHPUnit_Framework_Error_Warning
-	 */
 	public function testAutoBracketsBadArg()
 	{
-		$this->html->auto_brackets('on');
+		$this->assertFalse(
+			@$this->html->auto_brackets('on')
+		);
 	}
 
 	public function testAutoClose()
@@ -83,22 +82,20 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		);
 	}
 
-	/**
-	 * @expectedException PHPUnit_Framework_Error_Warning
-	 */
 	public function testFormatAttributesBadParam()
 	{
-		$this->html->attributes( 'A string' );
+		$this->assertFalse(
+			@$this->html->attributes( 'A string' )
+		);
 	}
 
-	/**
-	 * @expectedException PHPUnit_Framework_Error_Warning
-	 */
 	public function testFormatAttributesBadName()
 	{
-		$this->html->attributes(
-			array(
-				'a"bad=key' => 'A fake value'
+		$this->assertFalse(
+			@$this->html->attributes(
+				array(
+					'a"bad=key' => 'A fake value'
+				)
 			)
 		);
 	}
