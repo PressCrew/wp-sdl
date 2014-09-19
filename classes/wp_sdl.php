@@ -63,10 +63,18 @@ final class WP_SDL
 	{
 		// make sure class been not been loaded yet
 		if ( false === class_exists( $class_name, false ) ) {
-			// load class file
-			require_once self::$files_ready[ $class_name ];
-			// set as loaded
-			self::$files_loaded[ $class_name ] = true;
+			// ensure that class file was initialized
+			if ( true === isset( self::$files_ready[ $class_name ] ) ) {
+				// load class file
+				require_once self::$files_ready[ $class_name ];
+				// set as loaded
+				self::$files_loaded[ $class_name ] = true;
+			} else {
+				// class never initialized, fatal
+				throw new RuntimeException(
+					sprintf( 'The class: "%s" has not been initialized!', $class_name )
+				);
+			}
 		}
 	}
 
