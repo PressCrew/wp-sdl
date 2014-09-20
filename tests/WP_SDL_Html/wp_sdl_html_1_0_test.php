@@ -244,6 +244,19 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->html->input( 'text', 'firstname', 'Bob', array(), 'Joe' );
 	}
 
+	public function testValueIsCurrent()
+	{
+		$this->assertTrue( $this->html->value_is_current( 'foo', 'foo' ) );
+		$this->assertTrue( $this->html->value_is_current( 'foo', array( 'foo', 'bar' ) ) );
+	}
+
+	public function testValueIsNotCurrent()
+	{
+		$this->assertFalse( $this->html->value_is_current( null, null ) );
+		$this->assertFalse( $this->html->value_is_current( 'foo', 'bar' ) );
+		$this->assertFalse( $this->html->value_is_current( 'foo', array( 'bar', 'baz' ) ) );
+	}
+
 	public function testRadioGroup()
 	{
 		$this->expectOutputString(
