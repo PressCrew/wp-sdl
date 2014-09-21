@@ -28,6 +28,21 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertAttributeEquals( '1.0', 'VERSION', 'WP_SDL_Html_1_0' );
 	}
 
+	public function testDebugModeToggle()
+	{
+		// should be off by default
+		$this->assertAttributeEquals( false, 'debug_mode', $this->html );
+		// toggle on
+		$this->html->debug_mode( true );
+		$this->assertAttributeEquals( true, 'debug_mode', $this->html );
+		// toggle back off
+		$this->html->debug_mode( false );
+		$this->assertAttributeEquals( false, 'debug_mode', $this->html );
+		// toggle non boolean
+		$this->html->debug_mode( 'string' );
+		$this->assertAttributeEquals( false, 'debug_mode', $this->html );
+	}
+
 	public function testSmartCloseToggle()
 	{
 		// should be on by default
