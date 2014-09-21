@@ -28,6 +28,21 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertAttributeEquals( '1.0', 'VERSION', 'WP_SDL_Html_1_0' );
 	}
 
+	public function testSmartCloseToggle()
+	{
+		// should be on by default
+		$this->assertAttributeEquals( true, 'smart_close', $this->html );
+		// toggle off
+		$this->html->smart_close( false );
+		$this->assertAttributeEquals( false, 'smart_close', $this->html );
+		// toggle back on
+		$this->html->smart_close( true );
+		$this->assertAttributeEquals( true, 'smart_close', $this->html );
+		// toggle non boolean
+		$this->html->smart_close( 'string' );
+		$this->assertAttributeEquals( true, 'smart_close', $this->html );
+	}
+
 	public function testAutoBrackets()
 	{
 		// on by default
