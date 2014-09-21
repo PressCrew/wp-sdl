@@ -98,6 +98,22 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->assertAttributeEquals( false, 'auto_close', $this->html );
 	}
 
+	/**
+	 * @covers WP_SDL_Html_1_0::auto_close_tag
+	 */
+	public function testAutoCloseUnsupportedTag()
+	{
+		// load stub
+		require_once 'stubs/stub_html_1_0.php';
+
+		// new stub instance
+		$html = new STUB_Html_1_0();
+		$html->compat( WP_SDL::support( '1.0' ) );
+
+		// test bad auto close tag type
+		$this->assertFalse( $html->bad_auto_close_tag() );
+	}
+
 	public function testFormatAttributes()
 	{
 		$this->assertEquals(
