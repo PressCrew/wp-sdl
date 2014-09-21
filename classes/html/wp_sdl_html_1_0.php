@@ -333,7 +333,7 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	{
 		// sanity check element names in debug mode
 		if (
-			true == WP_DEBUG &&
+			true == $this->debug_mode &&
 			1 !== preg_match( '/^[a-z]+$/', $element )
 		) {
 			// generate error
