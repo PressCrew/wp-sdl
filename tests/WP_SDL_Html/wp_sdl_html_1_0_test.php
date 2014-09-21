@@ -172,6 +172,13 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 			);
 	}
 
+	public function testOpenDebugging()
+	{
+		$this->html->debug_mode( true );
+
+		$this->assertFalse( $this->html->open( '1badtag' ) );
+	}
+
 	public function testClose()
 	{
 		$this->expectOutputString(
