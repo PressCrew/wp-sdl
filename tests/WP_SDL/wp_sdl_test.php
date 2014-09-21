@@ -32,7 +32,6 @@ class WP_SDL_Test extends PHPUnit_Framework_TestCase
 		$obj = WP_SDL::support( '1.0' );
 		$this->assertInstanceOf( 'WP_SDL_1_0', $obj );
 		$this->assertAttributeCount( 7, 'files_ready', 'WP_SDL' );
-		$this->assertAttributeCount( 1, 'files_loaded', 'WP_SDL' );
 	}
 
 	public function testSupportsOneSuccess()
