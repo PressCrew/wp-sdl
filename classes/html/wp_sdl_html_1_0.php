@@ -20,6 +20,13 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 	protected static $VERSION = '1.0';
 
 	/**
+	 * Debug mode toggle.
+	 * 
+	 * @var boolean
+	 */
+	private $debug_mode = false;
+
+	/**
 	 * Auto close brackets toggle
 	 *
 	 * @var boolean
@@ -78,6 +85,33 @@ class WP_SDL_Html_1_0 extends WP_SDL_Helper_1_0
 		'track' => false,
 		'wbr' => false
 	);
+
+	/**
+	 * Toggle debug mode on/off.
+	 *
+	 * Debug mode is OFF by default.
+	 *
+	 * @param boolean $toggle Pass true/false to toggle on/off.
+	 * @return WP_SDL_Html_1_0
+	 */
+	public function debug_mode( $toggle )
+	{
+		// is toggle boolean?
+		if ( is_bool( $toggle ) ) {
+			// yep, set it
+			$this->debug_mode = $toggle;
+		} else {
+			// not good
+			$this->compat()->doing_it_wrong(
+				__METHOD__,
+				__( 'Argument must be true/false (boolean).', 'wp-sdl' ),
+				self::$VERSION
+			);
+		}
+
+		// maintain the chain
+		return $this;
+	}
 
 	/**
 	 * Format attributes for an HTML element.
