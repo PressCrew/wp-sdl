@@ -204,6 +204,29 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->html->close();
 	}
 
+	public function testSmartCloseEmpty()
+	{
+		// smart close must be off
+		$this->html->smart_close( false );
+		$this->assertAttributeEquals( false, 'smart_close', $this->html );
+
+		// try to pass empty element to close
+		$this->assertFalse( $this->html->open( 'div' )->close() );
+	}
+
+	public function testSmartCloseNoContentModel()
+	{
+		$this->expectOutputString(
+			'<div class="foo">Hello<hr></div>'
+		);
+
+		$this->html
+			->open( 'div', array( 'class' => 'foo' ) )
+				->content( 'Hello' )
+				->open( 'hr' )
+			->close();
+	}
+
 	public function testSmartCloseNested()
 	{
 		$this->expectOutputString(
