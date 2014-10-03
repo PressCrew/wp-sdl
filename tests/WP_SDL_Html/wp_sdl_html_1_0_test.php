@@ -39,7 +39,7 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->html->debug_mode( false );
 		$this->assertAttributeEquals( false, 'debug_mode', $this->html );
 		// toggle non boolean
-		$this->html->debug_mode( 'string' );
+		@$this->html->debug_mode( 'string' );
 		$this->assertAttributeEquals( false, 'debug_mode', $this->html );
 	}
 
@@ -54,7 +54,7 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$this->html->smart_close( true );
 		$this->assertAttributeEquals( true, 'smart_close', $this->html );
 		// toggle non boolean
-		$this->html->smart_close( 'string' );
+		@$this->html->smart_close( 'string' );
 		$this->assertAttributeEquals( true, 'smart_close', $this->html );
 	}
 
@@ -111,7 +111,7 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$html->compat( WP_SDL::support( '1.0' ) );
 
 		// test bad auto close tag type
-		$this->assertFalse( $html->bad_auto_close_tag() );
+		$this->assertFalse( @$html->bad_auto_close_tag() );
 	}
 
 	public function testFormatAttributes()
@@ -192,7 +192,7 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 	{
 		$this->html->debug_mode( true );
 
-		$this->assertFalse( $this->html->open( '1badtag' ) );
+		$this->assertFalse( @$this->html->open( '1badtag' ) );
 	}
 
 	public function testClose()
@@ -231,7 +231,7 @@ class WP_SDL_Html_1_0_Test extends PHPUnit_Framework_TestCase
 		$result = $this->html->open( 'div' );
 
 		// try to pass empty element to close
-		$this->assertFalse( $result->close() );
+		$this->assertFalse( @$result->close() );
 	}
 
 	public function testSmartCloseNoContentModel()
