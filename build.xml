@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="WP-SDL" default="dist">
+
+	<!-- Properties -->
+	<property name="builddir" value="./build" />
+	<property name="distdir" value="./dist" />
+
+	<!-- Target: test -->
+	<target name="test">
+		<phpunit
+			pharlocation="/usr/bin/phpunit"
+			configuration="./phpunit.xml"
+			haltonerror="true"
+			haltonfailure="true"
+			printsummary="true"
+		>
+			<formatter type="plain" usefile="false" />
+			<batchtest>
+				<fileset dir="./tests">
+					<include name="**/*_test.php"/>
+				</fileset>
+			</batchtest>
+		</phpunit>
+	</target>
+
+	<!-- Target: clean -->
+	<target name="clean">
+		<echo msg="Cleaning up..." />
+		<delete dir="${builddir}" quiet="true" />
+		<delete dir="${distdir}" quiet="true" />
+	</target>
+
+	<!-- Target: prepare -->
+	<target name="prepare" depends="test">
+		<phingcall target="clean" />
+		<echo msg="Creating build directory ${builddir}" />
+		<mkdir dir="${builddir}" />
+		<echo msg="Creating dist directory ${distdir}" />
+		<mkdir dir="${distdir}" />
+	</target>
+
+	<!-- Target: build -->
+	<target name="build" depends="prepare">
+		<echo msg="Copying files to build directory..." />
+		<copy todir="${builddir}" >
+			<fileset dir=".">
+				<include name="classes/**" />
+				<include name="README.md" />
+				<include name="wp-sdl-quickstart.php" />
+				<include name="wp-sdl.php" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- Target: dist (default) -->
+	<target name="dist" depends="build">
+		<echo msg="Creating zip archive..." />
+		<zip destfile="${distdir}/wp-sdl.zip">
+			<fileset dir="${builddir}">
+				<include name="*" />
+			</fileset>
+		</zip>
+		<echo msg="Files copied and compressed in build directory OK!" />
+	</target>
+</project>
