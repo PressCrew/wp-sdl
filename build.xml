@@ -32,7 +32,7 @@
 	</target>
 
 	<!-- Target: prepare -->
-	<target name="prepare" depends="test">
+	<target name="prepare">
 		<phingcall target="clean" />
 		<echo msg="Creating build directory ${builddir}" />
 		<mkdir dir="${builddir}" />
