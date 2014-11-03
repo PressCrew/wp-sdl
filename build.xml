@@ -58,7 +58,7 @@
 		<echo msg="Creating zip archive..." />
 		<zip destfile="${distdir}/wp-sdl.zip">
 			<fileset dir="${builddir}">
-				<include name="*" />
+				<include name="**" />
 			</fileset>
 		</zip>
 		<echo msg="Files copied and compressed in build directory OK!" />
