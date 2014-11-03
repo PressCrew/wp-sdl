@@ -2,6 +2,9 @@
 /**
  * Auxiliary 1.0
  *
+ * Auxiliary classes are used by helpers to encapsulate specializations
+ * when access to the "parent" helper object may be required.
+ *
  * @link http://wp-sdl.org/
  * @author Marshall Sorenson
  * @link http://marshallsorenson.com/
