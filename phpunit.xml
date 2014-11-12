@@ -1,11 +1,8 @@
 <phpunit bootstrap="tests/bootstrap.php" colors="true">
 	<php>
 		<server name="SERVER_PROTOCOL" value="HTTP/1.1" />
-		<server name="HTTP_HOST" value="bpsugar.localdomain" />
+		<server name="HTTP_HOST" value="localhost" />
 		<server name="PHP_SELF" value="/index.php" />
-		<const name="WP_DEBUG" value="false" />
-		<const name="DISABLE_WP_CRON" value="true" />
-		<const name="WP_TEST_LOAD_PATH" value="/var/www/html/wp-load.php" />
 	</php>
 	<testsuites>
 		<testsuite name="WP-SDL Test Suite">

@@ -4,65 +4,102 @@
 
 	<!-- Properties -->
 	<property name="composerpath" value="/usr/bin/composer.phar" />
-	<property name="builddir" value="./build" />
-	<property name="distdir" value="./dist" />
+	<resolvepath propertyName="phpunitpath" file="${phing.dir}/vendor/bin/phpunit" />
+	<resolvepath propertyName="wpclipath" file="${phing.dir}/vendor/bin/wp" />
+	<resolvepath propertyName="source.dir" file="${phing.dir}/src" />
+	<resolvepath propertyName="source.tests" file="${phing.dir}/tests" />
+	<resolvepath propertyName="build.dir" file="${phing.dir}/build" />
+	<resolvepath propertyName="build.dist" file="${build.dir}/dist" />
+	<resolvepath propertyName="build.env" file="${build.dir}/env" />
+
+	<!-- Target: clean -->
+	<target name="clean">
+		<echo msg="Cleaning up..." />
+		<delete dir="${build.dist}" quiet="true" />
+	</target>
+
+	<!-- Target: prepare -->
+	<target name="prepare" depends="clean">
+		<echo msg="Preparing build dir..." />
+		<mkdir dir="${build.dist}" />
+	</target>
+
+	<!-- Target: prepare-test -->
+	<target name="prepare-test" depends="prepare">
+
+		<!-- Install dependencies -->
+		<echo msg="Installing dependencies via composer..." />
+		<composer composer="${composerpath}" command="install" />
+
+		<!-- default WordPress properties -->
+		<property name="wp.version" value="4.0" />
+		<property name="wp.dbname" value="wp_sdl_unit_tests" />
+		<property name="wp.dbuser" value="wordpress" />
+		<property name="wp.dbpass" value="wordpress" />
+		<property name="wp.dbhost" value="localhost" />
+		<property name="wp.url" value="http://localhost/" />
+		<property name="wp.title" value="WP-SDL Unit Testing" />
+		<property name="wp.admin_user" value="admin" />
+		<property name="wp.admin_password" value="admin" />
+		<property name="wp.admin_email" value="root@127.0.0.1" />
+
+		<!-- check if env exists -->
+		<available file="${build.env}" type="dir" property="wp_is_installed" value="true" />
+
+		<!-- WordPress testing env -->
+		<echo msg="Checking if WordPress environment is installed..." />
+		<if>
+			<isset property="wp_is_installed" />
+			<then>
+				<echo msg="WordPress test env is installed in: ${build.env}" />
+				<echo msg="Dropping existing WordPress database..." />
+				<exec command="${wpclipath} db drop --path=${build.env} --yes" checkreturn="true" />
+			</then>
+			<else>
+				<echo msg="Downloading WordPress test env to: ${build.env}" />
+				<exec command="${wpclipath} core download --path=${build.env} --version=${wp.version}" checkreturn="true" />
+				<echo msg="Creating WordPress config..." />
+				<exec command="${wpclipath} core config --path=${build.env} --dbname=${wp.dbname} --dbuser=${wp.dbuser} --dbpass=${wp.dbpass} --dbhost=${wp.dbhost}" checkreturn="true" />
+			</else>
+		</if>
+		<echo msg="Creating WordPress database..." />
+		<exec command="${wpclipath} db create --path=${build.env}" checkreturn="true" />
+		<echo msg="Installing WordPress tables..." />
+		<exec command="${wpclipath} core install --path=${build.env} --url='${wp.url}' --title='${wp.title}' --admin_user='${wp.admin_user}' --admin_password='${wp.admin_password}' --admin_email='${wp.admin_email}'" checkreturn="true" />
+	</target>
 
 	<!-- Target: test -->
-	<target name="test">
+	<target name="test" depends="prepare-test">
+		<php expression="require_once('vendor/autoload.php');" />
 		<phpunit
-			pharlocation="/usr/bin/phpunit"
-			configuration="./phpunit.xml"
+			pharlocation="${phpunitpath}"
+			configuration="${build.dir}/phpunit.xml"
 			haltonerror="true"
 			haltonfailure="true"
 			printsummary="true"
 		>
 			<formatter type="plain" usefile="false" />
 			<batchtest>
-				<fileset dir="./tests">
+				<fileset dir="${source.tests}">
 					<include name="**/*_test.php"/>
 				</fileset>
 			</batchtest>
 		</phpunit>
 	</target>
 
-	<!-- Target: clean -->
-	<target name="clean">
-		<echo msg="Cleaning up..." />
-		<delete dir="${builddir}" quiet="true" />
-		<delete dir="${distdir}" quiet="true" />
-	</target>
-
-	<!-- Target: prepare -->
-	<target name="prepare">
-		<phingcall target="clean" />
-		<echo msg="Creating build directory ${builddir}" />
-		<mkdir dir="${builddir}" />
-		<echo msg="Creating dist directory ${distdir}" />
-		<mkdir dir="${distdir}" />
-		<composer composer="${composerpath}" command="install" />
-	</target>
-
 	<!-- Target: build -->
 	<target name="build" depends="prepare">
-		<echo msg="Copying files to build directory..." />
-		<copy todir="${builddir}" >
-			<fileset dir=".">
-				<include name="classes/**" />
-				<include name="README.md" />
-				<include name="wp-sdl-quickstart.php" />
-				<include name="wp-sdl.php" />
-			</fileset>
-		</copy>
+		<echo msg="Building..." />
 	</target>
-
+	
 	<!-- Target: dist (default) -->
 	<target name="dist" depends="build">
 		<echo msg="Creating zip archive..." />
-		<zip destfile="${distdir}/wp-sdl.zip">
-			<fileset dir="${builddir}">
+		<zip destfile="${build.dist}/wp-sdl.zip" prefix="wp-sdl/">
+			<fileset dir="${source.dir}">
 				<include name="**" />
 			</fileset>
 		</zip>
-		<echo msg="Files copied and compressed in build directory OK!" />
+		<echo msg="Files copied and compressed!" />
 	</target>
 </project>
