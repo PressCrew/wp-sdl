@@ -29,7 +29,7 @@
 
 		<!-- Install dependencies -->
 		<echo msg="Installing dependencies via composer..." />
-		<composer composer="${composerpath}" command="install" />
+		<composer composer="${composerpath}" command="install; pwd;" />
 
 		<!-- default WordPress properties -->
 		<property name="wp.version" value="4.0" />
