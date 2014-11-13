@@ -34,8 +34,8 @@
 		<!-- default WordPress properties -->
 		<property name="wp.version" value="4.0" />
 		<property name="wp.dbname" value="wp_sdl_unit_tests" />
-		<property name="wp.dbuser" value="wordpress" />
-		<property name="wp.dbpass" value="wordpress" />
+		<property name="wp_dbuser" value="wordpress" />
+		<property name="wp_dbpass" value="wordpress" />
 		<property name="wp.dbhost" value="localhost" />
 		<property name="wp.url" value="http://localhost/" />
 		<property name="wp.title" value="WP-SDL Unit Testing" />
@@ -59,7 +59,7 @@
 				<echo msg="Downloading WordPress test env to: ${build.env}" />
 				<exec command="${wpclipath} core download --path=${build.env} --version=${wp.version}" checkreturn="true" />
 				<echo msg="Creating WordPress config..." />
-				<exec command="${wpclipath} core config --path=${build.env} --dbname=${wp.dbname} --dbuser=${wp.dbuser} --dbpass=${wp.dbpass} --dbhost=${wp.dbhost}" checkreturn="true" />
+				<exec command="${wpclipath} core config --path=${build.env} --dbname=${wp.dbname} --dbuser=${wp_dbuser} --dbpass=${wp_dbpass} --dbhost=${wp.dbhost}" checkreturn="true" />
 			</else>
 		</if>
 		<echo msg="Creating WordPress database..." />
