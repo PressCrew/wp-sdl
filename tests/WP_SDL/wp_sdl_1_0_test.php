@@ -44,7 +44,7 @@ class WP_SDL_1_0_Test extends PHPUnit_Framework_TestCase
 	 */
 	public function testHelperFail()
 	{
-		$this->wpsdl->helper('not_a_helper');
+		$this->wpsdl->helper('not_a_helper','5.6.7');
 	}
 
 	/**
