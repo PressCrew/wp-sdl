@@ -59,7 +59,9 @@
 				<echo msg="Downloading WordPress test env to: ${build.env}" />
 				<exec command="${wpclipath} core download --path=${build.env} --version=${wp.version}" checkreturn="true" />
 				<echo msg="Creating WordPress config..." />
-				<exec command="${wpclipath} core config --path=${build.env} --dbname=${wp.dbname} --dbuser=${wp_dbuser} --dbpass=${wp_dbpass} --dbhost=${wp.dbhost}" checkreturn="true" />
+				<echo msg="${wpclipath} core config --path=${build.env} --dbname=${wp.dbname} --dbuser=${wp_dbuser} --dbpass=${wp_dbpass} --dbhost=${wp.dbhost}" />
+				<exec command="${wpclipath} core config --path=${build.env} --dbname=${wp.dbname} --dbuser=${wp_dbuser} --dbpass=${wp_dbpass} --dbhost=${wp.dbhost}" outputProperty="debugging" />
+				<echo msg="Debug: ${debugging}" />
 			</else>
 		</if>
 		<echo msg="Creating WordPress database..." />
