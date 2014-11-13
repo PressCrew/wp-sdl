@@ -29,7 +29,7 @@
 
 		<!-- Install dependencies -->
 		<echo msg="Installing dependencies via composer..." />
-		<exec command="${composerpath} install" dir="${phing.dir}" outputProperty="composer.out" />
+		<exec command="whoami; ${composerpath} install" dir="${phing.dir}" outputProperty="composer.out" />
 		<echo msg="${composer.out}" />
 		<!-- default WordPress properties -->
 		<property name="wp.version" value="4.0" />
