@@ -29,8 +29,8 @@
 
 		<!-- Install dependencies -->
 		<echo msg="Installing dependencies via composer..." />
-		<exec command="whoami; ${composerpath} install" dir="${phing.dir}" outputProperty="composer.out" />
-		<echo msg="${composer.out}" />
+		<composer composer="${composerpath}" command="install" />
+
 		<!-- default WordPress properties -->
 		<property name="wp.version" value="4.0" />
 		<property name="wp.dbname" value="wp_sdl_unit_tests" />
