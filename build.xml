@@ -21,20 +21,8 @@
 		<php expression="require_once('vendor/autoload.php');" />
 	</target>
 
-	<!-- Target: clean -->
-	<target name="clean">
-		<echo msg="Cleaning up..." />
-		<delete dir="${build.dist}" quiet="true" />
-	</target>
-
-	<!-- Target: prepare -->
-	<target name="prepare" depends="clean">
-		<echo msg="Preparing build dir..." />
-		<mkdir dir="${build.dist}" />
-	</target>
-
-	<!-- Target: prepare-test -->
-	<target name="prepare-test" depends="prepare">
+	<!-- Target: test-prepare -->
+	<target name="test-prepare">
 		<!-- default WordPress properties -->
 		<property name="wp.version" value="4.0" />
 		<property name="wp.dbname" value="wp_sdl_unit_tests" />
@@ -73,10 +61,18 @@
 	</target>
 
 	<!-- Target: test -->
-	<target name="test" depends="prepare-test">
+	<target name="test" depends="test-prepare">
+		<php function="define">
+			<param value="WP_SDL_BOOTSTRAP_ENV" />
+			<param value="${build.env}" />
+		</php>
+		<php function="define">
+			<param value="WP_SDL_BOOTSTRAP_SRC" />
+			<param value="${source.dir}" />
+		</php>
 		<phpunit
 			pharlocation="${phpunitpath}"
-			configuration="${build.dir}/phpunit.xml"
+			configuration="phpunit.xml"
 			haltonerror="true"
 			haltonfailure="true"
 			printsummary="true"
@@ -90,13 +86,20 @@
 		</phpunit>
 	</target>
 
-	<!-- Target: build -->
-	<target name="build" depends="prepare">
-		<echo msg="Building..." />
+	<!-- Target: dist-clean -->
+	<target name="dist-clean">
+		<echo msg="Removing old dist artifacts..." />
+		<delete dir="${build.dist}" quiet="true" />
 	</target>
-	
+
+	<!-- Target: dist-prepare -->
+	<target name="dist-prepare">
+		<echo msg="Preparing build dir..." />
+		<mkdir dir="${build.dist}" />
+	</target>
+
 	<!-- Target: dist (default) -->
-	<target name="dist" depends="build">
+	<target name="dist" depends="dist-prepare">
 		<echo msg="Creating zip archive..." />
 		<zip destfile="${build.dist}/wp-sdl.zip" prefix="wp-sdl/">
 			<fileset dir="${source.dir}">

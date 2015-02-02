@@ -21,7 +21,7 @@ if ( false === defined( 'DISABLE_WP_CRON' ) ) {
 
 // default path to wordpress env
 if ( false === defined( 'WP_SDL_BOOTSTRAP_ENV' ) ) {
-	define( 'WP_SDL_BOOTSTRAP_ENV', '/var/www/html' );
+	define( 'WP_SDL_BOOTSTRAP_ENV', getcwd() . '/build/env' );
 }
 
 // default path to src files
